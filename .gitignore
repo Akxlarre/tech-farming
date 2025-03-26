@@ -1,13 +1,13 @@
 # Angular - frontend
-/tech-farming-backend/node_modules/
-/tech-farming-backend/dist/
+/tech-farming-frontend/node_modules/
+/tech-farming-frontend/dist/
 /tech-farming-backend/.angular/
 
 # Python - backend
-/tech-farming-frontend/__pycache__/
-/tech-farming-frontend/.venv/
-/tech-farming-frontend/env/
-/tech-farming-frontend/*.pyc
+/tech-farming-backend/__pycache__/
+/tech-farming-backend/.venv/
+/tech-farming-backend/env/
+/tech-farming-backend/*.pyc
 
 # General
 .env
