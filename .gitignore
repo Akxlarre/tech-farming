@@ -6,10 +6,12 @@
 # Python - backend
 /tech-farming-backend/__pycache__/
 /tech-farming-backend/.venv/
+/tech-farming-backend/venv/
 /tech-farming-backend/env/
 /tech-farming-backend/*.pyc
 
 # General
+*.pyc
 .env
 *.log
 .DS_Store
