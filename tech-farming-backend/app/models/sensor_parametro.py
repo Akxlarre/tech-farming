@@ -6,5 +6,5 @@ class SensorParametro(db.Model):
     sensor_id = db.Column(db.Integer, db.ForeignKey('sensores.id'), nullable=False)
     tipo_sensor_id = db.Column(db.Integer, db.ForeignKey('tipos_sensor.id'), nullable=False)
 
-    umbral = db.relationship('ConfiguracionUmbral', backref='parametro', uselist=False)
-    alertas = db.relationship('Alerta', backref='parametro', lazy=True)
+    umbral = db.relationship('ConfiguracionUmbral', backref='parametro', uselist=False, cascade="all, delete-orphan")
+    alertas = db.relationship('Alerta', backref='parametro', cascade="all, delete-orphan", lazy=True)

@@ -12,4 +12,4 @@ class Invernadero(db.Model):
     descripcion = db.Column(db.Text)
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
-    sensores = db.relationship('Sensor', backref='invernadero', lazy=True)
+    sensores = db.relationship('Sensor', backref='invernadero', cascade="all, delete-orphan", lazy=True)

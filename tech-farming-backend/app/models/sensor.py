@@ -13,4 +13,4 @@ class Sensor(db.Model):
     pos_y = db.Column(db.Integer)
     zona = db.Column(db.String(50))
 
-    parametros = db.relationship('SensorParametro', backref='sensor', lazy=True)
+    parametros = db.relationship('SensorParametro', backref='sensor', cascade="all, delete-orphan", lazy=True)
