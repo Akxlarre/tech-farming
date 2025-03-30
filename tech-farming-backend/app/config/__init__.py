@@ -33,7 +33,7 @@ def escribir_dato(sensor_id, tipo_sensor, invernadero_id, zona, valor, unidad=No
         .tag("invernadero_id", invernadero_id)
         .tag("zona", zona)
         .field("valor", valor)
-        .time(datetime.utcnow())  # ✅ Corregido: Agregar timestamp válido
+        .time(datetime.utcnow())
     )
 
     # Agregar campos opcionales si existen
