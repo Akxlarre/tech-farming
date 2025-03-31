@@ -10,12 +10,11 @@ class Config:
     # Variables Supabase
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
     # Variables InfluxDB
     INFLUXDB_URL = os.getenv("INFLUXDB_URL")
     INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
     INFLUXDB_ORG = os.getenv("INFLUXDB_ORG")
-    INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET")    
+    INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "temporalSeries_v2")  # Fallback
 
     # Intentar conectar con InfluxDB
     try:
@@ -24,32 +23,28 @@ class Config:
         print("✅ Conexión exitosa a InfluxDB")
     except Exception as e:
         print(f"❌ Error conectando a InfluxDB: {e}")
+        client = None
 
-def escribir_dato(sensor_id, tipo_sensor, invernadero_id, zona, valor, unidad=None, pos_x=None, pos_y=None):
+def escribir_dato(sensor_id, parametro, valor):
+    if not sensor_id or not parametro or valor is None:
+        print("⚠️ Error: sensor_id, parametro y valor son obligatorios")
+        return
+
     point = (
         Point("lecturas_sensores")
         .tag("sensor_id", sensor_id)
-        .tag("tipo_sensor", tipo_sensor)
-        .tag("invernadero_id", invernadero_id)
-        .tag("zona", zona)
+        .field("parametro", parametro)
         .field("valor", valor)
         .time(datetime.utcnow())
     )
 
-    # Agregar campos opcionales si existen
-    if unidad:
-        point.field("unidad", unidad)
-    if pos_x is not None:
-        point.field("pos_x", pos_x)
-    if pos_y is not None:
-        point.field("pos_y", pos_y)
-
-    # Escribir dato solo si la conexión fue exitosa
     if Config.client:
         Config.write_api.write(bucket=Config.INFLUXDB_BUCKET, org=Config.INFLUXDB_ORG, record=point)
-        print("✅ Dato insertado correctamente en InfluxDB")
+        print(f"✅ Dato insertado: sensor_id={sensor_id}, parametro={parametro}, valor={valor}")
     else:
         print("❌ No se pudo insertar el dato porque la conexión a InfluxDB falló.")
 
-# Prueba con un dato de ejemplo
-escribir_dato(sensor_id="S001", tipo_sensor="Temperatura", invernadero_id="IV01", zona="Norte", valor=25.3, unidad="C")
+# Prueba con datos de ejemplo
+escribir_dato(sensor_id="S001", parametro="humedad", valor=60.5)
+escribir_dato(sensor_id="S002", parametro="ph", valor=6.8)
+
