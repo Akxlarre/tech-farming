@@ -1,39 +1,61 @@
 from flask import Blueprint, request, jsonify
-import logging
-from app.config import escribir_dato
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
+from datetime import datetime
+import os
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
+from app.models.supabase_queries import obtener_sensor_metadata
 
-# Crear el Blueprint
-sensores_bp = Blueprint('sensores', __name__)
+router = Blueprint('sensores', __name__)
 
-@sensores_bp.route('/datos', methods=['POST'])
-def recibir_datos_sensores():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "No se recibió JSON válido"}), 400
+# Configuración de InfluxDB
+INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
+INFLUXDB_URL = os.getenv("INFLUXDB_URL")
+INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET")
+ORG = os.getenv("INFLUXDB_ORG")
 
-        # Extraer datos del JSON
-        sensor_id = data.get("sensor_id")
-        tipo_sensor = data.get("tipo_sensor")
-        invernadero_id = data.get("invernadero_id")
-        zona = data.get("zona")
-        valor = data.get("valor")
-        unidad = data.get("unidad", None)
-        pos_x = data.get("pos_x", None)
-        pos_y = data.get("pos_y", None)
+client = InfluxDBClient(
+    url=INFLUXDB_URL,
+    token=INFLUXDB_TOKEN,
+    org=ORG
+)
+write_api = client.write_api(write_options=SYNCHRONOUS)
 
-        if not all([sensor_id, tipo_sensor, invernadero_id, zona, valor]):
-            return jsonify({"error": "Faltan datos obligatorios"}), 400
 
-        # Guardar en InfluxDB
-        escribir_dato(sensor_id, tipo_sensor, invernadero_id, zona, valor, unidad, pos_x, pos_y)
+@router.route('/api/sensores/datos', methods=['POST'])
+def recibir_datos_sensor():
+    data = request.get_json()
 
-        logging.info(f"✅ Datos recibidos y almacenados: {data}")
-        return jsonify({"message": "Datos guardados correctamente"}), 201
+    sensor_id = data.get("sensor_id")
+    mediciones = data.get("mediciones")
 
-    except Exception as e:
-        logging.error(f"❌ Error al procesar datos: {e}")
-        return jsonify({"error": "Error interno del servidor"}), 500
+    if not sensor_id or not mediciones:
+        return jsonify({"error": "Faltan campos obligatorios"}), 400
+
+    sensor_info = obtener_sensor_metadata(sensor_id)
+    if not sensor_info:
+        return jsonify({"error": "Sensor no registrado"}), 404
+
+    puntos = []
+
+    for m in mediciones:
+        parametro = m.get("parametro")
+        valor = m.get("valor")
+
+        if not parametro or valor is None:
+            continue
+
+        punto = (
+            Point("lecturas_sensores")
+            .tag("sensor_id", sensor_id)
+            .field("parametro", parametro)
+            .field("valor", float(valor))
+            .time(datetime.utcnow())
+        )
+        puntos.append(punto)
+
+    if puntos:
+        write_api.write(bucket=INFLUXDB_BUCKET, record=puntos)
+        return jsonify({"message": "Datos recibidos correctamente"}), 200
+    else:
+        return jsonify({"error": "No se procesaron datos válidos"}), 400
