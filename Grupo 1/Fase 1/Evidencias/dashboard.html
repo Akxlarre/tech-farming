@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tech Farming - Mockup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.0.24/dist/full.css" rel="stylesheet" type="text/css" />
+  <script>
+    function mostrarVista(vista) {
+      const secciones = document.querySelectorAll('.vista');
+      secciones.forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(vista).classList.remove('hidden');
+    }
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('hidden');
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F4F6F8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 1rem;
+    }
+    .sidebar {
+      background-color: #174C3C;
+      color: white;
+    }
+    .sidebar a {
+      color: white;
+      font-weight: 500;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: #145C44;
+      color: #E0FFE0;
+    }
+    .sidebar a.active {
+      background-color: #0F3C2F;
+      border-left: 4px solid #6EE7B7;
+    }
+    .sidebar .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #A0AEC0;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      padding-left: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .card {
+      border-radius: 1rem;
+      border: 1px solid #E0E0E0;
+      background-color: #FFFFFF;
+      padding: 1.618rem;
+    }
+    .card-title {
+      color: #2B2B2B;
+      font-size: 1.618rem;
+      font-weight: 600;
+      margin-bottom: 0.618rem;
+    }
+    .card-body {
+      padding: 1.618rem;
+    }
+    .table th {
+      color: #555;
+      background-color: #FAFAFA;
+      font-weight: 600;
+      padding: 1rem 1.618rem;
+    }
+    .table td {
+      background-color: #FFFFFF;
+      padding: 0.618rem 1rem;
+    }
+    .btn {
+      font-weight: 500;
+      border-radius: 0.618rem;
+      padding: 0.618rem 1rem;
+    }
+    .btn-sm {
+      padding: 0.5rem 0.809rem;
+    }
+    .btn-xs {
+      padding: 0.382rem 0.618rem;
+    }
+    h1 {
+      font-size: 2.618rem;
+    }
+    h2 {
+      font-size: 1.618rem;
+    }
+    p, select, input, table {
+      font-size: 1rem;
+    }
+  </style>
+  <script>
+    window.onload = function () {
+      document.getElementById('login').classList.remove('hidden');
+      document.getElementById('app').classList.add('hidden');
+    };
+
+    function iniciarSesion() {
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+    }
+      function setActiveLink() {
+      const links = document.querySelectorAll('.sidebar a');
+      const currentPath = window.location.pathname;
+      links.forEach(link => {
+        if (link.href.includes(currentPath)) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    }
+    window.addEventListener('DOMContentLoaded', setActiveLink);
+    function setActiveManual(el) {
+      document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+      el.classList.add('active');
+    }
+  </script>
+</head>
+<body>
+<!-- Login -->
+<section id="login" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200 hidden px-4">
+  <div class="card w-full max-w-lg shadow-2xl bg-white border border-gray-200">
+    <div class="card-body px-[2.618rem] py-[3.236rem] space-y-[2.618rem]">
+      <div class="text-center">
+        <h2 class="text-[2rem] font-bold text-green-800">🌿 Tech Farming</h2>
+        <p class="text-gray-500 text-sm mt-1">Bienvenido, ingresa tus credenciales</p>
+      </div>
+      <form class="space-y-[2.618rem]">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 text-base">Correo electrónico</span>
+          </label>
+          <input type="email" placeholder="usuario@correo.com" class="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-green-400" required />
+        </div>
+        <div class="form-control">
+          <label class="label flex justify-between">
+            <span class="label-text text-gray-700 text-base">Contraseña</span>
+            <a href="#" class="label-text-alt text-green-600 hover:underline text-sm">¿Olvidaste tu contraseña?</a>
+          </label>
+          <input type="password" placeholder="••••••••" class="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-green-400" required />
+        </div>
+        <div class="form-control">
+          <button type="submit" class="btn bg-green-700 hover:bg-green-800 text-white font-semibold w-full text-base" onclick="iniciarSesion()">Iniciar sesión</button>
+        </div>
+        <div class="text-center pt-2">
+          <p class="text-sm text-gray-500">¿No tienes cuenta? <a href="#" class="text-green-600 hover:underline">Regístrate aquí</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+<div id="app">
+<!-- Header -->
+<header class="navbar bg-white shadow-md px-4 flex items-center justify-between">
+  <div class="flex-none lg:hidden">
+    <button class="btn btn-ghost btn-circle" onclick="toggleSidebar()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+  <div class="flex items-center gap-4">
+      <a class="btn btn-ghost normal-case text-xl text-green-800">🌿 Tech Farming</a>
+      
+    </div>
+  <div class="flex items-center gap-4 pr-2">
+    <div class="dropdown dropdown-end">
+      <label tabindex="0" class="btn btn-ghost hover:bg-gray-100 transition-all duration-200">
+  <div class="flex items-center gap-2">
+    <div class="avatar w-10 h-10 rounded-full ring ring-green-500 ring-offset-base-100 ring-offset-2 overflow-hidden">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Avatar del usuario" />
+    </div>
+    <span class="hidden md:inline text-sm font-medium text-gray-700">Admin</span>
+  </div>
+</label>
+      <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-white rounded-box w-56 text-sm space-y-1">
+        <li><a>Perfil</a></li>
+        <li><a>Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 bg-gradient-to-b from-[#174C3C] to-[#1F5D47] text-white shadow-xl h-screen sticky top-0 hidden lg:flex flex-col rounded-r-xl px-6 py-6 justify-between">
+  <div class="space-y-2">
+    <a href="#" onclick="mostrarVista('dashboard'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>📊</span> <span class="font-medium">Dashboard</span>
+    </a>
+    <a href="#" onclick="mostrarVista('sensores'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>🧪</span> <span class="font-medium">Sensores</span>
+    </a>
+    <a href="#" onclick="mostrarVista('zonas'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>🌱</span> <span class="font-medium">Zonas</span>
+    </a>
+    <a href="#" onclick="mostrarVista('historial'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>📈</span> <span class="font-medium">Historial</span>
+    </a>
+    <a href="#" onclick="mostrarVista('alertas'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>🚨</span> <span class="font-medium">Alertas</span>
+    </a>
+    <a href="#" onclick="mostrarVista('predicciones'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>🔮</span> <span class="font-medium">Predicciones</span>
+    </a>
+
+    <div class="text-xs uppercase text-gray-300 tracking-wider px-3 mt-6 mb-2">Administrador</div>
+    <a href="#" onclick="mostrarVista('admin'); setActiveManual(this); return false;" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-700 transition-all">
+      <span>⚙️</span> <span class="font-medium">Gestión de Usuarios</span>
+    </a>
+  </div>
+</aside>
+
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 space-y-8">
+      <!-- Dashboard Principal -->
+      <section id="dashboard" class="vista">
+  
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4" aria-label="Encabezado del dashboard">
+  <h1 class="text-3xl font-bold">Dashboard Principal</h1>
+  <select class="select select-bordered select-sm rounded-full w-full sm:w-auto max-w-xs min-w-[12rem]" aria-label="Selector de invernadero">
+
+    <option selected>Milanówek</option>
+    <option>Invernadero Norte</option>
+    <option>Invernadero Sur</option>
+  </select>
+</div>
+
+
+  <!-- Fila 1: Resumen de variables en tiempo real + Alertas activas -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-[2.618rem]">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[1.618rem]">
+      <div class="card" role="region" aria-label="Temperatura actual"><div class="card-body"><h2 class="card-title">Temperatura</h2><p>22°C</p></div></div>
+      <div class="card" role="region" aria-label="Humedad actual"><div class="card-body"><h2 class="card-title">Humedad</h2><p>45%</p></div></div>
+      <div class="card" role="region" aria-label="pH del suelo"><div class="card-body"><h2 class="card-title">pH</h2><p>6.8</p></div></div>
+      <div class="card" role="region" aria-label="Nutrientes NPK"><div class="card-body"><h2 class="card-title">NPK</h2><p>Óptimo</p></div></div>
+      <div class="card" role="region" aria-label="Nivel de agua"><div class="card-body"><h2 class="card-title">Nivel de Agua</h2><p>75%</p></div></div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Alertas Activas</h2>
+        <ul class="space-y-2">
+          <li class="alert alert-error">Sensor S003 fuera de rango (pH bajo)</li>
+          <li class="alert alert-warning">Humedad baja en Zona Sur</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila 2: Gráfico de tendencia -->
+  <div class="mt-[2.618rem]">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Tendencia de Temperatura (últimas 24h)</h2>
+        <div class="h-48 bg-blue-100 rounded flex items-center justify-center text-blue-500">
+          [Gráfico de línea simulado]
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila 3: Estado general de sensores -->
+  <div class="mt-[2.618rem]">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Estado de Sensores</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <p class="font-bold">Activos</p>
+            <p class="text-green-600">12</p>
+          </div>
+          <div class="text-center">
+            <p class="font-bold">Inactivos</p>
+            <p class="text-gray-500">3</p>
+          </div>
+          <div class="text-center">
+            <p class="font-bold">Error</p>
+            <p class="text-red-500">1</p>
+          </div>
+          <div class="text-center">
+            <p class="font-bold">Desconectados</p>
+            <p class="text-yellow-600">2</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila 4: Mapa de zonas + Predicción próxima -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-[2.618rem] mt-[2.618rem]">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Mapa de Zonas</h2>
+        <div class="h-48 bg-green-100 rounded flex items-center justify-center text-green-700">
+          [Esquema del Invernadero]
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">Predicción Próxima</h2>
+        <p class="text-gray-700">Se espera una disminución de humedad del 10% en las próximas 6 horas.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accesos rápidos -->
+  <div class="flex flex-wrap justify-center gap-4 mt-[2.618rem]">
+    <a class="btn btn-outline" onclick="mostrarVista('historial')">📈 Historial</a>
+    <a class="btn btn-outline" onclick="mostrarVista('sensores')">🖧 Sensores</a>
+    <a class="btn btn-outline" onclick="mostrarVista('alertas')">🚨 Alertas</a>
+    <a class="btn btn-outline" onclick="mostrarVista('admin')">⚙️ Configuración</a>
+  </div>
+</section>
+
+      <!-- Vista de Sensores -->
+      <section id="sensores" class="vista hidden">
+  <h1 class="text-3xl font-bold mb-8">Vista de Sensores</h1>
+
+  <!-- Filtros -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-[1.618rem] mb-[2rem]" role="region" aria-label="Filtros de sensores">
+    <select class="select select-bordered w-full" aria-label="Filtrar por tipo de sensor">
+      <option selected>Filtrar por tipo</option>
+      <option>Temperatura</option>
+      <option>Humedad</option>
+      <option>pH</option>
+    </select>
+    <select class="select select-bordered w-full" aria-label="Filtrar por zona">
+      <option selected>Filtrar por zona</option>
+      <option>Zona Norte</option>
+      <option>Zona Sur</option>
+    </select>
+    <select class="select select-bordered w-full" aria-label="Filtrar por estado">
+      <option selected>Filtrar por estado</option>
+      <option>Activo</option>
+      <option>Inactivo</option>
+      <option>Error</option>
+    </select>
+  </div>
+
+  <!-- Botones acción -->
+  <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-[2rem]">
+    <button class="btn btn-outline w-full md:w-auto">📤 Exportar CSV</button>
+    <button class="btn btn-primary w-full md:w-auto">➕ Añadir Sensor</button>
+  </div>
+
+  <!-- Versión móvil: tarjetas -->
+  <div class="grid gap-4 md:hidden">
+    <div class="card p-4 space-y-2">
+      <h2 class="font-bold text-lg">Sensor Temp 1</h2>
+      <p><strong>Tipo:</strong> 🌡️ Temperatura</p>
+      <p><strong>Zona:</strong> Invernadero 1</p>
+      <p><strong>Unidad:</strong> °C</p>
+      <p><strong>Estado:</strong> <span class="badge badge-success">Activo</span></p>
+      <p><strong>Última lectura:</strong> 22°C - 10:00</p>
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-sm btn-outline">👁️ Ver</button>
+        <button class="btn btn-sm btn-outline">✏️ Editar</button>
+        <button class="btn btn-sm btn-error text-white">🗑️ Eliminar</button>
+      </div>
+    </div>
+    <div class="card p-4 space-y-2">
+      <h2 class="font-bold text-lg">Sensor PH 1</h2>
+      <p><strong>Tipo:</strong> 🧪 pH</p>
+      <p><strong>Zona:</strong> Zona Sur</p>
+      <p><strong>Unidad:</strong> pH</p>
+      <p><strong>Estado:</strong> <span class="badge badge-warning">Advertencia</span></p>
+      <p><strong>Última lectura:</strong> 4.2 - 10:10</p>
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-sm btn-outline">👁️ Ver</button>
+        <button class="btn btn-sm btn-outline">✏️ Editar</button>
+        <button class="btn btn-sm btn-error text-white">🗑️ Eliminar</button>
+      </div>
+    </div>
+    <div class="card p-4 space-y-2">
+      <h2 class="font-bold text-lg">Sensor Humedad</h2>
+      <p><strong>Tipo:</strong> 💧 Humedad</p>
+      <p><strong>Zona:</strong> Zona Norte</p>
+      <p><strong>Unidad:</strong> %</p>
+      <p><strong>Estado:</strong> <span class="badge badge-error">Desactivado</span></p>
+      <p><strong>Última lectura:</strong> 35% - 10:05</p>
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-sm btn-outline">👁️ Ver</button>
+        <button class="btn btn-sm btn-outline">✏️ Editar</button>
+        <button class="btn btn-sm btn-error text-white">🗑️ Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Versión escritorio: tabla -->
+  <div class="overflow-x-auto hidden md:block">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Zona</th>
+          <th>Unidad</th>
+          <th>Estado</th>
+          <th>Última lectura</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>S001</td>
+          <td>Sensor Temp 1</td>
+          <td>🌡️ Temperatura</td>
+          <td>Invernadero 1</td>
+          <td>°C</td>
+          <td><span class="badge badge-success">Activo</span></td>
+          <td>22°C - 10:00</td>
+          <td class="flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline">👁️ Ver</button>
+            <button class="btn btn-sm btn-outline">✏️ Editar</button>
+            <button class="btn btn-sm btn-error text-white">🗑️ Eliminar</button>
+          </td>
+        </tr>
+        <tr>
+          <td>S004</td>
+          <td>Sensor PH 1</td>
+          <td>🧪 pH</td>
+          <td>Zona Sur</td>
+          <td>pH</td>
+          <td><span class="badge badge-warning">Advertencia</span></td>
+          <td>4.2 - 10:10</td>
+          <td class="flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline">👁️ Ver</button>
+            <button class="btn btn-sm btn-outline">✏️ Editar</button>
+            <button class="btn btn-sm btn-error text-white">🗑️ Eliminar</button>
+          </td>
+        </tr>
+        <tr>
+          <td>S005</td>
+          <td>Sensor Humedad</td>
+          <td>💧 Humedad</td>
+          <td>Zona Norte</td>
+          <td>%</td>
+          <td><span class="badge badge-error">Desactivado</span></td>
+          <td>35% - 10:05</td>
+          <td class="flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline">👁️ Ver</button>
+            <button class="btn btn-sm btn-outline">✏️ Editar</button>
+            <button class="btn btn-sm btn-error text-white">🗑️ Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+      <section id="zonas" class="vista hidden">
+  <h1 class="text-3xl font-bold mb-[2.618rem]">Zonas e Invernaderos</h1>
+
+  <!-- Filtros y acción -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-[1.618rem] mb-[2.618rem] items-end">
+    <div>
+      <label class="block mb-2 font-medium text-gray-700">Filtrar por estado:</label>
+      <select class="select select-bordered w-full">
+        <option selected>Todos</option>
+        <option>Normal</option>
+        <option>Advertencia</option>
+        <option>Crítico</option>
+      </select>
+    </div>
+    <div class="flex justify-end">
+      <button class="btn btn-primary w-full md:w-auto">+ Crear Zona</button>
+    </div>
+  </div>
+
+  <!-- Tarjetas de zonas -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[2.618rem]">
+    <div class="card">
+      <div class="card-body space-y-2">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title">Zona Norte</h2>
+          <span class="badge badge-success">✅</span>
+        </div>
+        <p class="text-gray-600 text-sm">Invernadero Principal</p>
+        <p class="text-sm">Sensores activos: <strong>3</strong></p>
+        <div class="grid grid-cols-2 gap-[0.618rem] mt-4 text-sm">
+          <div class="bg-green-50 rounded p-2">🌡️ Temp: 22°C</div>
+          <div class="bg-blue-50 rounded p-2">💧 Hum: 45%</div>
+        </div>
+        <div class="flex justify-between gap-2 mt-[1.618rem]">
+          <button class="btn btn-outline btn-sm flex-1">Ver</button>
+          <button class="btn btn-outline btn-warning btn-sm flex-1">Editar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body space-y-2">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title">Zona Sur</h2>
+          <span class="badge badge-warning">⚠️</span>
+        </div>
+        <p class="text-gray-600 text-sm">Invernadero Experimental</p>
+        <p class="text-sm">Sensores activos: <strong>2</strong></p>
+        <div class="grid grid-cols-2 gap-[0.618rem] mt-4 text-sm">
+          <div class="bg-green-50 rounded p-2">🌡️ Temp: 18°C</div>
+          <div class="bg-blue-50 rounded p-2">💧 Hum: 32%</div>
+        </div>
+        <div class="flex justify-between gap-2 mt-[1.618rem]">
+          <button class="btn btn-outline btn-sm flex-1">Ver</button>
+          <button class="btn btn-outline btn-warning btn-sm flex-1">Editar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body space-y-2">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title">Zona Este</h2>
+          <span class="badge badge-error">❌</span>
+        </div>
+        <p class="text-gray-600 text-sm">Área de Ensayo</p>
+        <p class="text-sm">Sensores activos: <strong>1</strong></p>
+        <div class="grid grid-cols-2 gap-[0.618rem] mt-4 text-sm">
+          <div class="bg-green-50 rounded p-2">🌡️ Temp: --</div>
+          <div class="bg-blue-50 rounded p-2">💧 Hum: --</div>
+        </div>
+        <div class="flex justify-between gap-2 mt-[1.618rem]">
+          <button class="btn btn-outline btn-sm flex-1">Ver</button>
+          <button class="btn btn-outline btn-warning btn-sm flex-1">Editar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+      <section id="predicciones" class="vista hidden">
+  <h1 class="text-3xl font-bold mb-[2.618rem]">Predicciones y Tendencias</h1>
+
+  <!-- Filtros con mejor distribución -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-[2.618rem] mb-[2.618rem]">
+    <div class="flex flex-col gap-[0.618rem]">
+      <label class="text-gray-700 font-medium">Variable</label>
+      <select class="select select-bordered w-full">
+        <option selected>Seleccionar variable</option>
+        <option>Temperatura</option>
+        <option>Humedad</option>
+        <option>pH</option>
+      </select>
+    </div>
+    <div class="flex flex-col gap-[0.618rem]">
+      <label class="text-gray-700 font-medium">Zona</label>
+      <select class="select select-bordered w-full">
+        <option selected>Seleccionar zona</option>
+        <option>Zona Norte</option>
+        <option>Zona Sur</option>
+      </select>
+    </div>
+    <div class="flex flex-col gap-[0.618rem]">
+      <label class="text-gray-700 font-medium">Proyección</label>
+      <select class="select select-bordered w-full">
+        <option selected>Proyección</option>
+        <option>6h</option>
+        <option>12h</option>
+        <option>24h</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Gráfico de predicción -->
+  <div class="card mb-[2.618rem]">
+    <div class="card-body">
+      <h2 class="card-title">Gráfico de Predicción</h2>
+      <div class="h-64 bg-blue-100 rounded flex items-center justify-center text-blue-500">
+        [Predicción ARIMA aquí]
+      </div>
+      <p class="mt-[1rem] text-sm text-gray-500">Nivel de confianza: ±5%</p>
+    </div>
+  </div>
+
+  <!-- Indicadores y resumen mejor distribuidos -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-[2.618rem]">
+    <div class="card">
+      <div class="card-body space-y-[1rem]">
+        <h2 class="card-title">Tendencia</h2>
+        <p class="text-green-600 font-semibold">📉 Humedad proyectada a la baja</p>
+        <p class="text-sm text-gray-600">Comparado con el promedio de los últimos 7 días.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body space-y-[1rem]">
+        <h2 class="card-title">Resumen Predictivo</h2>
+        <p class="text-gray-700">Se proyecta una disminución de humedad en Zona Sur en las próximas 8 horas.</p>
+        <p class="text-gray-500 text-sm">Actúe preventivamente para evitar deshidratación del cultivo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+      <!-- Vista de Admin -->
+      <section id="admin" class="vista hidden">
+  <h1 class="text-3xl font-bold mb-[2.618rem]">Panel de Administración</h1>
+
+  <!-- Navegación de Tabs -->
+  <div class="tabs tabs-boxed mb-[2.618rem]">
+    <a class="tab tab-active">Usuarios</a>
+    <a class="tab">Sensores</a>
+    <a class="tab">Zonas</a>
+    <a class="tab">Umbrales</a>
+  </div>
+
+  <!-- Sección de Gestión de Usuarios -->
+  <div class="card">
+    <div class="card-body space-y-[2.618rem]">
+      <div class="flex justify-between items-center">
+        <h2 class="card-title">Usuarios Registrados</h2>
+        <button class="btn btn-primary">+ Añadir Usuario</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Carlos Torres</td>
+              <td>carlos@campo.cl</td>
+              <td><span class="badge badge-error">Administrador</span></td>
+              <td><span class="badge badge-success">Activo</span></td>
+              <td>
+                <div class="flex justify-center gap-2">
+                  <button class="btn btn-xs btn-outline">Editar</button>
+                  <button class="btn btn-xs btn-outline">Desactivar</button>
+                  <button class="btn btn-xs btn-error text-white">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>María Silva</td>
+              <td>maria@agro.cl</td>
+              <td><span class="badge badge-success">Técnico</span></td>
+              <td><span class="badge badge-success">Activo</span></td>
+              <td>
+                <div class="flex justify-center gap-2">
+                  <button class="btn btn-xs btn-outline">Editar</button>
+                  <button class="btn btn-xs btn-outline">Desactivar</button>
+                  <button class="btn btn-xs btn-error text-white">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+      <!-- Vista de Historial -->
+      <section id="historial" class="vista hidden">
+  <h1 class="text-3xl font-bold mb-[2.618rem]">Historial de Variables</h1>
+
+  <!-- Contenedor de filtros -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-[2.618rem] mb-[2.618rem]">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-[1.618rem]">
+      <select class="select select-bordered w-full">
+        <option selected>Seleccionar variable</option>
+        <option>Temperatura</option>
+        <option>Humedad</option>
+        <option>pH</option>
+        <option>NPK</option>
+      </select>
+      <select class="select select-bordered w-full">
+        <option selected>Filtrar por zona</option>
+        <option>Zona Norte</option>
+        <option>Zona Sur</option>
+      </select>
+      <select class="select select-bordered w-full">
+        <option selected>Filtrar por sensor</option>
+        <option>S001</option>
+        <option>S002</option>
+        <option>S003</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-2 gap-[1.618rem]">
+      <input type="date" class="input input-bordered w-full" placeholder="Desde" />
+      <input type="date" class="input input-bordered w-full" placeholder="Hasta" />
+    </div>
+  </div>
+
+  <!-- Botón exportar -->
+  <div class="flex justify-end mb-[2.618rem]">
+    <button class="btn btn-outline">📤 Exportar CSV</button>
+  </div>
+
+  <!-- Gráfico principal -->
+  <div class="card mb-[2.618rem]">
+    <div class="card-body">
+      <h2 class="card-title">Tendencia de Variable Seleccionada</h2>
+      <div class="h-64 bg-gray-200 rounded flex items-center justify-center text-gray-500">
+        [Aquí iría el gráfico interactivo de líneas]
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicadores estadísticos -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-[1.618rem]">
+    <div class="card text-center">
+      <div class="card-body p-4">
+        <p class="text-gray-500">Promedio</p>
+        <p class="font-bold text-xl">23.4°C</p>
+      </div>
+    </div>
+    <div class="card text-center">
+      <div class="card-body p-4">
+        <p class="text-gray-500">Mínimo</p>
+        <p class="font-bold text-xl">18.1°C</p>
+      </div>
+    </div>
+    <div class="card text-center">
+      <div class="card-body p-4">
+        <p class="text-gray-500">Máximo</p>
+        <p class="font-bold text-xl">28.9°C</p>
+      </div>
+    </div>
+    <div class="card text-center">
+      <div class="card-body p-4">
+        <p class="text-gray-500">Desvío estándar</p>
+        <p class="font-bold text-xl">2.4</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <!-- Vista de Alertas -->
+      <section id="alertas" class="vista hidden">
+  <h1 class="text-3xl font-bold mb-[2.618rem]">Gestión de Alertas</h1>
+
+  <!-- Alertas activas -->
+  <div class="card mb-[2.618rem]">
+    <div class="card-body space-y-[1.618rem]">
+      <h2 class="card-title">Alertas Activas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[1.618rem]">
+        <div class="alert alert-error flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <span>⚠️ Sensor S003 fuera de rango (pH bajo)</span>
+          <button class="btn btn-sm btn-outline mt-2 sm:mt-0">Resolver</button>
+        </div>
+        <div class="alert alert-warning flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <span>⚠️ Humedad baja en Zona Sur</span>
+          <button class="btn btn-sm btn-outline mt-2 sm:mt-0">Resolver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historial de alertas -->
+  <div class="card mb-[2.618rem]">
+    <div class="card-body">
+      <h2 class="card-title mb-[1rem]">Historial de Alertas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-[1.618rem] mb-[1.618rem]">
+        <select class="select select-bordered">
+          <option selected>Filtrar por variable</option>
+          <option>Temperatura</option>
+          <option>Humedad</option>
+          <option>pH</option>
+        </select>
+        <select class="select select-bordered">
+          <option selected>Filtrar por zona</option>
+          <option>Zona Norte</option>
+          <option>Zona Sur</option>
+        </select>
+        <input type="date" class="input input-bordered" />
+      </div>
+
+      <!-- Vista móvil -->
+      <div class="grid gap-4 md:hidden">
+        <div class="card p-4 space-y-2">
+          <p><strong>Fecha:</strong> 2025-03-30</p>
+          <p><strong>Sensor:</strong> S003</p>
+          <p><strong>Zona:</strong> Invernadero 1</p>
+          <p><strong>Variable:</strong> pH</p>
+          <p><strong>Valor:</strong> 3.2</p>
+          <p><strong>Nivel:</strong> <span class="badge badge-error">Crítico</span></p>
+        </div>
+        <div class="card p-4 space-y-2">
+          <p><strong>Fecha:</strong> 2025-03-28</p>
+          <p><strong>Sensor:</strong> S002</p>
+          <p><strong>Zona:</strong> Zona Sur</p>
+          <p><strong>Variable:</strong> Humedad</p>
+          <p><strong>Valor:</strong> 15%</p>
+          <p><strong>Nivel:</strong> <span class="badge badge-warning">Advertencia</span></p>
+        </div>
+      </div>
+
+      <!-- Vista escritorio -->
+      <div class="overflow-x-auto hidden md:block">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Sensor</th>
+              <th>Zona</th>
+              <th>Variable</th>
+              <th>Valor</th>
+              <th>Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2025-03-30</td>
+              <td>S003</td>
+              <td>Invernadero 1</td>
+              <td>pH</td>
+              <td>3.2</td>
+              <td><span class="badge badge-error">Crítico</span></td>
+            </tr>
+            <tr>
+              <td>2025-03-28</td>
+              <td>S002</td>
+              <td>Zona Sur</td>
+              <td>Humedad</td>
+              <td>15%</td>
+              <td><span class="badge badge-warning">Advertencia</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuración de umbrales -->
+  <div class="card">
+    <div class="card-body space-y-[2.618rem]">
+      <h2 class="card-title">Configuración de Umbrales</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-[1.618rem]">
+        <select class="select select-bordered">
+          <option selected>Variable</option>
+          <option>Temperatura</option>
+          <option>Humedad</option>
+        </select>
+        <input type="number" placeholder="Mínimo" class="input input-bordered" />
+        <input type="number" placeholder="Máximo" class="input input-bordered" />
+        <select class="select select-bordered">
+          <option selected>Nivel</option>
+          <option>Bajo</option>
+          <option>Medio</option>
+          <option>Crítico</option>
+        </select>
+        <button class="btn btn-primary w-full lg:w-auto">Guardar</button>
+      </div>
+    </div>
+  </div>
+</section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
