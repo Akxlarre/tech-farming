@@ -1,0 +1,50 @@
+<!-- layout.component.html -->
+
+<!-- Splash -->
+<app-splash *ngIf="showSplash" class="fixed inset-0 z-[9999]"></app-splash>
+
+<!-- Contenido principal (se oculta mientras el splash está activo) -->
+<ng-container *ngIf="!showSplash">
+  <app-header></app-header>
+
+  <main class="min-h-screen bg-[#F4F6F8]">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Modal para confirmar cierre de sesión -->
+  <input type="checkbox" id="modal-cerrar-sesion" class="modal-toggle" />
+  <div class="modal z-50">
+    <div
+      class="modal-box rounded-2xl shadow-xl bg-white/80 backdrop-blur-md border border-gray-200">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-3xl animate-bounce">🌿</span>
+        <h3 class="font-bold text-xl text-gray-800 tracking-tight">Confirmar Salida</h3>
+      </div>
+      <p class="text-sm text-gray-600 leading-snug">
+        Estás a punto de cerrar sesión.<br />
+        ¡Te esperamos pronto de vuelta! <span class="text-yellow-400">✨</span>
+      </p>
+      <div class="modal-action mt-6 flex justify-end gap-2">
+        <label
+          for="modal-cerrar-sesion"
+          class="btn btn-outline hover:bg-gray-100 text-gray-700 font-medium"
+        >
+          Cancelar
+        </label>
+        <button
+          (click)="authService.cerrarSesion()"
+          class="btn bg-pink-600 hover:bg-pink-700 text-white font-semibold shadow-md transition-all duration-200"
+        >
+          <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de cierre -->
+  <div id="toast-logout" class="toast toast-top toast-end z-[9999] hidden">
+    <div class="alert alert-success shadow-md">
+      <span>🌿 Sesión cerrada correctamente</span>
+    </div>
+  </div>
+</ng-container>

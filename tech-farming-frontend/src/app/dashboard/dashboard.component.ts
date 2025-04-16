@@ -1,14 +1,17 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-
+import { CommonModule } from '@angular/common'; 
+import { VariableCardsComponent } from '../dashboard/components/variable-card/variable-card.component'; 
+import { TrendChartComponent } from './components/tendencia/trend-chart.component';
+import { AlertPanelComponent } from './components/alertas-resumen/alert-panel.component';
+import { SensorStatusComponent } from './components/estado-sensores/sensor-status.component';
+import { SensorMapComponent } from './components/mapa-zonas/sensor-map.component'; 
+import { NextPredictionComponent } from './components/prediccion-resumen/next-prediction.component';
 @Component({
-  standalone: true, // ← Debe estar presente
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterModule],
+  standalone: true,
+  imports: [CommonModule, VariableCardsComponent,TrendChartComponent, AlertPanelComponent, SensorStatusComponent,SensorMapComponent, NextPredictionComponent],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrls: ['./dashboard.component.css'] 
 })
 export class DashboardComponent {
-  // Lógica del componente aquí
 }

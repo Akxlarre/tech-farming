@@ -1,0 +1,92 @@
+<div class="modal-container grid grid-cols-12 gap-0">
+
+    <!-- Panel de Información (Principal) -->
+    <section class="info-panel col-span-7 p-[2rem] pr-[2.5rem] overflow-y-auto flex flex-col gap-[3.25rem]">
+      
+      <!-- Sección 1: Info General -->
+      <section class="flex flex-col gap-[1.25rem]">
+        <h2 class="section-title text-2xl font-bold text-slate-800">🌿 Información del Sensor</h2>
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-[0.75rem] text-slate-600 text-sm">
+          <div><dt class="font-semibold">🧪 Tipo</dt><dd>{{ sensor.tipo }}</dd></div>
+          <div><dt class="font-semibold">📍 Zona</dt><dd>{{ sensor.zona }}</dd></div>
+          <div><dt class="font-semibold">📐 Coordenadas</dt><dd>X: 4.2 / Y: 1.3</dd></div>
+          <div><dt class="font-semibold">📆 Instalación</dt><dd>2024-11-15</dd></div>
+          <div><dt class="font-semibold">🟢 Estado</dt>
+            <dd>
+              <span class="badge" [ngClass]="{
+                'badge-success': sensor.estado === 'Activo',
+                'badge-warning': sensor.estado === 'Advertencia',
+                'badge-error': sensor.estado === 'Crítico' || sensor.estado === 'Error'
+              }">{{ sensor.estado }}</span>
+            </dd>
+          </div>
+          <div><dt class="font-semibold">📅 Última actualización</dt><dd>2025-04-04 14:32</dd></div>
+        </dl>
+      </section>
+  
+      <!-- Sección 2: Últimos Valores -->
+      <section class="flex flex-col gap-[1.25rem]">
+        <h2 class="section-title text-xl font-semibold text-slate-800">📊 Últimos Valores</h2>
+        <table class="w-full text-sm text-left border-separate border-spacing-y-[0.5rem]">
+          <thead class="text-slate-500">
+            <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th><th>Umbral</th><th>Fecha</th></tr>
+          </thead>
+          <tbody>
+            <tr class="bg-slate-50 rounded-lg shadow-sm">
+              <td>🌡️ Temperatura</td><td>29.5°C</td><td>°C</td><td><span class="text-error">🔺 Alta</span></td><td>2025-04-04</td>
+            </tr>
+            <tr class="bg-slate-50 rounded-lg shadow-sm">
+              <td>💧 Humedad</td><td>82.5</td><td>%</td><td><span class="text-warning">⚠️ Alta</span></td><td>2025-04-04</td>
+            </tr>
+            <tr class="bg-slate-50 rounded-lg shadow-sm">
+              <td>🌱 nitrogeno/td><td>6.2</td><td>%</td><td><span class="text-success">✅ Dentro</span></td><td>2025-04-04</td>
+            </tr>
+            <tr class="bg-slate-50 rounded-lg shadow-sm">
+              <td>🌱 fosforo</td><td>5.8</td><td>%</td><td><span class="text-success">✅ Dentro</span></td><td>2025-04-04</td>
+            </tr>
+            <tr class="bg-slate-50 rounded-lg shadow-sm">
+              <td>🌱 potasio</td><td>4.5</td><td>%</td><td><span class="text-success">✅ Dentro</span></td><td>2025-04-04</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </section>
+  
+      <!-- Sección 3: Historial -->
+      <section class="flex flex-col gap-[1.25rem]">
+        <h2 class="section-title text-xl font-semibold text-slate-800">📈 Historial Rápido</h2>
+        <div class="grid grid-cols-3 gap-[1rem]">
+          <div class="history-card">🌡️ Temperatura</div>
+          <div class="history-card">💧 Humedad</div>
+          <div class="history-card">🌱 nitrogeno</div>
+           <div class="history-card">🌱 fosforo</div>
+           <div class="history-card">🌱 potasio</div>
+        </div>
+        <a href="#" class="text-blue-600 underline text-sm">🔍 Ver historial completo</a>
+      </section>
+    </section>
+  
+    <!-- Panel Secundario -->
+    <aside class="side-panel col-span-5 p-[2rem] pt-[2.5rem] pb-[3.25rem] bg-slate-50 flex flex-col gap-[2rem] border-l border-slate-200">
+  
+      <!-- Sección 4: Mapa -->
+      <div class="map-box flex justify-center items-center h-[13rem] bg-white rounded-xl border border-slate-200 text-slate-400 text-sm font-medium">
+        🗺️ Mapa del sensor
+      </div>
+      <button class="btn btn-secondary w-full mt-[0.75rem]">📍 Reubicar</button>
+  
+      <!-- Sección 5: Alertas -->
+      <section class="flex flex-col gap-[0.75rem]">
+        <h3 class="text-md font-semibold text-slate-700">🚨 Alertas Recientes</h3>
+        <div class="alert-box bg-yellow-100 text-yellow-800">⚠️ Humedad alta (82%)</div>
+        <div class="alert-box bg-red-500 text-white">🔥 Temp. atípica (34.1°C)</div>
+      </section>
+  
+      <!-- Sección 6: Acciones -->
+      <section class="mt-auto flex flex-col gap-[0.75rem]">
+        <button class="btn btn-success w-full">✏️ Editar</button>
+        <button type="button" class="btn btn-outline" (click)="cerrar()">Cancelar</button>
+      </section>
+  
+    </aside>
+  </div>

@@ -1,1 +1,50 @@
-<p>dashboard works!</p>
+<section class="space-y-[2.618rem] scroll-smooth px-4 sm:px-10 lg:px-16">
+
+  <!-- Header Dashboard -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-[2.618rem]">
+    <h1 class="text-[2.618rem] font-bold text-gray-800 leading-snug tracking-tight">Dashboard Principal</h1>
+    <div class="flex gap-4 items-center">
+      <button class="btn bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2 rounded-xl shadow-sm flex items-center gap-2 transition duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-white" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-5-5.917V4a2 2 0 10-4 0v1.083A6.002 6.002 0 004 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5m8 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <span>Modo Pasivo</span>
+      </button>
+      <select class="select select-bordered select-sm rounded-full w-full sm:w-auto max-w-xs min-w-[12rem]">
+        <option selected>📍 Invernadero Norte</option>
+        <option>Invernadero Sur</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tarjetas de variables principales -->
+  <app-variable-card />
+
+  <!-- Sección Gráfico + Alertas -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-[1.618rem]">
+    <div class="lg:col-span-2 card p-4 rounded-2xl shadow-md bg-white">
+      <app-trend-chart [variable]="'Temperatura'" />
+    </div>
+    <div class="card p-4 rounded-2xl shadow-md bg-white">
+      <app-alert-panel />
+    </div>
+  </div>
+
+  <!-- Estado General de Sensores -->
+  <div class="card p-4 rounded-2xl shadow-md bg-white">
+    <app-sensor-status />
+  </div>
+
+  <!-- Mapa de Zonas + Predicción Próxima -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-[1.618rem]">
+    <div class="card p-4 rounded-2xl shadow-md bg-white">
+      <app-sensor-map />
+    </div>
+    <div class="card p-4 rounded-2xl shadow-md bg-white">
+      <app-next-prediction />
+    </div>
+  </div>
+
+</section>

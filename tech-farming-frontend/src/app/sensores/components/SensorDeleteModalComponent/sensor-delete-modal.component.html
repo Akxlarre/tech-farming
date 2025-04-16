@@ -1,0 +1,19 @@
+<div class="rounded-2xl shadow-xl max-w-md bg-red-50 border border-red-200 px-6 py-6 space-y-4 animate-fadeInZoom">
+  <div class="flex items-center gap-2 text-red-600 text-lg font-semibold border-b border-red-300 pb-2">
+    <span class="text-xl animate-bounce">🗑️</span>
+    Confirmar eliminación
+  </div>
+  <p class="text-sm text-gray-700 leading-relaxed">
+    Esta acción eliminará permanentemente el sensor
+    <span class="font-bold text-red-500">"{{ sensor?.nombre }}"</span>.<br />
+    <span class="font-medium text-gray-600">No podrás deshacer esta acción.</span>
+  </p>
+
+  <div class="flex justify-end gap-4 pt-2">
+    <button class="btn btn-sm btn-outline" (click)="cancelar()">Cancelar</button>
+    <button class="btn btn-sm bg-red-600 text-white hover:bg-red-700 shadow-sm" [disabled]="loading" (click)="confirmarEliminacion()">
+      <span *ngIf="!loading">Eliminar</span>
+      <span *ngIf="loading" class="loading loading-spinner loading-sm"></span>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+:host {
+    display: block;
+  }
+  
+  select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #4ade80; /* verde suave */
+  }
