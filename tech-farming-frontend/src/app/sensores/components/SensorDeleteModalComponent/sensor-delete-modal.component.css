@@ -1,0 +1,13 @@
+:host {
+  animation: fadeInZoom 0.25s ease-out;
+}
+@keyframes fadeInZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

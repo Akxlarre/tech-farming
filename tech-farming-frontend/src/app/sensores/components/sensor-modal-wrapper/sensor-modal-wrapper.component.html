@@ -1,0 +1,10 @@
+<div
+  class="fixed inset-0 bg-black/50 z-[9998] flex items-center justify-center transition-all"
+  (click)="onOverlayClick($event)"
+  [ngClass]="{
+    'animate-fadeIn': !closing,
+    'animate-fadeOut': closing
+  }"
+>
+  <ng-content></ng-content>
+</div>

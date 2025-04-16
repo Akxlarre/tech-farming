@@ -1,0 +1,22 @@
+<div class="grid gap-[1.618rem] md:hidden">
+  <div *ngFor="let sensor of sensores" class="card p-[1.618rem] space-y-[0.618rem]">
+    <h2 class="font-bold text-lg">{{ sensor.nombre }}</h2>
+    <p><strong>Tipo:</strong> {{ sensor.icono }} {{ sensor.tipo }}</p>
+    <p><strong>Zona:</strong> {{ sensor.zona }}</p>
+    <p><strong>Unidad:</strong> {{ sensor.unidad }}</p>
+    <p><strong>Estado:</strong>
+      <span [ngClass]="{
+        'badge badge-success': sensor.estado === 'Activo',
+        'badge badge-warning': sensor.estado === 'Advertencia',
+        'badge badge-error': sensor.estado === 'Crítico' || sensor.estado === 'Error'
+      }">{{ sensor.estado }}</span>
+    </p>
+    <p><strong>Última lectura:</strong> {{ sensor.lectura }}</p>
+
+    <div class="flex gap-2 mt-2">
+      <button class="btn btn-sm btn-outline" (click)="ver(sensor)">👁️ Ver</button>
+      <button class="btn btn-sm btn-outline" (click)="editar(sensor)">✏️ Editar</button>
+      <button class="btn btn-sm btn-error text-white" (click)="eliminar(sensor)">🗑️ Eliminar</button>
+    </div>
+  </div>
+</div>

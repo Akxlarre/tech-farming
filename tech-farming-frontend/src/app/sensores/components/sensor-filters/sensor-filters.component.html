@@ -1,0 +1,34 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-[1.618rem] mb-[1.618rem]">
+  <!-- Tipo -->
+  <select aria-label="Filtrar por tipo de sensor" class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full">
+    <option selected>Filtrar por tipo</option>
+    <option>Temperatura</option>
+    <option>Humedad</option>
+    <option>pH</option>
+    <option>NPK</option>
+    <option>Nivel Agua</option>
+  </select>
+
+  <!-- Zona -->
+  <select aria-label="Filtrar por zona" class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full">
+    <option selected>Filtrar por zona</option>
+    <option>Zona Norte</option>
+    <option>Zona Sur</option>
+    <option>Zona Este</option>
+  </select>
+
+  <!-- Estado -->
+  <select aria-label="Filtrar por estado" class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full">
+    <option selected>Filtrar por estado</option>
+    <option>Activo</option>
+    <option>Advertencia</option>
+    <option>Crítico</option>
+    <option>Error</option>
+  </select>
+
+  <!-- Búsqueda -->
+  <div class="relative">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">🔍</span>
+    <input type="text" placeholder="Buscar por nombre, ID o zona" class="input input-bordered pl-10 rounded-xl shadow-sm w-full focus:ring focus:ring-offset-2 focus:ring-green-500" />
+  </div>
+</div>

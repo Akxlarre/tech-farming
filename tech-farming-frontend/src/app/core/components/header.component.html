@@ -1,0 +1,90 @@
+<header class="navbar bg-white shadow-md px-6 py-2 flex justify-between items-center sticky top-0 z-50">
+    <!-- Logo + Nav Desktop -->
+    <div class="flex items-center gap-6">
+      <!-- Logo -->
+      <div class="flex items-center gap-2">
+        <img src="assets/img/hoja-logo.png" alt="Logo" class="w-12 h-12" />
+        <span class="text-xl font-bold text-green-800">Tech Farming</span>
+      </div>
+  
+      <!-- Navegación Desktop -->
+      <nav class="hidden lg:flex gap-1">
+        <a [routerLink]="'/dashboard'" [ngClass]="isActive('/dashboard') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Dashboard
+        </a>
+        <a [routerLink]="'/sensores'" [ngClass]="isActive('/sensores') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Sensores
+        </a>
+        <a [routerLink]="'/zonas'" [ngClass]="isActive('/zonas') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Zonas
+        </a>
+        <a [routerLink]="'/historial'" [ngClass]="isActive('/historial') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Historial
+        </a>
+        <a [routerLink]="'/alertas'" [ngClass]="isActive('/alertas') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Alertas
+        </a>
+        <a [routerLink]="'/predicciones'" [ngClass]="isActive('/predicciones') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Predicciones
+        </a>
+        <a [routerLink]="'/admin'" [ngClass]="isActive('/admin') ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-100'"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+          Usuarios
+        </a>
+      </nav>
+    </div>
+  
+    <!-- Perfil + Menú Hamburguesa -->
+    <div class="flex items-center gap-4">
+      <!-- Avatar SIEMPRE visible -->
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full ring ring-green-500 ring-offset-2">
+            <img src="https://i.pravatar.cc/150?img=12" />
+          </div>
+        </label>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow-lg bg-white rounded-box w-56 space-y-1">
+          <li>
+            <a class="flex items-center gap-3 text-gray-800 hover:bg-gray-100 rounded-lg px-3 py-2 transition-all duration-200">
+              <i class="fas fa-user text-green-700"></i>
+              Perfil
+            </a>
+          </li>
+          <li><div class="border-t border-gray-200 my-1"></div></li>
+          <li>
+            <a onclick="logout()" 
+               class="flex items-center gap-3 text-red-600 hover:bg-red-100 rounded-lg px-3 py-2 transition-all duration-200 hover:scale-105 font-semibold">
+              <i class="fas fa-sign-out-alt"></i>
+              Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div>
+  
+      <!-- Menú Hamburguesa solo en móvil -->
+      <div class="lg:hidden dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </label>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow-xl bg-white/80 backdrop-blur-md rounded-box w-52 animate-fade-in-down text-sm text-gray-800 z-50">
+          <li><a routerLink="/dashboard">Dashboard</a></li>
+          <li><a routerLink="/sensores">Sensores</a></li>
+          <li><a routerLink="/zonas">Zonas</a></li>
+          <li><a routerLink="/historial">Historial</a></li>
+          <li><a routerLink="/alertas">Alertas</a></li>
+          <li><a routerLink="/predicciones">Predicciones</a></li>
+          <li><a routerLink="/admin">Usuarios</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  

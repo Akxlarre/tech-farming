@@ -1,0 +1,25 @@
+<section class="vista min-h-screen scroll-smooth px-4 sm:px-10 lg:px-16 space-y-[2.618rem]">
+  <!-- Encabezado de la vista de sensores -->
+  <app-sensor-header />
+
+  <!-- Filtros por tipo, zona, estado y búsqueda -->
+  <app-sensor-filters />
+
+  <!-- Tabla para escritorio -->
+  <app-sensor-table [sensores]="sensores" />
+
+  <!-- Tarjetas para móviles con paginación -->
+  <app-sensor-card-list [sensores]="sensores" />
+
+  <!-- Modales de acción (ver / editar / eliminar) -->
+  <ng-container *ngIf="modalType">
+    <app-sensor-modal-wrapper>
+      <ng-container [ngSwitch]="modalType">
+        <app-sensor-edit-modal *ngSwitchCase="'edit'" />
+        <app-sensor-delete-modal *ngSwitchCase="'delete'" />
+        <app-sensor-view-modal *ngSwitchCase="'view'" />
+        <app-sensor-create-modal *ngSwitchCase="'create'" />
+      </ng-container>
+    </app-sensor-modal-wrapper>
+  </ng-container>
+</section>

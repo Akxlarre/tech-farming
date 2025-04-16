@@ -1,0 +1,22 @@
+<section class="estado-container">
+    <h2 class="estado-titulo">Estado de Sensores</h2>
+  
+    <div class="estado-grid">
+      <div>
+        <p class="estado-label">Activos</p>
+        <p class="estado-valor text-green-600">{{ estadoSensores.activos }}</p>
+      </div>
+      <div>
+        <p class="estado-label">Inactivos</p>
+        <p class="estado-valor text-gray-500">{{ estadoSensores.inactivos }}</p>
+      </div>
+      <div>
+        <p class="estado-label">Error</p>
+        <p class="estado-valor text-red-500">{{ estadoSensores.error }}</p>
+      </div>
+      <div>
+        <p class="estado-label">Desconectados</p>
+        <p class="estado-valor text-yellow-500">{{ estadoSensores.desconectados }}</p>
+      </div>
+    </div>
+</section>
