@@ -6,7 +6,7 @@
       ➕ Crear nuevo sensor
     </h2>
 
-    <form [formGroup]="formulario" (ngSubmit)="guardar()" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div>
         <label for="nombre" class="label">Nombre del sensor</label>
         <input id="nombre" type="text" formControlName="nombre" class="input input-bordered w-full" />
@@ -18,17 +18,17 @@
       </div>
 
       <div>
-        <label for="invernadero" class="label">Invernadero</label>
-        <select id="invernadero" formControlName="invernadero" class="select select-bordered w-full">
-          <option value="" disabled selected>Selecciona uno</option>
-          <option *ngFor="let i of invernaderos" [value]="i">{{ i }}</option>
+        <label>Invernadero</label>
+        <select id="invernadero_id" formControlName="invernadero_id" class="select select-bordered w-full">
+          <option [ngValue]="null" diabled>Seleccione uno</option>
+          <option *ngFor="let i of invernaderos" [value]="i.id">{{ i }}</option>
         </select>
       </div>
 
       <div>
         <label for="zona" class="label">Zona</label>
         <select id="zona" formControlName="zona" class="select select-bordered w-full">
-          <option value="" disabled selected>Selecciona una zona</option>
+          <option [ngValue]="null" disabled>Selecciona una zona</option>
           <option *ngFor="let z of zonas" [value]="z">{{ z }}</option>
         </select>
       </div>
@@ -40,12 +40,12 @@
 
       <div>
         <label for="posX" class="label">Posición X</label>
-        <input id="posX" type="number" formControlName="posX" class="input input-bordered w-full" />
+        <input id="posX" type="number" formControlName="pos_x" class="input input-bordered w-full" />
       </div>
 
       <div>
         <label for="posY" class="label">Posición Y</label>
-        <input id="posY" type="number" formControlName="posY" class="input input-bordered w-full" />
+        <input id="posY" type="number" formControlName="pos_y" class="input input-bordered w-full" />
       </div>
 
       <div class="flex items-center gap-3">
@@ -54,31 +54,19 @@
       </div>
 
       <div class="sm:col-span-2">
-        <fieldset>
-          <legend class="label">Parámetros que medirá</legend>
-          <div class="flex flex-wrap gap-2">
-            <label *ngFor="let param of parametros" class="cursor-pointer flex items-center">
-              <input
-                type="checkbox"
-                [value]="param"
-                (change)="toggleParametro(param, $event)"
-                [checked]="isParametroChecked(param)"
-                class="hidden peer"
-              />
-              <span
-                class="px-3 py-1 rounded-full bg-gray-200 text-sm peer-checked:bg-violet-600 peer-checked:text-white"
-              >
-                {{ param }}
-              </span>
-            </label>            
-          </div>
-        </fieldset>
+        <div class="sm:col-span-2">
+          <label>Tipo de sensor</label>
+          <select id="tipo_sensor_id" formControlName="tipo_sensor_id" class="select select-bordered w-full">
+            <option [ngValue]="null" disabled>Selecciona un tipo de sensor</option>
+            <option *ngFor="let tipo of tiposSensor" [value]="tipo.id">{{ tipo.nombre }}</option>
+          </select>
+        </div>
       </div>
 
       <!-- Botones -->
       <div class="sm:col-span-2 flex justify-between items-center pt-4">
         <button type="button" class="btn btn-outline" (click)="cerrar()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="formulario.invalid" (click)="guardar()">
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
           💾 Guardar sensor
         </button>
       </div>
@@ -120,7 +108,7 @@
 
     <!-- Endpoint -->
     <p class="text-sm"><strong>Endpoint:</strong>
-      <code class="text-blue-700 font-mono">POST /api/sensores/datos</code>
+      <code class="text-blue-700 font-mono"> POST /api/sensores/datos</code>
     </p>
 
     <!-- Advertencia token -->

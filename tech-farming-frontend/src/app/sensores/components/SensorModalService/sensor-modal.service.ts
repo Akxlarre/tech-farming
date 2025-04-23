@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Sensor } from '../../models/sensor.model';
 
+export type SensorModalType = 'view' | 'edit' | 'delete' | 'create';
+
 @Injectable({ providedIn: 'root' })
 export class SensorModalService {
-  modalType$ = new BehaviorSubject<'view' | 'edit' | 'delete' | 'create' | null>(null);
+  modalType$ = new BehaviorSubject<SensorModalType | null>(null);
   selectedSensor$ = new BehaviorSubject<Sensor | null>(null);
   closing$ = new BehaviorSubject<boolean>(false);  // Nuevo
 
-  openModal(type: 'view' | 'edit' | 'delete' | 'create', sensor: Sensor | null) {
+  openModal(type: SensorModalType, sensor: Sensor | null) {
     this.closing$.next(false);
     this.selectedSensor$.next(sensor);
     this.modalType$.next(type);

@@ -4,7 +4,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from datetime import datetime
 import os
 
-from app.models.supabase_queries import obtener_sensor_metadata
+from app.models.sensor_queries import obtener_sensor_metadata, insertar_sensor
 
 router = Blueprint('sensores', __name__)
 
@@ -22,17 +22,17 @@ client = InfluxDBClient(
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
-@router.route('/api/sensores/datos', methods=['POST'])
+@router.route('/datos', methods=['POST'])
 def recibir_datos_sensor():
     data = request.get_json()
 
-    sensor_id = data.get("sensor_id")
+    token = data.get("token")
     mediciones = data.get("mediciones")
 
-    if not sensor_id or not mediciones:
+    if not token or not mediciones:
         return jsonify({"error": "Faltan campos obligatorios"}), 400
 
-    sensor_info = obtener_sensor_metadata(sensor_id)
+    sensor_info = obtener_sensor_metadata(token)
     if not sensor_info:
         return jsonify({"error": "Sensor no registrado"}), 404
 
@@ -47,7 +47,7 @@ def recibir_datos_sensor():
 
         punto = (
             Point("lecturas_sensores")
-            .tag("sensor_id", sensor_id)
+            .tag("token", token)
             .field("parametro", parametro)
             .field("valor", float(valor))
             .time(datetime.utcnow())
@@ -59,3 +59,30 @@ def recibir_datos_sensor():
         return jsonify({"message": "Datos recibidos correctamente"}), 200
     else:
         return jsonify({"error": "No se procesaron datos válidos"}), 400
+
+
+@router.route('/', methods=['POST'])
+def crear_sensor():
+    data = request.get_json()
+
+    required_fields = ["invernadero_id", "nombre", "zona", "tipo_sensor_id"]
+    if not all(field in data and data[field] for field in required_fields):
+        return jsonify({"error": "Faltan campos requerido"}), 400
+
+    try:
+        # Convertir fecha si viene como string
+        if "fecha_instalacion" in data and isinstance(data["fecha_instalacion"], str):
+            data["fecha_instalacion"] = datetime.strptime(data["fecha_instalacion"], "%Y-%m-%d").date()
+
+        sensor = insertar_sensor(data)
+
+        if sensor:
+            return jsonify({
+                "message": "Sensor creado exitosamente",
+                "sensor_id": sensor.id
+            }), 201
+        else:
+            return jsonify({"error": "No se pudo crear el sensor"}), 500
+
+    except Exception as e:
+        return jsonify({"error": f"Error al crear el sensor: {str(e)}"}), 500

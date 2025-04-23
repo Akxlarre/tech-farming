@@ -26,8 +26,7 @@ export class SensorEditModalComponent implements OnInit {
 
     this.editForm = this.fb.group({
       nombre: [this.sensor?.nombre || '', Validators.required],
-      tipo: [this.sensor?.tipo || '', Validators.required],
-      unidad: [this.sensor?.unidad || '', Validators.required],
+      tipo: [this.sensor?.tipo_sensor_id || '', Validators.required],
       estado: [this.sensor?.estado || '', Validators.required],
       zona: [this.sensor?.zona || '', Validators.required],
     });

@@ -1,7 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { SensorService } from '../../../../sensores.service';
 import { SensorModalService } from '../../../SensorModalService/sensor-modal.service';
+import { Zona } from '../../../../../zonas/models/zona.model';
+import { ZonaService } from '../../../../../zonas/zonas.service';
+import { Invernadero } from '../../../../models/invernadero.model';
+import { InvernaderoService } from '../../../../invernaderos.service';
+import { TipoSensor } from '../../../../models/tipo_sensor.model';
+import { TipoSensorService } from '../../../../tipo_sensor.service';
 
 @Component({
   selector: 'app-sensor-create-modal',
@@ -11,65 +18,85 @@ import { SensorModalService } from '../../../SensorModalService/sensor-modal.ser
   styleUrls: ['./sensor-create-modal.component.css']
 })
 export class SensorCreateModalComponent implements OnInit {
-  formulario!: FormGroup;
-  invernaderos = ['Invernadero Norte', 'Invernadero Sur'];
-  zonas = ['Zona A', 'Zona B'];
-  parametros = ['Temperatura', 'Humedad', 'P', 'K', 'N'];
+  form!: FormGroup;
+  zonas: Zona[] = [];
+  invernaderos: Invernadero[] = [];
+  tiposSensor: TipoSensor[] = [];
 
   // Estado del modal de token
   tokenModalOpen = false;
   tokenHidden = true;
   tokenValue = '';
 
-  constructor(private fb: FormBuilder, public modalService: SensorModalService) {}
+  constructor(
+    private fb: FormBuilder, 
+    private modalService: SensorModalService,
+    private sensorService: SensorService,
+    private invernaderoService: InvernaderoService,
+    private zonaService: ZonaService,
+    private tipoSensorService: TipoSensorService) {}
 
   ngOnInit(): void {
-    this.formulario = this.fb.group({
+    this.form = this.fb.group({
       nombre: ['', Validators.required],
       descripcion: [''],
-      invernadero: ['', Validators.required],
+      invernadero_id: ['', Validators.required],
       zona: ['', Validators.required],
-      fechaInstalacion: ['', Validators.required],
-      posX: [0, [Validators.required, Validators.min(0)]],
-      posY: [0, [Validators.required, Validators.min(0)]],
+      fecha_instalacion: ['', Validators.required],
+      pos_x: [0, [Validators.required, Validators.min(0)]],
+      pos_y: [0, [Validators.required, Validators.min(0)]],
+      tipo_sensor_id: [null, Validators.required],
       estado: [true],
-      parametros: this.fb.array([])
+    });
+
+    this.cargarInvernaderos();
+    this.cargarTiposSensor();
+  }
+
+  cargarInvernaderos(): void {
+    this.invernaderoService.obtenerInvernaderos().subscribe({
+      next: (res) => this.invernaderos = res,
+      error: (err) => console.error('Error al cargar invernaderos:', err)
     });
   }
 
-  /** Acceso al FormArray de parámetros */
-  get parametrosFormArray(): FormArray {
-    return this.formulario.get('parametros') as FormArray;
+  cargarZonas(invernaderoId: number): void {
+    this.zonaService.obtenerZonasPorInvernadero(invernaderoId).subscribe({
+      next: (res) => this.zonas = res,
+      error: (err) => console.error('Error al cargar zonas:', err)
+    });
   }
 
-  /** Verifica si un parámetro está seleccionado */
-  isParametroChecked(param: string): boolean {
-    return this.parametrosFormArray.value.includes(param);
+  cargarTiposSensor(): void {
+    this.tipoSensorService.obtenerTiposSensor().subscribe({
+      next: (res) => this.tiposSensor = res,
+      error: (err) => console.error('Error al cargar tipos de sensor:', err)
+    });
   }
 
-  /** Agrega o remueve parámetros del FormArray */
-  toggleParametro(param: string, event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    if (checked) {
-      this.parametrosFormArray.push(this.fb.control(param));
+  onInvernaderoChange(): void {
+    const id = this.form.get('invernadero_id')?.value;
+    if (id) {
+      this.cargarZonas(id);
     } else {
-      const idx = this.parametrosFormArray.controls.findIndex(ctrl => ctrl.value === param);
-      if (idx !== -1) {
-        this.parametrosFormArray.removeAt(idx);
+      this.zonas = [];
+    }
+  }
+
+  guardar() {
+    if (this.form.invalid) return;
+    
+    this.sensorService.crearSensor(this.form.value).subscribe({
+      next: (res) => {
+        this.tokenValue = res.token;
+        this.tokenModalOpen = true;
+      },
+      error: (err) => {
+        console.error('Error al crear sensor:', err);
       }
-    }
+    });
   }
 
-  guardar(): void {
-    if (this.formulario.valid) {
-      // Aquí iría el llamado al servicio para crear el sensor y obtener el token
-      // Por ahora simulamos la generación de un token aleatorio
-      this.tokenValue = Math.random().toString(36).substring(2, 14);
-      this.tokenModalOpen = true;
-    } else {
-      this.formulario.markAllAsTouched();
-    }
-  }
   copyToken(): void {
     navigator.clipboard.writeText(this.tokenValue)
       .then(() => {

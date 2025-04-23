@@ -1,11 +1,11 @@
 export interface Sensor {
-    id: string;
-    nombre: string;
-    tipo: string;
-    icono: string;
-    zona: string;
-    unidad: string;
-    estado: string;
-    lectura: string;
-  }
-  
+  invernadero_id: number;
+  nombre: string;
+  descripcion?: string;
+  estado?: boolean;
+  fecha_instalacion?: string;
+  pos_x?: number;
+  pos_y?: number;
+  zona: string;
+  tipo_sensor_id: number;
+}
