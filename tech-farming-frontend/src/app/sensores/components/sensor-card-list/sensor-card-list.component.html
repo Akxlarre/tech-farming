@@ -2,7 +2,7 @@
   <div *ngFor="let sensor of sensores" class="card p-[1.618rem] space-y-[0.618rem]">
     <h2 class="font-bold text-lg">{{ sensor.nombre }}</h2>
     <p><strong>Tipo:</strong> {{ sensor.tipo_sensor_id}}</p>
-    <p><strong>Zona:</strong> {{ sensor.zona }}</p>
+    <p><strong>Invernadero:</strong> {{ sensor.invernadero_id }}</p>
     <p><strong>Unidad:</strong> </p>
     <p><strong>Estado:</strong>
       <span [ngClass]="{
@@ -11,7 +11,7 @@
         'badge badge-error': sensor.estado === 'Crítico' || sensor.estado === 'Error'
       }">{{ sensor.estado }}</span>
     </p>
-    <p><strong>Última lectura:</strong> {{ sensor.lectura }}</p>
+    <p><strong>Última lectura:</strong></p>
 
     <div class="flex gap-2 mt-2">
       <button class="btn btn-sm btn-outline" (click)="ver(sensor)">👁️ Ver</button>

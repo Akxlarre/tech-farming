@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from app.models.tipo_sensor_queries import obtener_tipos_sensor
+from app.queries.tipo_sensor_queries import obtener_tipos_sensor
 
 router_tipo_sensor = Blueprint('tipo_sensor', __name__)
 

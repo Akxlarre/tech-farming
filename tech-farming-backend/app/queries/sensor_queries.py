@@ -12,11 +12,10 @@ def insertar_sensor(data):
             invernadero_id=data["invernadero_id"],
             nombre=data.get("nombre"),
             descripcion=data.get("descripcion"),
-            estado=data.get("estado", True),
+            estado=data.get("estado"),
             fecha_instalacion=data.get("fecha_instalacion", date.today()),
             pos_x=data.get("pos_x"),
             pos_y=data.get("pos_y"),
-            zona=data.get("zona"),
             tipo_sensor_id=data["tipo_sensor_id"],
             token=secrets.token_hex(16)
         )

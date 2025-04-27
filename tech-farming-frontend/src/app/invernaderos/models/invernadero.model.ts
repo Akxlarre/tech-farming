@@ -1,6 +1,6 @@
 export interface Invernadero {
+    id: number;
     nombre: string;
     descripcion?: string;
-    invernadero_id: number;
   }
   

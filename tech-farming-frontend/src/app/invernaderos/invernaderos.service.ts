@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Invernadero } from './models/invernadero.model';
 
 @Injectable({ providedIn: 'root' })
@@ -9,6 +10,6 @@ export class InvernaderoService {
   constructor(private http: HttpClient) {}
 
   obtenerInvernaderos() {
-    return this.http.get<Invernadero[]>(this.apiUrl);
-  }
+      return this.http.get<Invernadero[]>(this.apiUrl);
+    }
 }

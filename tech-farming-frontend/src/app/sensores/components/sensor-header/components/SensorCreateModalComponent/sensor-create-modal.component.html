@@ -13,8 +13,8 @@
       </div>
 
       <div>
-        <label for="fechaInstalacion" class="label">Fecha de instalación</label>
-        <input id="fechaInstalacion" type="date" formControlName="fechaInstalacion" class="input input-bordered w-full" />
+        <label for="fecha_instalacion" class="label">Fecha de instalación</label>
+        <input id="fecha_instalacion" type="date" formControlName="fecha_instalacion" class="input input-bordered w-full" />
       </div>
 
       <div>
@@ -22,14 +22,6 @@
         <select id="invernadero_id" formControlName="invernadero_id" class="select select-bordered w-full">
           <option [ngValue]="null" diabled>Seleccione uno</option>
           <option *ngFor="let i of invernaderos" [value]="i.id">{{ i }}</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="zona" class="label">Zona</label>
-        <select id="zona" formControlName="zona" class="select select-bordered w-full">
-          <option [ngValue]="null" disabled>Selecciona una zona</option>
-          <option *ngFor="let z of zonas" [value]="z">{{ z }}</option>
         </select>
       </div>
 
@@ -82,7 +74,7 @@
 
     <!-- Mapa del sensor -->
     <div class="w-full h-64 bg-gray-100 rounded-lg shadow-inner flex items-center justify-center text-gray-400">
-      [🗺️ MAPA DE la ZONA]
+      [🗺️ MAPA DEL INVERNADERO ]
     </div>
 
     <h3 class="text-lg font-bold flex items-center gap-2 text-gray-800">

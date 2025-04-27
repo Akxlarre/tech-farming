@@ -3,10 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { SensorService } from '../../../../sensores.service';
 import { SensorModalService } from '../../../SensorModalService/sensor-modal.service';
-import { Zona } from '../../../../../zonas/models/zona.model';
-import { ZonaService } from '../../../../../zonas/zonas.service';
-import { Invernadero } from '../../../../models/invernadero.model';
-import { InvernaderoService } from '../../../../invernaderos.service';
+import { Invernadero } from '../../../../../invernaderos/models/invernadero.model';
+import { InvernaderoService } from '../../../../../invernaderos/invernaderos.service';
 import { TipoSensor } from '../../../../models/tipo_sensor.model';
 import { TipoSensorService } from '../../../../tipo_sensor.service';
 
@@ -19,7 +17,6 @@ import { TipoSensorService } from '../../../../tipo_sensor.service';
 })
 export class SensorCreateModalComponent implements OnInit {
   form!: FormGroup;
-  zonas: Zona[] = [];
   invernaderos: Invernadero[] = [];
   tiposSensor: TipoSensor[] = [];
 
@@ -33,7 +30,6 @@ export class SensorCreateModalComponent implements OnInit {
     private modalService: SensorModalService,
     private sensorService: SensorService,
     private invernaderoService: InvernaderoService,
-    private zonaService: ZonaService,
     private tipoSensorService: TipoSensorService) {}
 
   ngOnInit(): void {
@@ -41,12 +37,11 @@ export class SensorCreateModalComponent implements OnInit {
       nombre: ['', Validators.required],
       descripcion: [''],
       invernadero_id: ['', Validators.required],
-      zona: ['', Validators.required],
       fecha_instalacion: ['', Validators.required],
       pos_x: [0, [Validators.required, Validators.min(0)]],
       pos_y: [0, [Validators.required, Validators.min(0)]],
       tipo_sensor_id: [null, Validators.required],
-      estado: [true],
+      estado: [''],
     });
 
     this.cargarInvernaderos();
@@ -60,27 +55,11 @@ export class SensorCreateModalComponent implements OnInit {
     });
   }
 
-  cargarZonas(invernaderoId: number): void {
-    this.zonaService.obtenerZonasPorInvernadero(invernaderoId).subscribe({
-      next: (res) => this.zonas = res,
-      error: (err) => console.error('Error al cargar zonas:', err)
-    });
-  }
-
   cargarTiposSensor(): void {
     this.tipoSensorService.obtenerTiposSensor().subscribe({
       next: (res) => this.tiposSensor = res,
       error: (err) => console.error('Error al cargar tipos de sensor:', err)
     });
-  }
-
-  onInvernaderoChange(): void {
-    const id = this.form.get('invernadero_id')?.value;
-    if (id) {
-      this.cargarZonas(id);
-    } else {
-      this.zonas = [];
-    }
   }
 
   guardar() {

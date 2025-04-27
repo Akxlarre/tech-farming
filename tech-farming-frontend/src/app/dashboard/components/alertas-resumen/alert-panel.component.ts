@@ -11,6 +11,6 @@ import { CommonModule } from '@angular/common';
 export class AlertPanelComponent {
   @Input() alertas = [
     { tipo: 'error', mensaje: 'Sensor S003 fuera de rango (pH bajo)' },
-    { tipo: 'warning', mensaje: 'Humedad baja en Zona Sur' }
+    { tipo: 'warning', mensaje: 'Humedad baja en Invernadero Sur' }
   ];
 }

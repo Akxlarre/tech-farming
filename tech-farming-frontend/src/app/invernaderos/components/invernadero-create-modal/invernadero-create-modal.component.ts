@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ZonaModalService } from '../zonaModalService/zona-modal.service';
+import { InvernaderoModalService } from '../invernaderoModalService/invernadero-modal.service';
 
 @Component({
-  selector: 'app-zona-create-modal',
+  selector: 'app-invernadero-create-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './zona-create-modal.component.html',
-  styleUrls: ['./zona-create-modal.component.css']
+  templateUrl: './invernadero-create-modal.component.html',
+  styleUrls: ['./invernadero-create-modal.component.css']
 })
-export class ZonaCreateModalComponent implements OnInit {
+export class InvernaderoCreateModalComponent implements OnInit {
   formulario!: FormGroup;
   loading = false;
 
@@ -18,7 +18,7 @@ export class ZonaCreateModalComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    public zonaModalService: ZonaModalService
+    public invernaderoModalService: InvernaderoModalService
   ) {}
 
   ngOnInit(): void {
@@ -33,8 +33,8 @@ export class ZonaCreateModalComponent implements OnInit {
     if (this.formulario.valid) {
       this.loading = true;
       setTimeout(() => {
-        console.log('✅ Zona creada:', this.formulario.value);
-        this.zonaModalService.closeModal();
+        console.log('✅ Invernadero creado:', this.formulario.value);
+        this.invernaderoModalService.closeModal();
         this.loading = false;
       }, 1000);
     } else {
@@ -43,6 +43,6 @@ export class ZonaCreateModalComponent implements OnInit {
   }
 
   cerrar(): void {
-    this.zonaModalService.closeWithAnimation();
+    this.invernaderoModalService.closeWithAnimation();
   }
 }
