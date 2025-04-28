@@ -1,0 +1,15 @@
+<div
+  class="fixed inset-0 bg-black/50 z-[9998] flex items-center justify-center transition-all"
+  (click)="onOverlayClick($event)"
+  [ngClass]="{
+    'animate-fadeIn': !closing,
+    'animate-fadeOut': closing
+  }"
+>
+  <div
+    #modalContent
+    class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-5xl mx-auto transition-all relative"
+  >
+    <ng-content></ng-content>
+  </div>
+</div>

@@ -28,4 +28,3 @@ export class ZonaCreateModalComponent {
       // aquí va la lógica real para enviar la zona al backend
     }
   }
-}

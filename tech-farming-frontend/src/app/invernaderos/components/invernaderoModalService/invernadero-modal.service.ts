@@ -13,6 +13,7 @@ export class ZonaModalService {
   openModal(type: ZonaModalType, zona: any = null) {
     this.closing$.next(false);
     this.selectedZona$.next(zona);
+
     this.modalType$.next(type);
   }
 

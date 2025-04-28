@@ -1,7 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { SensorService } from '../../../../sensores.service';
 import { SensorModalService } from '../../../SensorModalService/sensor-modal.service';
+import { Invernadero } from '../../../../../invernaderos/models/invernadero.model';
+import { InvernaderoService } from '../../../../../invernaderos/invernaderos.service';
+import { TipoSensor } from '../../../../models/tipos_sensor.model';
+import { TipoSensorService } from '../../../../tipos_sensor.service';
+import { TipoParametro } from '../../../../models/tipos_parametro.model';
+import { TipoParametroService } from '../../../../tipos_parametro.service';
 
 @Component({
   selector: 'app-sensor-create-modal',
@@ -11,65 +18,109 @@ import { SensorModalService } from '../../../SensorModalService/sensor-modal.ser
   styleUrls: ['./sensor-create-modal.component.css']
 })
 export class SensorCreateModalComponent implements OnInit {
-  formulario!: FormGroup;
-  invernaderos = ['Invernadero Norte', 'Invernadero Sur'];
-  zonas = ['Zona A', 'Zona B'];
-  parametros = ['Temperatura', 'Humedad', 'P', 'K', 'N'];
+  form!: FormGroup;
+  invernaderos: Invernadero[] = [];
+  tiposSensor: TipoSensor[] = [];
+  tiposParametro: TipoParametro[] = [];
 
   // Estado del modal de token
   tokenModalOpen = false;
   tokenHidden = true;
   tokenValue = '';
 
-  constructor(private fb: FormBuilder, public modalService: SensorModalService) {}
+  constructor(
+    private fb: FormBuilder, 
+    private modalService: SensorModalService,
+    private sensorService: SensorService,
+    private invernaderoService: InvernaderoService,
+    private tipoSensorService: TipoSensorService,
+    private tipoParametroService: TipoParametroService,) {}
 
   ngOnInit(): void {
-    this.formulario = this.fb.group({
+    this.form = this.fb.group({
       nombre: ['', Validators.required],
       descripcion: [''],
-      invernadero: ['', Validators.required],
-      zona: ['', Validators.required],
-      fechaInstalacion: ['', Validators.required],
-      posX: [0, [Validators.required, Validators.min(0)]],
-      posY: [0, [Validators.required, Validators.min(0)]],
-      estado: [true],
-      parametros: this.fb.array([])
+      invernadero_id: ['', Validators.required],
+      fecha_instalacion: ['', Validators.required],
+      pos_x: [0, [Validators.required, Validators.min(0)]],
+      pos_y: [0, [Validators.required, Validators.min(0)]],
+      parametros: [[]],
+      estado: [''],
+    });
+
+    this.cargarInvernaderos();
+    this.cargarTiposParametro();
+  }
+
+  cargarInvernaderos(): void {
+    this.invernaderoService.obtenerInvernaderos().subscribe({
+      next: (res) => this.invernaderos = res,
+      error: (err) => console.error('Error al cargar invernaderos:', err)
     });
   }
 
-  /** Acceso al FormArray de parámetros */
-  get parametrosFormArray(): FormArray {
-    return this.formulario.get('parametros') as FormArray;
-  }
-
-  /** Verifica si un parámetro está seleccionado */
-  isParametroChecked(param: string): boolean {
-    return this.parametrosFormArray.value.includes(param);
-  }
-
-  /** Agrega o remueve parámetros del FormArray */
-  toggleParametro(param: string, event: Event): void {
+  toggleEstado(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
-    if (checked) {
-      this.parametrosFormArray.push(this.fb.control(param));
-    } else {
-      const idx = this.parametrosFormArray.controls.findIndex(ctrl => ctrl.value === param);
-      if (idx !== -1) {
-        this.parametrosFormArray.removeAt(idx);
-      }
-    }
+    this.form.get('estado')?.setValue(checked ? 'Activo' : 'Inactivo');
   }
 
-  guardar(): void {
-    if (this.formulario.valid) {
-      // Aquí iría el llamado al servicio para crear el sensor y obtener el token
-      // Por ahora simulamos la generación de un token aleatorio
-      this.tokenValue = Math.random().toString(36).substring(2, 14);
-      this.tokenModalOpen = true;
+  cargarTiposParametro(): void {
+    this.tipoParametroService.obtenerTiposParametro().subscribe({
+      next: (res) => { this.tiposParametro = res;
+      console.log('Tipos de parámetro cargados:', this.tiposParametro); },
+      error: (err) => console.error('Error cargando tipos de parámetro:', err)
+    });
+  }
+
+  toggleParametro(nombre: string, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const parametros = this.form.get('parametros')?.value || [];
+  
+    if (checked) {
+      this.form.get('parametros')?.setValue([...parametros, nombre]);
     } else {
-      this.formulario.markAllAsTouched();
+      this.form.get('parametros')?.setValue(parametros.filter((p: string) => p !== nombre));
     }
   }
+  
+  isParametroSeleccionado(nombre: string): boolean {
+    return this.form.get('parametros')?.value.includes(nombre);
+  }
+
+  guardar() {
+    if (this.form.invalid || this.form.get('parametros')?.value.length === 0) {
+      console.warn('Falta información o parámetros no seleccionados.');
+      return;
+    }
+
+    const tipoSensorId = this.form.value.parametros.length > 1 ? 2 : 1;
+
+    const sensorData = {
+      ...this.form.value,
+      tipo_sensor_id: tipoSensorId,
+    };
+    
+    this.sensorService.crearSensor(sensorData).subscribe({
+      next: (res) => {
+        this.tokenValue = res.token;
+        this.tokenModalOpen = true;
+
+        alert('✅ Sensor creado exitosamente.');
+
+        this.form.reset({
+          pos_x: 0,
+          pos_y: 0,
+          parametros: [],
+          estado: 'Inactivo'
+        });
+  
+      },
+      error: (err) => {
+        console.error('Error al crear sensor:', err);
+      }
+    });
+  }
+
   copyToken(): void {
     navigator.clipboard.writeText(this.tokenValue)
       .then(() => {

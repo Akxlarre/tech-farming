@@ -17,7 +17,7 @@ export const layoutRoutes: Routes = [
           import('../sensores/sensores.routes').then((m) => m.sensoresRoutes),
       },
       {
-        path: 'zonas',
+        path: 'invernaderos',
         loadChildren: () =>
           import('../invernaderos/zonas.routes').then((m) => m.zonasRoutes),
       },
