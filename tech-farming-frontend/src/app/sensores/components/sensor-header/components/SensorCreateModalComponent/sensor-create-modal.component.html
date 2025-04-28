@@ -22,8 +22,8 @@
       <div>
         <label>Invernadero</label>
         <select id="invernadero_id" formControlName="invernadero_id" class="select select-bordered w-full">
-          <option [ngValue]="null" diabled>Seleccione uno</option>
-          <option *ngFor="let i of invernaderos" [value]="i.id">{{ i }}</option>
+          <option [ngValue]="null" disabled selection>Seleccione uno</option>
+          <option *ngFor="let i of invernaderos" [value]="i.id">{{ i.nombre }}</option>
         </select>
       </div>
 
@@ -45,7 +45,16 @@
 
       <div class="flex items-center gap-3">
         <label for="estado" class="label">Estado</label>
-        <input id="estado" type="checkbox" formControlName="estado" class="toggle toggle-success" />
+        <input 
+          id="estado"
+          type="checkbox"
+          [checked]="form.get('estado')?.value === 'Activo'"
+          (change)="toggleEstado($event)"
+          class="toggle toggle-success"
+        />
+        <span class="text-sm">
+          {{ form.get('estado')?.value || 'Inactivo' }}
+        </span>
       </div>
 
       <div class="sm:col-span-2">
@@ -77,7 +86,7 @@
       <!-- Botones -->
       <div class="sm:col-span-2 flex justify-between items-center pt-4">
         <button type="button" class="btn btn-outline" (click)="cerrar()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || form.get('parametros')?.value.length === 0">
           💾 Guardar sensor
         </button>
       </div>

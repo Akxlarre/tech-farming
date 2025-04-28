@@ -59,6 +59,11 @@ export class SensorCreateModalComponent implements OnInit {
     });
   }
 
+  toggleEstado(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.form.get('estado')?.setValue(checked ? 'Activo' : 'Inactivo');
+  }
+
   cargarTiposParametro(): void {
     this.tipoParametroService.obtenerTiposParametro().subscribe({
       next: (res) => { this.tiposParametro = res;
@@ -83,12 +88,32 @@ export class SensorCreateModalComponent implements OnInit {
   }
 
   guardar() {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.form.get('parametros')?.value.length === 0) {
+      console.warn('Falta información o parámetros no seleccionados.');
+      return;
+    }
+
+    const tipoSensorId = this.form.value.parametros.length > 1 ? 2 : 1;
+
+    const sensorData = {
+      ...this.form.value,
+      tipo_sensor_id: tipoSensorId,
+    };
     
-    this.sensorService.crearSensor(this.form.value).subscribe({
+    this.sensorService.crearSensor(sensorData).subscribe({
       next: (res) => {
         this.tokenValue = res.token;
         this.tokenModalOpen = true;
+
+        alert('✅ Sensor creado exitosamente.');
+
+        this.form.reset({
+          pos_x: 0,
+          pos_y: 0,
+          parametros: [],
+          estado: 'Inactivo'
+        });
+  
       },
       error: (err) => {
         console.error('Error al crear sensor:', err);

@@ -19,8 +19,8 @@ import { InvernaderoCreateModalComponent } from './components/invernadero-create
     InvernaderoCreateModalComponent,
     // InvernaderoCardListComponent
   ],
-  templateUrl: './invernadero.component.html',
-  styleUrls: ['./invernadero.component.css']
+  templateUrl: './invernaderos.component.html',
+  styleUrls: ['./invernaderos.component.css']
 })
 export class InvernaderosComponent implements OnInit {
   modalType: InvernaderoModalType = null;

@@ -3,7 +3,7 @@ from app.models.sensor import Sensor
 from datetime import date
 import secrets
 
-def obtener_sensor_metadata(token):
+def obtener_sensor(token):
     return Sensor.query.filter_by(token=token).first()
 
 def insertar_sensor(data):
