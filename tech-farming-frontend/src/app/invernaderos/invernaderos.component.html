@@ -1,20 +1,22 @@
 <section class="vista min-h-screen scroll-smooth px-4 sm:px-10 lg:px-16 space-y-[2.618rem]">
-    <!-- Header con nombre de la página y botones de acción -->
-    <app-invernadero-header />
-  
-    <!-- Componente de filtros separado (pendiente de implementar) -->
-    <!-- <app-invernadero-filters /> -->
-  
-    <!-- Carrusel o listado de invernaderos (pendiente de implementar) -->
-    <!-- <app-invernadero-card-list [invernaderos]="invernaderos" /> -->
-  
-    <!-- Modales de acción: crear, ver, editar invernadero -->
-    <ng-container *ngIf="modalType">
-        <app-invernadero-modal-wrapper>
-          <ng-container [ngSwitch]="modalType">
-            <app-invernadero-create-modal *ngSwitchCase="'create'" />
-          </ng-container>
-        </app-invernadero-modal-wrapper>
+  <!-- Header con nombre de la página y botones de acción -->
+  <app-zona-header />
+
+  <!-- Filtros visuales -->
+  <app-zona-filters />
+
+  <!-- Tabla de escritorio -->
+  <app-zone-table [zonas]="zonas" class="hidden md:block" />
+
+  <!-- Tarjetas móviles -->
+  <app-zone-card-list [zonas]="zonas" class="block md:hidden" />
+
+  <!-- Modales: Crear zona -->
+  <ng-container *ngIf="modalType">
+    <app-zona-modal-wrapper>
+      <ng-container [ngSwitch]="modalType">
+        <app-zona-create-modal *ngSwitchCase="'create'" />
       </ng-container>
-  </section>
-  
+    </app-zona-modal-wrapper>
+  </ng-container>
+</section>

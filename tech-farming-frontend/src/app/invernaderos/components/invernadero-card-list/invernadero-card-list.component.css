@@ -1,0 +1,5 @@
+/* Padding inferior y separación entre tarjetas móviles */
+:host {
+    display: block;
+    padding-bottom: 2rem;
+  }

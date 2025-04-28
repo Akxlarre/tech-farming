@@ -1,48 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { InvernaderoModalService } from '../invernaderoModalService/invernadero-modal.service';
 
 @Component({
-  selector: 'app-invernadero-create-modal',
+  selector: 'app-zona-create-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './invernadero-create-modal.component.html',
-  styleUrls: ['./invernadero-create-modal.component.css']
+  templateUrl: './zona-create-modal.component.html'
 })
-export class InvernaderoCreateModalComponent implements OnInit {
-  formulario!: FormGroup;
-  loading = false;
+export class ZonaCreateModalComponent {
+  formulario: FormGroup;
 
-  invernaderos = ['Invernadero Norte', 'Invernadero Sur']; // Simulación, luego conectar con backend
-
-  constructor(
-    private fb: FormBuilder,
-    public invernaderoModalService: InvernaderoModalService
-  ) {}
-
-  ngOnInit(): void {
+  constructor(private fb: FormBuilder) {
     this.formulario = this.fb.group({
-      nombre: ['', Validators.required],
-      descripcion: [''],
-      invernadero: ['', Validators.required]
+      nombre: ['', [Validators.required, Validators.maxLength(100)]],
+      descripcion: ['', [Validators.required, Validators.maxLength(255)]]
     });
   }
 
-  guardar(): void {
-    if (this.formulario.valid) {
-      this.loading = true;
-      setTimeout(() => {
-        console.log('✅ Invernadero creado:', this.formulario.value);
-        this.invernaderoModalService.closeModal();
-        this.loading = false;
-      }, 1000);
-    } else {
-      this.formulario.markAllAsTouched();
-    }
+  cerrar() {
+    // cerrar modal usando tu ZonaModalService
   }
 
-  cerrar(): void {
-    this.invernaderoModalService.closeWithAnimation();
+  guardar() {
+    if (this.formulario.valid) {
+      console.log('Zona creada', this.formulario.value);
+      // aquí va la lógica real para enviar la zona al backend
+    }
   }
-}

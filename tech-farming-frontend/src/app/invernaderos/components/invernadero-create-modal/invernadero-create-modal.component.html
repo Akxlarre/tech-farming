@@ -1,33 +1,40 @@
-<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 animate-fadeInZoom">
-    <h2 class="text-[1.625rem] font-bold text-green-700 flex items-center gap-2 mb-6">
-      ➕ Crear nuevo invernadero 
-    </h2>
-  
-    <form [formGroup]="formulario" (ngSubmit)="guardar()" class="space-y-5">
-      <!-- Nombre -->
-      <div>
-        <label class="label">Nombre del invernadero</label>
-        <input formControlName="nombre" type="text" class="input input-bordered w-full" placeholder="Ej: Invernadero Norte" />
-        <small *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched" class="text-red-500">
-          El nombre es requerido.
-        </small>
-      </div>
-  
-      <!-- Descripción -->
-      <div>
-        <label class="label">Descripción</label>
-        <textarea formControlName="descripcion" class="textarea textarea-bordered w-full" rows="3"
-          placeholder="Descripción opcional..."></textarea>
-      </div>
-  
-      <!-- Acciones -->
-      <div class="flex justify-between pt-6">
-        <button type="button" class="btn btn-outline" (click)="cerrar()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="loading || formulario.invalid">
-          <span *ngIf="!loading">💾 Guardar invernadero</span>
-          <span *ngIf="loading" class="loading loading-spinner loading-sm text-white"></span>
-        </button>
-      </div>
-    </form>
+<div class="p-6 sm:p-8 grid gap-6" [formGroup]="formulario">
+  <!-- Título -->
+  <h2 class="text-[1.625rem] font-bold text-green-700 flex items-center gap-2">
+    ➕ Crear nueva zona
+  </h2>
+
+  <!-- Campo: Nombre -->
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text font-semibold text-gray-700">Nombre de la zona</span>
+    </label>
+    <input
+      type="text"
+      formControlName="nombre"
+      class="input input-bordered w-full"
+      placeholder="Ej: Zona Norte"
+    />
   </div>
-  
+
+  <!-- Campo: Descripción -->
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text font-semibold text-gray-700">Descripción</span>
+    </label>
+    <textarea
+      formControlName="descripcion"
+      rows="3"
+      class="textarea textarea-bordered w-full"
+      placeholder="Breve descripción del área o cultivo..."
+    ></textarea>
+  </div>
+
+  <!-- Acciones -->
+  <div class="flex justify-end gap-3 pt-4 border-t">
+    <button type="button" class="btn btn-outline" (click)="cerrar()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [disabled]="formulario.invalid">
+      💾 Guardar Zona
+    </button>
+  </div>
+</div>
