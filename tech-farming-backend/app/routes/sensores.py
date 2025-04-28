@@ -22,45 +22,6 @@ client = InfluxDBClient(
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
-@router.route('/datos', methods=['POST'])
-def recibir_datos_sensor():
-    data = request.get_json()
-
-    token = data.get("token")
-    mediciones = data.get("mediciones")
-
-    if not token or not mediciones:
-        return jsonify({"error": "Faltan campos obligatorios"}), 400
-
-    sensor_info = obtener_sensor_metadata(token)
-    if not sensor_info:
-        return jsonify({"error": "Sensor no registrado"}), 404
-
-    puntos = []
-
-    for m in mediciones:
-        parametro = m.get("parametro")
-        valor = m.get("valor")
-
-        if not parametro or valor is None:
-            continue
-
-        punto = (
-            Point("lecturas_sensores")
-            .tag("token", token)
-            .field("parametro", parametro)
-            .field("valor", float(valor))
-            .time(datetime.utcnow())
-        )
-        puntos.append(punto)
-
-    if puntos:
-        write_api.write(bucket=INFLUXDB_BUCKET, record=puntos)
-        return jsonify({"message": "Datos recibidos correctamente"}), 200
-    else:
-        return jsonify({"error": "No se procesaron datos válidos"}), 400
-
-
 @router.route('/', methods=['POST'])
 def crear_sensor():
     data = request.get_json()

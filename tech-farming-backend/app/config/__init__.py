@@ -14,7 +14,7 @@ class Config:
     INFLUXDB_URL = os.getenv("INFLUXDB_URL")
     INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
     INFLUXDB_ORG = os.getenv("INFLUXDB_ORG")
-    INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "temporalSeries_v2")  # Fallback
+    INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "temporalSeries_v3")  # Fallback
 
     # Intentar conectar con InfluxDB
     try:

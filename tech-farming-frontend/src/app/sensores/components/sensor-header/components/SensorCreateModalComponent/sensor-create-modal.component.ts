@@ -5,8 +5,10 @@ import { SensorService } from '../../../../sensores.service';
 import { SensorModalService } from '../../../SensorModalService/sensor-modal.service';
 import { Invernadero } from '../../../../../invernaderos/models/invernadero.model';
 import { InvernaderoService } from '../../../../../invernaderos/invernaderos.service';
-import { TipoSensor } from '../../../../models/tipo_sensor.model';
-import { TipoSensorService } from '../../../../tipo_sensor.service';
+import { TipoSensor } from '../../../../models/tipos_sensor.model';
+import { TipoSensorService } from '../../../../tipos_sensor.service';
+import { TipoParametro } from '../../../../models/tipos_parametro.model';
+import { TipoParametroService } from '../../../../tipos_parametro.service';
 
 @Component({
   selector: 'app-sensor-create-modal',
@@ -19,6 +21,7 @@ export class SensorCreateModalComponent implements OnInit {
   form!: FormGroup;
   invernaderos: Invernadero[] = [];
   tiposSensor: TipoSensor[] = [];
+  tiposParametro: TipoParametro[] = [];
 
   // Estado del modal de token
   tokenModalOpen = false;
@@ -30,7 +33,8 @@ export class SensorCreateModalComponent implements OnInit {
     private modalService: SensorModalService,
     private sensorService: SensorService,
     private invernaderoService: InvernaderoService,
-    private tipoSensorService: TipoSensorService) {}
+    private tipoSensorService: TipoSensorService,
+    private tipoParametroService: TipoParametroService,) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -40,12 +44,12 @@ export class SensorCreateModalComponent implements OnInit {
       fecha_instalacion: ['', Validators.required],
       pos_x: [0, [Validators.required, Validators.min(0)]],
       pos_y: [0, [Validators.required, Validators.min(0)]],
-      tipo_sensor_id: [null, Validators.required],
+      parametros: [[]],
       estado: [''],
     });
 
     this.cargarInvernaderos();
-    this.cargarTiposSensor();
+    this.cargarTiposParametro();
   }
 
   cargarInvernaderos(): void {
@@ -55,11 +59,27 @@ export class SensorCreateModalComponent implements OnInit {
     });
   }
 
-  cargarTiposSensor(): void {
-    this.tipoSensorService.obtenerTiposSensor().subscribe({
-      next: (res) => this.tiposSensor = res,
-      error: (err) => console.error('Error al cargar tipos de sensor:', err)
+  cargarTiposParametro(): void {
+    this.tipoParametroService.obtenerTiposParametro().subscribe({
+      next: (res) => { this.tiposParametro = res;
+      console.log('Tipos de parámetro cargados:', this.tiposParametro); },
+      error: (err) => console.error('Error cargando tipos de parámetro:', err)
     });
+  }
+
+  toggleParametro(nombre: string, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const parametros = this.form.get('parametros')?.value || [];
+  
+    if (checked) {
+      this.form.get('parametros')?.setValue([...parametros, nombre]);
+    } else {
+      this.form.get('parametros')?.setValue(parametros.filter((p: string) => p !== nombre));
+    }
+  }
+  
+  isParametroSeleccionado(nombre: string): boolean {
+    return this.form.get('parametros')?.value.includes(nombre);
   }
 
   guardar() {

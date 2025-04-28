@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify
-from app.queries.tipo_sensor_queries import obtener_tipos_sensor
+from app.queries.tipos_sensor_queries import obtener_tipos_sensor
 
-router_tipo_sensor = Blueprint('tipo_sensor', __name__)
+router = Blueprint('tipos_sensor', __name__)
 
-@router_tipo_sensor.route('/', methods=['GET'])
+@router.route('/', methods=['GET'])
 def listar_tipos_sensor():
     try:
         tipos = obtener_tipos_sensor()

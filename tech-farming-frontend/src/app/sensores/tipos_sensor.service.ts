@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TipoSensor } from './models/tipo_sensor.model';
+import { TipoSensor } from './models/tipos_sensor.model';
 
 @Injectable({ providedIn: 'root' })
 export class TipoSensorService {
