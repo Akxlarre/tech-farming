@@ -1,23 +1,23 @@
-// src/app/zonas/components/zona-modal-wrapper/zona-modal-wrapper.component.ts
+// src/app/invernaderos/components/invernaderos-modal-wrapper/invernaderos-modal-wrapper.component.ts
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ZonaModalService } from '../../components/zonaModalService/zona-modal.service';
+import { InvernaderoModalService } from '../invernaderoModalService/invernadero-modal.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-zona-modal-wrapper',
+  selector: 'app-invernadero-modal-wrapper',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './zona-modal-wrapper.component.html',
-  styleUrls: ['./zona-modal-wrapper.component.css']
+  templateUrl: './invernadero-modal-wrapper.component.html',
+  styleUrls: ['./invernadero-modal-wrapper.component.css']
 })
-export class ZonaModalWrapperComponent implements OnInit, OnDestroy {
+export class InvernaderoModalWrapperComponent implements OnInit, OnDestroy {
   closing = false;
   private sub!: Subscription;
 
   @ViewChild('modalContent', { static: true }) modalContent!: ElementRef;
 
-  constructor(public modalService: ZonaModalService) {}
+  constructor(public modalService: InvernaderoModalService) {}
 
   ngOnInit() {
     this.sub = this.modalService.closing$.subscribe(val => this.closing = val);

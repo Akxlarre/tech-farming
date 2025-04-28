@@ -44,24 +44,24 @@ export class SensoresComponent implements OnInit {
 
   sensores: Sensor[] = [
     {
-      id: 'S001',
+      id: 1,
+      invernadero_id: 101,
       nombre: 'Sensor Temp 1',
-      tipo: 'Temperatura',
-      icono: '🌡️',
-      zona: 'Zona Norte',
-      unidad: '°C',
-      estado: 'Activo',
-      lectura: '22°C - 10:00'
+      tipo_sensor_id: 1,
+      // icono: '🌡️',
+      // unidad: '°C',
+      estado: 'Activo'
+      // lectura: '22°C - 10:00'
     },
     {
-      id: 'S002',
+      id: 2,
+      invernadero_id: 102,
       nombre: 'Sensor Temp 2',
-      tipo: 'Temperatura',
-      icono: '🌡️',
-      zona: 'Zona Sur',
-      unidad: '°C',
-      estado: 'Advertencia',
-      lectura: '21°C - 10:05'
+      tipo_sensor_id: 2,
+      // icono: '🌡️',
+      // unidad: '°C',
+      estado: 'Advertencia'
+      // lectura: '21°C - 10:05'
     },
   ]
 }

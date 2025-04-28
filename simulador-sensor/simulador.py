@@ -3,7 +3,7 @@ import pandas as pd
 import time
 from datetime import datetime
 API_URL = "http://localhost:5000/api/sensores/datos" 
-SENSOR_ID = 4  
+SENSOR_TOKEN = "your_sensor_token_here"
 
 df = pd.read_csv("//home/akxlarre/Escritorio/IoTProcessed_Data.csv")
 
@@ -25,7 +25,7 @@ for index, row in df.iterrows():
             })
 
     payload = {
-        "sensor_id": SENSOR_ID,
+        "token": SENSOR_TOKEN,
         "mediciones": mediciones
     }
 

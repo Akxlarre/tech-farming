@@ -1,17 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SensorModalService } from '../SensorModalService/sensor-modal.service';
-
-interface Sensor {
-  id: string;
-  nombre: string;
-  tipo: string;
-  icono: string;
-  zona: string;
-  unidad: string;
-  estado: string;
-  lectura: string;
-}
+import { Sensor } from '../../models/sensor.model';
 
 
 @Component({

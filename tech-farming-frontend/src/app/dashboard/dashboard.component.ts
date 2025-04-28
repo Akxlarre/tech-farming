@@ -4,7 +4,7 @@ import { VariableCardsComponent } from '../dashboard/components/variable-card/va
 import { TrendChartComponent } from './components/tendencia/trend-chart.component';
 import { AlertPanelComponent } from './components/alertas-resumen/alert-panel.component';
 import { SensorStatusComponent } from './components/estado-sensores/sensor-status.component';
-import { SensorMapComponent } from './components/mapa-zonas/sensor-map.component'; 
+import { SensorMapComponent } from './components/mapa-invernaderos/sensor-map.component'; 
 import { NextPredictionComponent } from './components/prediccion-resumen/next-prediction.component';
 @Component({
   selector: 'app-dashboard',
