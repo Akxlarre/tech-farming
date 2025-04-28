@@ -1,10 +1,20 @@
+<!-- Fondo oscuro con animación -->
 <div
-  class="fixed inset-0 bg-black/50 z-[9998] flex items-center justify-center transition-all"
-  (click)="onOverlayClick($event)"
+  class="fixed inset-0 bg-black/50 z-[9997]"
   [ngClass]="{
-    'animate-fadeIn': !closing,
-    'animate-fadeOut': closing
+    'animate-overlayIn': !closing,
+    'animate-overlayOut': closing
   }"
+></div>
+
+<!-- Contenedor modal centrado -->
+<div
+  class="fixed inset-0 z-[9998] flex items-center justify-center px-4 sm:px-0"
 >
-  <ng-content></ng-content>
+  <div
+    #modalContent
+    (click)="onOverlayClick($event)"
+  >
+    <ng-content></ng-content>
+  </div>
 </div>

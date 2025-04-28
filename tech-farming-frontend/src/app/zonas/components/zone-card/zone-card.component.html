@@ -1,0 +1,30 @@
+<div class="card p-[1.618rem] space-y-[0.618rem] shadow-md border border-gray-200 bg-white rounded-xl">
+  <h2 class="font-bold text-lg text-green-700">{{ zona.nombre }}</h2>
+
+  <p>
+    <strong>Sensores activos:</strong> {{ zona.sensoresActivos }}
+  </p>
+
+  <p>
+    <strong>Estado:</strong>
+    <span
+      [ngClass]="{
+        'badge badge-success': zona.estado === 'Normal',
+        'badge badge-warning': zona.estado === 'Advertencia',
+        'badge badge-error': zona.estado === 'Crítico'
+      }"
+    >
+      {{ zona.estado }}
+    </span>
+  </p>
+
+  <p class="text-sm text-gray-500">
+    <strong>Creado:</strong> {{ zona.fechaCreacion | date: 'shortDate' }}
+  </p>
+
+  <div class="flex gap-2 mt-2">
+    <button class="btn btn-sm btn-outline" (click)="ver(zona)">👁️ Ver</button>
+    <button class="btn btn-sm btn-outline" (click)="editar(zona)">✏️ Editar</button>
+    <button class="btn btn-sm btn-error text-white" (click)="eliminar(zona)">🗑️ Eliminar</button>
+  </div>
+</div>

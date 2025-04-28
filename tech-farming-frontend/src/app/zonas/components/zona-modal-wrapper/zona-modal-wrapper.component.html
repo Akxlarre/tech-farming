@@ -1,14 +1,24 @@
+<!-- Fondo opaco con fade simple -->
 <div
-  class="fixed inset-0 bg-black/50 z-[9998] flex items-center justify-center transition-all"
-  (click)="onOverlayClick($event)"
+  class="fixed inset-0 bg-black/50 z-[9997]"
   [ngClass]="{
-    'animate-fadeIn': !closing,
-    'animate-fadeOut': closing
+    'animate-overlayIn': !closing,
+    'animate-overlayOut': closing
   }"
+></div>
+
+<!-- Modal contenido animado por separado -->
+<div
+  class="fixed inset-0 z-[9998] flex items-center justify-center px-4 sm:px-0"
 >
   <div
     #modalContent
-    class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-5xl mx-auto transition-all relative"
+    class="bg-white w-full max-w-2xl sm:rounded-2xl sm:shadow-xl transition-all relative animate-fadeInZoom"
+    [ngClass]="{
+      'animate-fadeInZoom': !closing,
+      'animate-fadeOutZoom': closing
+    }"
+    (click)="onOverlayClick($event)"
   >
     <ng-content></ng-content>
   </div>
