@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-zone-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './zone-card.component.html',
-  styleUrls: ['./zone-card.component.css']
+  templateUrl: './invernadero-card.component.html',
+  styleUrls: ['./invernadero-card.component.css']
 })
 export class ZoneCardComponent {
   @Input() zona: any;

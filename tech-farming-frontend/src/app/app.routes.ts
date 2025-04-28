@@ -11,7 +11,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent), /* canActivate: [AuthGuard] */},
       { path: 'sensores', loadComponent: () => import('./sensores/sensores.component').then(m => m.SensoresComponent) },
-      { path: 'zonas', loadComponent: () => import('./zonas/zonas.component').then(m => m.ZonasComponent) },
+      { path: 'zonas', loadComponent: () => import('./invernaderos/invernaderos.component').then(m => m.ZonasComponent) },
       { path: 'alertas', loadComponent: () => import('./alertas/alertas.component').then(m => m.AlertasComponent) },
       { path: 'historial', loadComponent: () => import('./historial/historial.component').then(m => m.HistorialComponent) },
       { path: 'admin', loadComponent: () => import('./admin/admin.component').then(m => m.AdminComponent) },

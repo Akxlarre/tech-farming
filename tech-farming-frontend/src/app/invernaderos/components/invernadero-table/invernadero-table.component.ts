@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-zone-table',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './zona-table.component.html',
+  templateUrl: './invernadero-table.component.html',
 })
 export class ZoneTableComponent {
   @Input() zonas: any[] = [];

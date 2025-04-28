@@ -1,13 +1,13 @@
 // src/app/zonas/zonas.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ZonaHeaderComponent } from './components/zone-header/zona-header.component';
-import { ZonaModalService, ZonaModalType } from './components/zonaModalService/zona-modal.service';
-import { ZonaModalWrapperComponent } from './components/zona-modal-wrapper/zona-modal-wrapper.component';
-import { ZonaCreateModalComponent } from './components/zone-create-modal/zona-create-modal.component';
-import { ZonaFiltersComponent } from './components/zone-filters/zona-filters.component';
-import { ZoneTableComponent } from './components/zona-table/zona-table.component';
-import { ZoneCardListComponent } from './components/zona-card-list/zone-card-list.component';
+import { ZonaHeaderComponent } from './components/invernadero-header/invernadero-header.component';
+import { ZonaModalService, ZonaModalType } from '../invernaderos/components/invernaderoModalService/invernadero-modal.service';
+import { ZonaModalWrapperComponent } from './components/invernadero-modal-wrapper/invernadero-modal-wrapper.component';
+import { ZonaCreateModalComponent } from './components/invernadero-create-modal/invernadero-create-modal.component';
+import { ZonaFiltersComponent } from './components/invernadero-filters/invernadero-filters.component';
+import { ZoneTableComponent } from './components/invernadero-table/invernadero-table.component';
+import { ZoneCardListComponent } from './components/invernadero-card-list/invernadero-card-list.component';
 
 @Component({
   selector: 'app-zonas',
@@ -21,8 +21,8 @@ import { ZoneCardListComponent } from './components/zona-card-list/zone-card-lis
     ZoneTableComponent,
     ZoneCardListComponent
   ],
-  templateUrl: './zonas.component.html',
-  styleUrls: ['./zonas.component.css']
+  templateUrl: './invernaderos.component.html',
+  styleUrls: ['./invernaderos.component.css']
 })
 export class ZonasComponent implements OnInit {
   modalType: ZonaModalType = null;

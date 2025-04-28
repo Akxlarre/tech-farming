@@ -6,7 +6,8 @@ import { Component } from '@angular/core';
     selector: 'app-zona-filters',
     standalone: true,
     imports: [CommonModule, FormsModule],
-    templateUrl: './zona-filters.component.html'
+    templateUrl: './invernadero-filters.component.html',
+    styleUrls: ['./invernadero-filters.component.css']
   })
   export class ZonaFiltersComponent {
     selectedEstado: string = '';

@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ZonaModalService } from '../zonaModalService/zona-modal.service';
+import { ZonaModalService } from '../invernaderoModalService/invernadero-modal.service';
 
 @Component({
   selector: 'app-zona-header',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './zona-header.component.html',
-  styleUrls: ['./zona-header.component.css']
+  templateUrl: './invernadero--header.component.html',
+  styleUrls: ['./invernadero--header.component.css']
 })
 export class ZonaHeaderComponent {
   constructor(private zonaModalService: ZonaModalService) {}

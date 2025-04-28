@@ -19,7 +19,7 @@ export const layoutRoutes: Routes = [
       {
         path: 'zonas',
         loadChildren: () =>
-          import('../zonas/zonas.routes').then((m) => m.zonasRoutes),
+          import('../invernaderos/zonas.routes').then((m) => m.zonasRoutes),
       },
       {
         path: 'alertas',

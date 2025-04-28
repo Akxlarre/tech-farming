@@ -1,15 +1,15 @@
 // src/app/zonas/components/zona-modal-wrapper/zona-modal-wrapper.component.ts
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ZonaModalService } from '../../components/zonaModalService/zona-modal.service';
+import { ZonaModalService } from '../invernaderoModalService/invernadero-modal.service';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-zona-modal-wrapper',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './zona-modal-wrapper.component.html',
-  styleUrls: ['./zona-modal-wrapper.component.css']
+  templateUrl: './invernadero-modal-wrapper.component.html',
+  styleUrls: ['./invernadero-modal-wrapper.component.css']
 })
 export class ZonaModalWrapperComponent implements OnInit, OnDestroy {
   closing = false;
