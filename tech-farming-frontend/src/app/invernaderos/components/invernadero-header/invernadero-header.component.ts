@@ -1,18 +1,19 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ZonaModalService } from '../invernaderoModalService/invernadero-modal.service';
+import { InvernaderoModalService } from '../invernaderoModalService/invernadero-modal.service';
 
 @Component({
-  selector: 'app-zona-header',
+  selector: 'app-invernadero-header',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './invernadero--header.component.html',
-  styleUrls: ['./invernadero--header.component.css']
+  templateUrl: './invernadero-header.component.html',
+  styleUrls: ['./invernadero-header.component.css']
 })
-export class ZonaHeaderComponent {
-  constructor(private zonaModalService: ZonaModalService) {}
+export class InvernaderoHeaderComponent {
 
-  abrirModalCrearZona() {
-    this.zonaModalService.openModal('create', null);
+  constructor(private invernaderoModalService: InvernaderoModalService) {}
+
+  abrirModalCrearInvernadero() {
+    this.invernaderoModalService.openModal('create', null);
   }
 }

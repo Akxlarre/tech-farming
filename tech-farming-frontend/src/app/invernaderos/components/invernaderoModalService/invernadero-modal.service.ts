@@ -1,18 +1,17 @@
-// src/app/zonas/services/zona-modal.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export type ZonaModalType = 'create' | 'view' | 'edit' | null;
+export type InvernaderoModalType = 'create' | 'view' | 'edit' | null;
 
 @Injectable({ providedIn: 'root' })
-export class ZonaModalService {
-  modalType$ = new BehaviorSubject<ZonaModalType>(null);
-  selectedZona$ = new BehaviorSubject<any>(null); // Puedes tipar con `Zona` más adelante
+export class InvernaderoModalService {
+  modalType$ = new BehaviorSubject<InvernaderoModalType>(null);
+  selectedInvernadero$ = new BehaviorSubject<any>(null); // Puedes tipar con `Invernadero` más adelante
   closing$ = new BehaviorSubject<boolean>(false);
 
-  openModal(type: ZonaModalType, zona: any = null) {
+  openModal(type: InvernaderoModalType, invernadero: any = null) {
     this.closing$.next(false);
-    this.selectedZona$.next(zona);
+    this.selectedInvernadero$.next(invernadero);
 
     this.modalType$.next(type);
   }
@@ -21,13 +20,13 @@ export class ZonaModalService {
     this.closing$.next(true);
     await new Promise(resolve => setTimeout(resolve, delay));
     this.modalType$.next(null);
-    this.selectedZona$.next(null);
+    this.selectedInvernadero$.next(null);
     this.closing$.next(false);
   }
 
   closeModal() {
     this.modalType$.next(null);
-    this.selectedZona$.next(null);
+    this.selectedInvernadero$.next(null);
     this.closing$.next(false);
   }
 }

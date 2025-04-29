@@ -1,19 +1,19 @@
 <div class="p-6 sm:p-8 grid gap-6" [formGroup]="formulario">
   <!-- Título -->
   <h2 class="text-[1.625rem] font-bold text-green-700 flex items-center gap-2">
-    ➕ Crear nueva zona
+    ➕ Crear nuevo invernadero
   </h2>
 
   <!-- Campo: Nombre -->
   <div class="form-control">
     <label class="label">
-      <span class="label-text font-semibold text-gray-700">Nombre de la zona</span>
+      <span class="label-text font-semibold text-gray-700">Nombre del invernadero</span>
     </label>
     <input
       type="text"
       formControlName="nombre"
       class="input input-bordered w-full"
-      placeholder="Ej: Zona Norte"
+      placeholder="Ej: Invernadero Norte"
     />
   </div>
 
@@ -34,7 +34,7 @@
   <div class="flex justify-end gap-3 pt-4 border-t">
     <button type="button" class="btn btn-outline" (click)="cerrar()">Cancelar</button>
     <button type="submit" class="btn btn-primary" [disabled]="formulario.invalid">
-      💾 Guardar Zona
+      💾 Guardar Invernadero
     </button>
   </div>
 </div>

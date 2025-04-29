@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-zona-create-modal',
+  selector: 'app-invernadero-create-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './zona-create-modal.component.html'
+  templateUrl: './invernadero-create-modal.component.html',  // <- corregido aquí
+  styleUrls: ['./invernadero-create-modal.component.css']
 })
-export class ZonaCreateModalComponent {
+export class InvernaderoCreateModalComponent {
   formulario: FormGroup;
 
   constructor(private fb: FormBuilder) {
@@ -19,12 +20,13 @@ export class ZonaCreateModalComponent {
   }
 
   cerrar() {
-    // cerrar modal usando tu ZonaModalService
+    // cerrar modal
   }
 
   guardar() {
     if (this.formulario.valid) {
-      console.log('Zona creada', this.formulario.value);
-      // aquí va la lógica real para enviar la zona al backend
+      console.log('Invernadero creado', this.formulario.value);
+      // lógica para enviar datos al backend
     }
   }
+}

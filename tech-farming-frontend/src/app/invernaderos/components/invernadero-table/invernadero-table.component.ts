@@ -2,15 +2,15 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-zone-table',
+  selector: 'app-invernadero-table',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './invernadero-table.component.html',
 })
-export class ZoneTableComponent {
-  @Input() zonas: any[] = [];
+export class InvernaderoTableComponent {
+  @Input() invernaderos: any[] = [];
 
-  open(tipo: 'view' | 'edit' | 'delete', zona: any) {
-    console.log(`Abrir modal: ${tipo}`, zona);
+  open(tipo: 'view' | 'edit' | 'delete', invernadero: any) {
+    console.log(`Abrir modal: ${tipo}`, invernadero);
   }
 }
