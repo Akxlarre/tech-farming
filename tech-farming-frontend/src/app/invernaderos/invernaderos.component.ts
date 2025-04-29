@@ -3,12 +3,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InvernaderoHeaderComponent } from './components/invernadero-header/invernadero-header.component';
-import { ZonaModalService, ZonaModalType } from './components/invernaderoModalService/invernadero-modal.service';
-import { ZonaModalWrapperComponent } from './components/invernadero-modal-wrapper/invernadero-modal-wrapper.component';
+import { InvernaderoModalService, InvernaderoModalType } from './components/invernaderoModalService/invernadero-modal.service';
+import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper/invernadero-modal-wrapper.component';
 import { InvernaderoCreateModalComponent } from './components/invernadero-create-modal/invernadero-create-modal.component';
-import { ZonaFiltersComponent } from './components/invernadero-filters/invernadero-filters.component';
-import { ZoneTableComponent } from './components/invernadero-table/invernadero-table.component';
-import { ZoneCardListComponent } from './components/invernadero-card-list/invernadero-card-list.component';
+import { InvernaderoFiltersComponent } from './components/invernadero-filters/invernadero-filters.component';
+import { InvernaderoTableComponent } from './components/invernadero-table/invernadero-table.component';
+import { InvernaderoCardListComponent } from './components/invernadero-card-list/invernadero-card-list.component';
 
 @Component({
   selector: 'app-invernaderos',
@@ -16,40 +16,40 @@ import { ZoneCardListComponent } from './components/invernadero-card-list/invern
   imports: [
     CommonModule,
     InvernaderoHeaderComponent,
-    ZonaModalWrapperComponent,
+    InvernaderoModalWrapperComponent,
     InvernaderoCreateModalComponent,
-    ZonaFiltersComponent,
-    ZoneTableComponent,
-    ZoneCardListComponent
+    InvernaderoFiltersComponent,
+    InvernaderoTableComponent,
+    InvernaderoCardListComponent
   ],
   templateUrl: './invernaderos.component.html',
   styleUrls: ['./invernaderos.component.css']
 })
 export class InvernaderosComponent implements OnInit {
-  modalType: ZonaModalType = null;
-  selectedZona: any = null;
+  modalType: InvernaderoModalType = null;
+  selectedInvernadero: any = null;
 
-  zonas = [
+  invernaderos = [
     {
-      id: 'Z001',
-      nombre: 'Zona Norte',
+      id: 'I001',
+      nombre: 'Invernadero Norte',
       sensoresActivos: 4,
       estado: 'Normal',
       fechaCreacion: '2024-04-10'
     },
     {
-      id: 'Z002',
-      nombre: 'Zona Hidropónica',
+      id: 'I002',
+      nombre: 'Invernadero Hidropónico',
       sensoresActivos: 2,
       estado: 'Crítico',
       fechaCreacion: '2024-03-15'
     }
   ];
 
-  constructor(public zonaModalService: ZonaModalService) {}
+  constructor(public invernaderoModalService: InvernaderoModalService) {}
 
   ngOnInit(): void {
-    this.zonaModalService.modalType$.subscribe(tipo => this.modalType = tipo);
-    this.zonaModalService.selectedZona$.subscribe(zona => this.selectedZona = zona);
+    this.invernaderoModalService.modalType$.subscribe(tipo => this.modalType = tipo);
+    this.invernaderoModalService.selectedInvernadero$.subscribe(invernadero => this.selectedInvernadero = invernadero);
   }
 }

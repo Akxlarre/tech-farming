@@ -1,14 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ZoneCardComponent } from '../invernadero-card/invernadero-card.component';
+import { InvernaderoCardComponent } from '../invernadero-card/invernadero-card.component';
 
 @Component({
-  selector: 'app-zone-card-list',
+  selector: 'app-invernadero-card-list',
   standalone: true,
-  imports: [CommonModule, ZoneCardComponent],
+  imports: [CommonModule, InvernaderoCardComponent],
   templateUrl: './invernadero-card-list.component.html',
   styleUrls: ['./invernadero-card-list.component.css']
 })
-export class ZoneCardListComponent {
-  @Input() zonas: any[] = [];
+export class InvernaderoCardListComponent {
+  @Input() invernaderos: any[] = [];
 }

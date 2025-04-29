@@ -3,7 +3,7 @@
       <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold tracking-wide">
         <tr>
           <th class="py-3 px-4">ID</th>
-          <th class="py-3 px-4">Nombre de Zona</th>
+          <th class="py-3 px-4">Nombre de Invernadero</th>
           <th class="py-3 px-4">Sensores Activos</th>
           <th class="py-3 px-4">Estado</th>
           <th class="py-3 px-4">Fecha de Creación</th>
@@ -11,25 +11,25 @@
         </tr>
       </thead>
       <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-        <tr *ngFor="let zona of zonas" class="hover:bg-gray-50 transition">
-          <td class="py-3 px-4">{{ zona.id }}</td>
-          <td class="py-3 px-4 font-medium text-green-800">{{ zona.nombre }}</td>
-          <td class="py-3 px-4">{{ zona.sensoresActivos }}</td>
+        <tr *ngFor="let invernadero of invernaderos" class="hover:bg-gray-50 transition">
+          <td class="py-3 px-4">{{ invernadero.id }}</td>
+          <td class="py-3 px-4 font-medium text-green-800">{{ invernadero.nombre }}</td>
+          <td class="py-3 px-4">{{ invernadero.sensoresActivos }}</td>
           <td class="py-3 px-4">
             <span class="badge"
               [ngClass]="{
-                'badge-success': zona.estado === 'Normal',
-                'badge-warning': zona.estado === 'Advertencia',
-                'badge-error': zona.estado === 'Crítico'
+                'badge-success': invernadero.estado === 'Normal',
+                'badge-warning': invernadero.estado === 'Advertencia',
+                'badge-error': invernadero.estado === 'Crítico'
               }">
-              {{ zona.estado }}
+              {{ invernadero.estado }}
             </span>
           </td>
-          <td class="py-3 px-4">{{ zona.fechaCreacion }}</td>
+          <td class="py-3 px-4">{{ invernadero.fechaCreacion }}</td>
           <td class="flex flex-wrap gap-2 py-3 px-4">
-            <button class="btn btn-sm btn-outline" (click)="open('view', zona)">👁️</button>
-            <button class="btn btn-sm btn-outline" (click)="open('edit', zona)">✏️</button>
-            <button class="btn btn-sm btn-error" (click)="open('delete', zona)">🗑️</button>
+            <button class="btn btn-sm btn-outline" (click)="open('view', invernadero)">👁️</button>
+            <button class="btn btn-sm btn-outline" (click)="open('edit', invernadero)">✏️</button>
+            <button class="btn btn-sm btn-error" (click)="open('delete', invernadero)">🗑️</button>
           </td>
         </tr>
       </tbody>

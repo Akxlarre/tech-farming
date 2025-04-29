@@ -3,20 +3,20 @@
   <app-invernadero-header />
 
   <!-- Filtros visuales -->
-  <app-zona-filters />
+  <app-invernadero-filters />
 
   <!-- Tabla de escritorio -->
-  <app-zone-table [zonas]="zonas" class="hidden md:block" />
+  <app-invernadero-table [invernaderos]="invernaderos" class="hidden md:block" />
 
   <!-- Tarjetas móviles -->
-  <app-zone-card-list [zonas]="zonas" class="block md:hidden" />
+  <app-invernadero-card-list [invernaderos]="invernaderos" class="block md:hidden" />
 
   <!-- Modales: Crear invernadero -->
   <ng-container *ngIf="modalType">
-    <app-zona-modal-wrapper>
+    <app-invernadero-modal-wrapper>
       <ng-container [ngSwitch]="modalType">
         <app-invernadero-create-modal *ngSwitchCase="'create'" />
       </ng-container>
-    </app-zona-modal-wrapper>
+    </app-invernadero-modal-wrapper>
   </ng-container>
 </section>
