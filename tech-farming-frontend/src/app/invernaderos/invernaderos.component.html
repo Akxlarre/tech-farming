@@ -1,21 +1,21 @@
 <section class="vista min-h-screen scroll-smooth px-4 sm:px-10 lg:px-16 space-y-[2.618rem]">
   <!-- Header con nombre de la página y botones de acción -->
-  <app-invernadero-header /> <!-- CORREGIDO -->
+  <app-invernadero-header />
 
   <!-- Filtros visuales -->
-  <app-zona-filters /> <!-- Esto sigue bien, aún se llama zona-filters -->
+  <app-zona-filters />
 
   <!-- Tabla de escritorio -->
-  <app-zone-table [zonas]="zonas" class="hidden md:block" /> <!-- Esto también está bien -->
+  <app-zone-table [zonas]="zonas" class="hidden md:block" />
 
   <!-- Tarjetas móviles -->
-  <app-zone-card-list [zonas]="zonas" class="block md:hidden" /> <!-- También bien -->
+  <app-zone-card-list [zonas]="zonas" class="block md:hidden" />
 
   <!-- Modales: Crear invernadero -->
   <ng-container *ngIf="modalType">
-    <app-zona-modal-wrapper> <!-- Esta parte está bien (aún se llama zona-modal-wrapper) -->
+    <app-zona-modal-wrapper>
       <ng-container [ngSwitch]="modalType">
-        <app-invernadero-create-modal *ngSwitchCase="'create'" /> <!-- CORREGIDO -->
+        <app-invernadero-create-modal *ngSwitchCase="'create'" />
       </ng-container>
     </app-zona-modal-wrapper>
   </ng-container>
