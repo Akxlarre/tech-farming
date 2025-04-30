@@ -23,11 +23,9 @@ client = InfluxDBClient(
 )
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
-
 @router.route('/', methods=['POST'])
 def crear_sensor():
     data = request.get_json()
-
     parametros = data.get("parametros", [])
 
     if not parametros:
@@ -38,7 +36,6 @@ def crear_sensor():
         return jsonify({"error": "Faltan campos requeridos"}), 400
 
     try:
-        # Buscar tipo de sensor según cantidad de parámetros
         if len(parametros) == 1:
             tipo_sensor = TipoSensor.query.filter_by(nombre="De un parámetro").first()
         else:
@@ -46,20 +43,16 @@ def crear_sensor():
 
         if not tipo_sensor:
             return jsonify({"error": "No se encontró el tipo de sensor adecuado"}), 400
-        
+
         data["tipo_sensor_id"] = tipo_sensor.id
 
-        # Convertir fecha si viene como string
         if "fecha_instalacion" in data and isinstance(data["fecha_instalacion"], str):
             data["fecha_instalacion"] = datetime.strptime(data["fecha_instalacion"], "%Y-%m-%d").date()
 
-        # Insertar el sensor
         sensor = insertar_sensor(data)
 
         if sensor:
-            # Insertar los parámetros asociados
             insertar_sensor_parametros(sensor.id, parametros)
-
             return jsonify({
                 "message": "Sensor creado exitosamente",
                 "sensor_id": sensor.id,
@@ -70,12 +63,10 @@ def crear_sensor():
 
     except Exception as e:
         return jsonify({"error": f"Error al crear el sensor: {str(e)}"}), 500
-    
-    
+
 @router.route('/datos', methods=['POST'])
 def recibir_datos_sensor():
     data = request.get_json()
-
     token = data.get("token")
     mediciones = data.get("mediciones")
 
@@ -87,11 +78,9 @@ def recibir_datos_sensor():
         return jsonify({"error": "Sensor no registrado"}), 404
 
     puntos = []
-
     for m in mediciones:
         parametro = m.get("parametro")
         valor = m.get("valor")
-
         if not parametro or valor is None:
             continue
 
@@ -109,3 +98,44 @@ def recibir_datos_sensor():
         return jsonify({"message": "Datos recibidos correctamente"}), 200
     else:
         return jsonify({"error": "No se procesaron datos válidos"}), 400
+
+@router.route('/ultimas-lecturas', methods=['GET'])
+def obtener_ultimas_lecturas():
+    try:
+        query = f'''
+        from(bucket: "{INFLUXDB_BUCKET}")
+          |> range(start: -30d)
+          |> filter(fn: (r) => r._measurement == "lecturas_sensores")
+          |> filter(fn: (r) => r._field == "valor")
+          |> sort(columns: ["_time"], desc: true)
+          |> group(columns: ["sensor_id"])
+          |> first()
+        '''
+
+        result = client.query_api().query(org=ORG, query=query)
+
+        lecturas = []
+        for table in result:
+            for record in table.records:
+                print("✅ Record:", record.values)
+                lecturas.append({
+                    "sensor_id": record["sensor_id"],
+                    "valor": record.get_value(),
+                    "timestamp": record.get_time().isoformat(),
+                    "tipo_sensor": record["tipo_sensor"] if "tipo_sensor" in record.values else None,
+                    "zona": record["zona"] if "zona" in record.values else None,
+                    "invernadero_id": record["invernadero_id"] if "invernadero_id" in record.values else None
+                })
+
+        print("✅ Lecturas resumidas:", lecturas)
+        return jsonify(lecturas)
+
+    except Exception as e:
+        print("❌ ERROR:", str(e))
+        return jsonify({"error": f"Error al consultar lecturas: {str(e)}"}), 500
+
+
+
+
+
+
