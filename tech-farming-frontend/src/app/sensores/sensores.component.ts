@@ -11,6 +11,7 @@ import { SensorEditModalComponent } from './components/SensorEditModalComponent/
 import { SensorViewModalComponent } from './components/SensorViewModalComponent/sensor-view-modal.component';
 import { SensorDeleteModalComponent } from './components/SensorDeleteModalComponent/sensor-delete-modal.component';
 import { SensorCreateModalComponent } from './components/sensor-header/components/SensorCreateModalComponent/sensor-create-modal.component';
+import { SensoresService, UltimaLectura } from '../services/sensores.service';
 
 @Component({
   selector: 'app-sensores',
@@ -31,16 +32,8 @@ import { SensorCreateModalComponent } from './components/sensor-header/component
   styleUrls: ['./sensores.component.css'],
 })
 export class SensoresComponent implements OnInit {
-  modalType: 'view' | 'edit' | 'delete' | 'create' | null = null;  
+  modalType: 'view' | 'edit' | 'delete' | 'create' | null = null;
   selectedSensor: any = null;
-
-  constructor(public modalService: SensorModalService) {}
-
-  ngOnInit(): void {
-    this.modalService.modalType$.subscribe(type => this.modalType = type);
-    console.log('modalType recibido en SensoresComponent:', this.modalType); // ✅ DEBUG
-    this.modalService.selectedSensor$.subscribe(sensor => this.selectedSensor = sensor);
-  }
 
   sensores: Sensor[] = [
     {
@@ -48,20 +41,31 @@ export class SensoresComponent implements OnInit {
       invernadero_id: 101,
       nombre: 'Sensor Temp 1',
       tipo_sensor_id: 1,
-      // icono: '🌡️',
-      // unidad: '°C',
       estado: 'Activo'
-      // lectura: '22°C - 10:00'
     },
     {
       id: 2,
       invernadero_id: 102,
       nombre: 'Sensor Temp 2',
       tipo_sensor_id: 2,
-      // icono: '🌡️',
-      // unidad: '°C',
       estado: 'Advertencia'
-      // lectura: '21°C - 10:05'
     },
-  ]
+  ];
+
+  ultimasLecturas: UltimaLectura[] = [];  // ✅ Propiedad declarada correctamente
+
+  constructor(
+    public modalService: SensorModalService,
+    private sensoresService: SensoresService
+  ) {}
+
+  ngOnInit(): void {
+    this.modalService.modalType$.subscribe(type => this.modalType = type);
+    this.modalService.selectedSensor$.subscribe(sensor => this.selectedSensor = sensor);
+
+    this.sensoresService.getUltimasLecturas().subscribe(data => {
+      this.ultimasLecturas = data;
+      console.log('📡 Lecturas desde backend:', data);
+    });
+  }
 }
