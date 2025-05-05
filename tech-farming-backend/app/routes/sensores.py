@@ -1,3 +1,5 @@
+# ✅ sensores.py corregido para extraer correctamente los campos como parametro y unidad
+
 from flask import Blueprint, request, jsonify
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -81,14 +83,20 @@ def recibir_datos_sensor():
     for m in mediciones:
         parametro = m.get("parametro")
         valor = m.get("valor")
+        unidad = m.get("unidad", "")  # Extraer unidad si viene
         if not parametro or valor is None:
             continue
 
         punto = (
             Point("lecturas_sensores")
             .tag("token", token)
+            .tag("sensor_id", sensor_info.id)
             .field("parametro", parametro)
             .field("valor", float(valor))
+            .field("unidad", unidad)
+            .tag("invernadero_id", str(sensor_info.invernadero_id))
+            .tag("tipo_sensor", sensor_info.tipo_sensor.nombre if sensor_info.tipo_sensor else "")
+            .tag("zona", sensor_info.zona if hasattr(sensor_info, 'zona') else "")
             .time(datetime.utcnow())
         )
         puntos.append(punto)
@@ -102,40 +110,38 @@ def recibir_datos_sensor():
 @router.route('/ultimas-lecturas', methods=['GET'])
 def obtener_ultimas_lecturas():
     try:
+        query_api = client.query_api()
         query = f'''
         from(bucket: "{INFLUXDB_BUCKET}")
           |> range(start: -30d)
           |> filter(fn: (r) => r._measurement == "lecturas_sensores")
-          |> filter(fn: (r) => r._field == "valor")
-          |> sort(columns: ["_time"], desc: true)
+          |> filter(fn: (r) => r._field == "valor" or r._field == "parametro")
+          |> pivot(
+               rowKey:   ["sensor_id", "_time"],
+               columnKey:["_field"],
+               valueColumn: "_value"
+             )
           |> group(columns: ["sensor_id"])
-          |> first()
+          |> last(column: "_time")
         '''
+        tables = query_api.query(query)
 
-        result = client.query_api().query(org=ORG, query=query)
-
-        lecturas = []
-        for table in result:
+        resultados = []
+        for table in tables:
             for record in table.records:
-                print("✅ Record:", record.values)
-                lecturas.append({
-                    "sensor_id": record["sensor_id"],
-                    "valor": record.get_value(),
-                    "timestamp": record.get_time().isoformat(),
-                    "tipo_sensor": record["tipo_sensor"] if "tipo_sensor" in record.values else None,
-                    "zona": record["zona"] if "zona" in record.values else None,
-                    "invernadero_id": record["invernadero_id"] if "invernadero_id" in record.values else None
+                vals = record.values
+                resultados.append({
+                    "sensor_id":     vals.get("sensor_id"),
+                    "parametro":     vals.get("parametro"),       # ahora sí traerá el parámetro
+                    "valor":         vals.get("valor"),           # tu número medido
+                    "timestamp":     record.get_time().isoformat(),
+                    "tipo_sensor":   vals.get("tipo_sensor"),
+                    "zona":          vals.get("zona"),
+                    "invernadero_id":vals.get("invernadero_id")
                 })
 
-        print("✅ Lecturas resumidas:", lecturas)
-        return jsonify(lecturas)
+        return jsonify(resultados), 200
 
     except Exception as e:
-        print("❌ ERROR:", str(e))
         return jsonify({"error": f"Error al consultar lecturas: {str(e)}"}), 500
-
-
-
-
-
 

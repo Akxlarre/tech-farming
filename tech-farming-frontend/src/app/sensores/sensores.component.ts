@@ -1,3 +1,4 @@
+// src/app/sensores/sensores.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SensorHeaderComponent } from './components/sensor-header/sensor-header.component';
@@ -35,24 +36,12 @@ export class SensoresComponent implements OnInit {
   modalType: 'view' | 'edit' | 'delete' | 'create' | null = null;
   selectedSensor: any = null;
 
-  sensores: Sensor[] = [
-    {
-      id: 1,
-      invernadero_id: 101,
-      nombre: 'Sensor Temp 1',
-      tipo_sensor_id: 1,
-      estado: 'Activo'
-    },
-    {
-      id: 2,
-      invernadero_id: 102,
-      nombre: 'Sensor Temp 2',
-      tipo_sensor_id: 2,
-      estado: 'Advertencia'
-    },
-  ];
+  ultimasLecturas: UltimaLectura[] = [];
 
-  ultimasLecturas: UltimaLectura[] = [];  // ✅ Propiedad declarada correctamente
+  sensores: Sensor[] = [
+    { id: 1, invernadero_id: 101, nombre: 'Sensor Temp 1', tipo_sensor_id: 1, estado: 'Activo' },
+    { id: 2, invernadero_id: 102, nombre: 'Sensor Temp 2', tipo_sensor_id: 2, estado: 'Advertencia' },
+  ];
 
   constructor(
     public modalService: SensorModalService,
@@ -60,12 +49,32 @@ export class SensoresComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Suscripciones al modal
     this.modalService.modalType$.subscribe(type => this.modalType = type);
     this.modalService.selectedSensor$.subscribe(sensor => this.selectedSensor = sensor);
 
+    // Carga de últimas lecturas desde InfluxDB
     this.sensoresService.getUltimasLecturas().subscribe(data => {
       this.ultimasLecturas = data;
-      console.log('📡 Lecturas desde backend:', data);
+      console.log('✅ Últimas lecturas recibidas:', data);
+
+      this.sensores.forEach(sensor => {
+        const lectura = data.find(l => l.sensor_id === sensor.id?.toString());
+        if (lectura) {
+          sensor.parametro = lectura.parametro || '';
+          sensor.unidad    = lectura.valor;           // valor numérico medido
+          sensor.timestamp = lectura.timestamp || '';
+        }
+      });
     });
+  }
+
+  /**
+   * Abre el modal correspondiente con el sensor seleccionado.
+   * Este método es invocado desde
+   * <app-sensor-table> a través de (view), (edit) y (delete).
+   */
+  open(type: 'view' | 'edit' | 'delete' | 'create', sensor: Sensor): void {
+    this.modalService.openModal(type, sensor);
   }
 }

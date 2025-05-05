@@ -9,6 +9,8 @@ export interface UltimaLectura {
   tipo_sensor?: string;
   zona?: string;
   invernadero_id?: string;
+  parametro?: string; 
+  unidad?: string; 
 }
 
 @Injectable({
@@ -19,7 +21,19 @@ export class SensoresService {
 
   constructor(private http: HttpClient) {}
 
+  // Obtiene las últimas lecturas desde el backend
   getUltimasLecturas(): Observable<UltimaLectura[]> {
     return this.http.get<UltimaLectura[]>(`${this.apiUrl}/ultimas-lecturas`);
+  }
+
+  // Envía datos de sensores al backend (InfluxDB)
+  enviarDatosSensor(payload: {
+    token: string;
+    mediciones: {
+      parametro: string;
+      valor: number;
+    }[];
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/datos`, payload);
   }
 }

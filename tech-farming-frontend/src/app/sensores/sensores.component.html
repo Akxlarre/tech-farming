@@ -2,27 +2,19 @@
   <!-- Encabezado -->
   <app-sensor-header />
 
-  <!-- 🔎 DEBUG: Últimas lecturas desde InfluxDB -->
-  <div class="bg-white shadow-md rounded-xl p-4 border border-gray-200">
-    <h3 class="text-lg font-semibold mb-2 text-gray-700">Últimas lecturas desde InfluxDB</h3>
-    <div *ngIf="ultimasLecturas.length > 0; else sinDatos">
-      <div *ngFor="let lectura of ultimasLecturas" class="text-sm text-gray-600 mb-3">
-        <p><strong>ID:</strong> {{ lectura.sensor_id }}</p>
-        <p><strong>Valor:</strong> {{ lectura.valor }}</p>
-        <p><strong>Fecha:</strong> {{ lectura.timestamp | date:'short' }}</p>
-        <hr class="my-2" />
-      </div>
-    </div>
-    <ng-template #sinDatos>
-      <p class="text-gray-500">No hay datos recientes disponibles.</p>
-    </ng-template>
-  </div>
+
 
   <!-- Filtros -->
   <app-sensor-filters />
 
-  <!-- Tabla escritorio -->
-  <app-sensor-table [sensores]="sensores" />
+  <!-- **Tabla escritorio** -->
+  <app-sensor-table
+    [sensores]="sensores"
+    [ultimasLecturas]="ultimasLecturas"
+    (view)="open('view',$event)"
+    (edit)="open('edit',$event)"
+    (delete)="open('delete',$event)">
+  </app-sensor-table>
 
   <!-- Tarjetas móviles -->
   <app-sensor-card-list [sensores]="sensores" />
@@ -31,10 +23,10 @@
   <ng-container *ngIf="modalType">
     <app-sensor-modal-wrapper>
       <ng-container [ngSwitch]="modalType">
-        <app-sensor-edit-modal *ngSwitchCase="'edit'" />
-        <app-sensor-delete-modal *ngSwitchCase="'delete'" />
-        <app-sensor-view-modal *ngSwitchCase="'view'" />
-        <app-sensor-create-modal *ngSwitchCase="'create'" />
+        <app-sensor-edit-modal   *ngSwitchCase="'edit'"></app-sensor-edit-modal>
+        <app-sensor-delete-modal *ngSwitchCase="'delete'"></app-sensor-delete-modal>
+        <app-sensor-view-modal   *ngSwitchCase="'view'"></app-sensor-view-modal>
+        <app-sensor-create-modal *ngSwitchCase="'create'"></app-sensor-create-modal>
       </ng-container>
     </app-sensor-modal-wrapper>
   </ng-container>

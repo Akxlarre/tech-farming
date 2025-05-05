@@ -45,6 +45,7 @@ def escribir_dato(sensor_id, parametro, valor):
         print("❌ No se pudo insertar el dato porque la conexión a InfluxDB falló.")
 
 # Prueba con datos de ejemplo
-escribir_dato(sensor_id="S001", parametro="humedad", valor=60.5)
-escribir_dato(sensor_id="S002", parametro="ph", valor=6.8)
+escribir_dato(sensor_id="S003", parametro="N", valor=69.5)
+escribir_dato(sensor_id="S003", parametro="Humedad", valor=70.0)
+escribir_dato(sensor_id="S004", parametro="Potasio", valor=9.8)
 

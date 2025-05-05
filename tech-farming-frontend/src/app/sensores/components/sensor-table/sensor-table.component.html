@@ -6,19 +6,17 @@
         <th class="py-3 px-4">Nombre</th>
         <th class="py-3 px-4">Tipo</th>
         <th class="py-3 px-4">Invernadero</th>
-        <th class="py-3 px-4">Unidad</th>
         <th class="py-3 px-4">Estado</th>
         <th class="py-3 px-4">Última lectura</th>
         <th class="py-3 px-4">Acciones</th>
       </tr>
     </thead>
     <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-      <tr *ngFor="let sensor of sensores" class="hover:bg-gray-50 transition">
+      <tr *ngFor="let sensor of merged" class="hover:bg-gray-50 transition">
         <td class="py-3 px-4">{{ sensor.id }}</td>
         <td class="py-3 px-4">{{ sensor.nombre }}</td>
-        <td class="py-3 px-4">{{ sensor.tipo }}</td>
+        <td class="py-3 px-4">{{ sensor.tipo_sensor_id }}</td>
         <td class="py-3 px-4">{{ sensor.invernadero_id }}</td>
-        <td class="py-3 px-4">{{ sensor.unidad }}</td>
         <td class="py-3 px-4">
           <span class="badge"
             [ngClass]="{
@@ -29,11 +27,13 @@
             {{ sensor.estado }}
           </span>
         </td>
-        <td class="py-3 px-4">{{ sensor.lectura }}</td>
+        <td class="py-3 px-4">
+          {{ sensor.timestamp ? (sensor.timestamp | date:'short') : '—' }}
+        </td>
         <td class="flex flex-wrap gap-2">
-          <button class="btn btn-sm btn-outline" (click)="open('view', sensor)">👁️</button>
-          <button class="btn btn-sm btn-outline" (click)="open('edit', sensor)">✏️</button>
-          <button class="btn btn-sm btn-error" (click)="open('delete', sensor)">🗑️</button>
+          <button class="btn btn-sm btn-outline" (click)="view.emit(sensor)">👁️</button>
+          <button class="btn btn-sm btn-outline" (click)="edit.emit(sensor)">✏️</button>
+          <button class="btn btn-sm btn-error"   (click)="delete.emit(sensor)">🗑️</button>
         </td>
       </tr>
     </tbody>
