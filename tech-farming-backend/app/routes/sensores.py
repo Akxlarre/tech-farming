@@ -1,4 +1,4 @@
-# ✅ sensores.py corregido para extraer correctamente los campos como parametro y unidad
+# src/app/routers/sensores.py
 
 from flask import Blueprint, request, jsonify
 from influxdb_client import InfluxDBClient, Point
@@ -8,6 +8,7 @@ import os
 
 from app.queries.sensor_queries import insertar_sensor, obtener_sensor
 from app.queries.sensor_parametro_queries import insertar_sensor_parametros
+from app.models.sensor import Sensor as SensorModel
 from app.models.tipo_sensor import TipoSensor
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
@@ -16,20 +17,34 @@ router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
 INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
 INFLUXDB_URL = os.getenv("INFLUXDB_URL")
 INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET")
-ORG = os.getenv("INFLUXDB_ORG")
+ORG            = os.getenv("INFLUXDB_ORG")
 
-client = InfluxDBClient(
-    url=INFLUXDB_URL,
-    token=INFLUXDB_TOKEN,
-    org=ORG
-)
+client    = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=ORG)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
-@router.route('/', methods=['POST'])
-def crear_sensor():
+
+@router.route('/', methods=['GET', 'POST'])
+def sensores_root():
+    if request.method == 'GET':
+        # Listar todos los sensores desde Supabase (PostgreSQL vía SQLAlchemy)
+        try:
+            sensores = SensorModel.query.all()
+            resultado = []
+            for s in sensores:
+                resultado.append({
+                    "id":              s.id,
+                    "invernadero_id":  s.invernadero_id,
+                    "nombre":          s.nombre,
+                    "tipo_sensor_id":  s.tipo_sensor_id,
+                    "estado":          s.estado
+                })
+            return jsonify(resultado), 200
+        except Exception as e:
+            return jsonify({"error": f"Error listando sensores: {str(e)}"}), 500
+
+    # Si es POST, creamos un nuevo sensor
     data = request.get_json()
     parametros = data.get("parametros", [])
-
     if not parametros:
         return jsonify({"error": "Debes seleccionar al menos un parámetro"}), 400
 
@@ -38,40 +53,39 @@ def crear_sensor():
         return jsonify({"error": "Faltan campos requeridos"}), 400
 
     try:
+        # Determinar tipo de sensor
         if len(parametros) == 1:
             tipo_sensor = TipoSensor.query.filter_by(nombre="De un parámetro").first()
         else:
             tipo_sensor = TipoSensor.query.filter_by(nombre="Multiparámetro").first()
-
         if not tipo_sensor:
             return jsonify({"error": "No se encontró el tipo de sensor adecuado"}), 400
 
         data["tipo_sensor_id"] = tipo_sensor.id
-
+        # Parsear fecha si viene como string
         if "fecha_instalacion" in data and isinstance(data["fecha_instalacion"], str):
             data["fecha_instalacion"] = datetime.strptime(data["fecha_instalacion"], "%Y-%m-%d").date()
 
         sensor = insertar_sensor(data)
-
-        if sensor:
-            insertar_sensor_parametros(sensor.id, parametros)
-            return jsonify({
-                "message": "Sensor creado exitosamente",
-                "sensor_id": sensor.id,
-                "token": sensor.token
-            }), 201
-        else:
+        if not sensor:
             return jsonify({"error": "No se pudo crear el sensor"}), 500
+
+        insertar_sensor_parametros(sensor.id, parametros)
+        return jsonify({
+            "message":   "Sensor creado exitosamente",
+            "sensor_id": sensor.id,
+            "token":     sensor.token
+        }), 201
 
     except Exception as e:
         return jsonify({"error": f"Error al crear el sensor: {str(e)}"}), 500
 
+
 @router.route('/datos', methods=['POST'])
 def recibir_datos_sensor():
-    data = request.get_json()
-    token = data.get("token")
-    mediciones = data.get("mediciones")
-
+    data        = request.get_json()
+    token       = data.get("token")
+    mediciones  = data.get("mediciones")
     if not token or not mediciones:
         return jsonify({"error": "Faltan campos obligatorios"}), 400
 
@@ -82,8 +96,8 @@ def recibir_datos_sensor():
     puntos = []
     for m in mediciones:
         parametro = m.get("parametro")
-        valor = m.get("valor")
-        unidad = m.get("unidad", "")  # Extraer unidad si viene
+        valor     = m.get("valor")
+        unidad    = m.get("unidad", "")
         if not parametro or valor is None:
             continue
 
@@ -96,16 +110,17 @@ def recibir_datos_sensor():
             .field("unidad", unidad)
             .tag("invernadero_id", str(sensor_info.invernadero_id))
             .tag("tipo_sensor", sensor_info.tipo_sensor.nombre if sensor_info.tipo_sensor else "")
-            .tag("zona", sensor_info.zona if hasattr(sensor_info, 'zona') else "")
+            .tag("zona", getattr(sensor_info, 'zona', ""))
             .time(datetime.utcnow())
         )
         puntos.append(punto)
 
-    if puntos:
-        write_api.write(bucket=INFLUXDB_BUCKET, record=puntos)
-        return jsonify({"message": "Datos recibidos correctamente"}), 200
-    else:
+    if not puntos:
         return jsonify({"error": "No se procesaron datos válidos"}), 400
+
+    write_api.write(bucket=INFLUXDB_BUCKET, record=puntos)
+    return jsonify({"message": "Datos recibidos correctamente"}), 200
+
 
 @router.route('/ultimas-lecturas', methods=['GET'])
 def obtener_ultimas_lecturas():
@@ -131,17 +146,16 @@ def obtener_ultimas_lecturas():
             for record in table.records:
                 vals = record.values
                 resultados.append({
-                    "sensor_id":     vals.get("sensor_id"),
-                    "parametro":     vals.get("parametro"),       # ahora sí traerá el parámetro
-                    "valor":         vals.get("valor"),           # tu número medido
-                    "timestamp":     record.get_time().isoformat(),
-                    "tipo_sensor":   vals.get("tipo_sensor"),
-                    "zona":          vals.get("zona"),
-                    "invernadero_id":vals.get("invernadero_id")
+                    "sensor_id":      vals.get("sensor_id"),
+                    "parametro":      vals.get("parametro"),
+                    "valor":          vals.get("valor"),
+                    "timestamp":      record.get_time().isoformat(),
+                    "tipo_sensor":    vals.get("tipo_sensor"),
+                    "zona":           vals.get("zona"),
+                    "invernadero_id": vals.get("invernadero_id"),
                 })
 
         return jsonify(resultados), 200
 
     except Exception as e:
         return jsonify({"error": f"Error al consultar lecturas: {str(e)}"}), 500
-

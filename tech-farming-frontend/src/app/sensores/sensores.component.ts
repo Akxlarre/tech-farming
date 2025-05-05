@@ -1,6 +1,7 @@
 // src/app/sensores/sensores.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { SensorHeaderComponent } from './components/sensor-header/sensor-header.component';
 import { SensorFiltersComponent } from './components/sensor-filters/sensor-filters.component';
 import { SensorTableComponent } from './components/sensor-table/sensor-table.component';
@@ -12,7 +13,12 @@ import { SensorEditModalComponent } from './components/SensorEditModalComponent/
 import { SensorViewModalComponent } from './components/SensorViewModalComponent/sensor-view-modal.component';
 import { SensorDeleteModalComponent } from './components/SensorDeleteModalComponent/sensor-delete-modal.component';
 import { SensorCreateModalComponent } from './components/sensor-header/components/SensorCreateModalComponent/sensor-create-modal.component';
+
 import { SensoresService, UltimaLectura } from '../services/sensores.service';
+import { InvernaderoService } from '../invernaderos/invernaderos.service';
+import { Invernadero } from '../invernaderos/models/invernadero.model';
+import { TipoSensorService } from './tipos_sensor.service';
+import { TipoSensor } from './models/tipos_sensor.model';
 
 @Component({
   selector: 'app-sensores',
@@ -33,48 +39,81 @@ import { SensoresService, UltimaLectura } from '../services/sensores.service';
   styleUrls: ['./sensores.component.css'],
 })
 export class SensoresComponent implements OnInit {
-  modalType: 'view' | 'edit' | 'delete' | 'create' | null = null;
-  selectedSensor: any = null;
+  modalType: 'view'|'edit'|'delete'|'create'|null = null;
+  selectedSensor: Sensor | null = null;
 
+  sensores: Sensor[]           = [];
   ultimasLecturas: UltimaLectura[] = [];
-
-  sensores: Sensor[] = [
-    { id: 1, invernadero_id: 101, nombre: 'Sensor Temp 1', tipo_sensor_id: 1, estado: 'Activo' },
-    { id: 2, invernadero_id: 102, nombre: 'Sensor Temp 2', tipo_sensor_id: 2, estado: 'Advertencia' },
-  ];
+  invernaderos: Invernadero[] = [];
+  tiposSensor: TipoSensor[]   = [];
 
   constructor(
-    public modalService: SensorModalService,
-    private sensoresService: SensoresService
+    public  modalService: SensorModalService,
+    private sensoresService: SensoresService,
+    private invernaderoService: InvernaderoService,
+    private tipoSensorService: TipoSensorService,
   ) {}
 
   ngOnInit(): void {
-    // Suscripciones al modal
-    this.modalService.modalType$.subscribe(type => this.modalType = type);
-    this.modalService.selectedSensor$.subscribe(sensor => this.selectedSensor = sensor);
+    // 1) Modal
+    this.modalService.modalType$.subscribe(t => this.modalType = t);
+    this.modalService.selectedSensor$.subscribe(s => this.selectedSensor = s);
 
-    // Carga de últimas lecturas desde InfluxDB
-    this.sensoresService.getUltimasLecturas().subscribe(data => {
-      this.ultimasLecturas = data;
-      console.log('✅ Últimas lecturas recibidas:', data);
+    // 2) Sensores desde Supabase (vía API)
+    this.sensoresService.getSensores().subscribe({
+      next: (data: Sensor[]) => {
+        console.log(data.length
+          ? `✅ ${data.length} sensores cargados:` 
+          : '⚠️ No se recibieron sensores', data);
+        this.sensores = data;
+      },
+      error: (err: any) => console.error('❌ Error cargando sensores:', err)
+    });
 
-      this.sensores.forEach(sensor => {
-        const lectura = data.find(l => l.sensor_id === sensor.id?.toString());
-        if (lectura) {
-          sensor.parametro = lectura.parametro || '';
-          sensor.unidad    = lectura.valor;           // valor numérico medido
-          sensor.timestamp = lectura.timestamp || '';
-        }
-      });
+    // 3) Invernaderos
+    this.invernaderoService.obtenerInvernaderos().subscribe({
+      next: (data: Invernadero[]) => {
+        console.log(`✅ ${data.length} invernaderos cargados:`, data);
+        this.invernaderos = data;
+      },
+      error: (err: any) => console.error('❌ Error cargando invernaderos:', err)
+    });
+
+    // 4) Tipos de sensor
+    this.tipoSensorService.obtenerTiposSensor().subscribe({
+      next: (data: TipoSensor[]) => {
+        console.log(`✅ ${data.length} tipos de sensor cargados:`, data);
+        this.tiposSensor = data;
+      },
+      error: (err: any) => console.error('❌ Error cargando tipos de sensor:', err)
+    });
+
+    // 5) Últimas lecturas desde InfluxDB
+    this.sensoresService.getUltimasLecturas().subscribe({
+      next: (data: UltimaLectura[]) => {
+        console.log(data.length
+          ? `✅ ${data.length} lecturas cargadas:` 
+          : '⚠️ No se recibieron lecturas', data);
+        this.ultimasLecturas = data;
+
+        // Merge lecturas en cada sensor
+        this.sensores.forEach(sensor => {
+          const lectura = data.find(l =>
+            l.sensor_id === `S00${sensor.id}` ||
+            l.sensor_id === sensor.id?.toString()
+          );
+          if (lectura) {
+            sensor.parametro = lectura.parametro  ?? '';
+            sensor.unidad    = lectura.valor;
+            sensor.timestamp = lectura.timestamp ?? '';
+          }
+        });
+      },
+      error: (err: any) => console.error('❌ Error cargando lecturas:', err)
     });
   }
 
-  /**
-   * Abre el modal correspondiente con el sensor seleccionado.
-   * Este método es invocado desde
-   * <app-sensor-table> a través de (view), (edit) y (delete).
-   */
-  open(type: 'view' | 'edit' | 'delete' | 'create', sensor: Sensor): void {
+  open(type: 'view'|'edit'|'delete'|'create', sensor: Sensor): void {
     this.modalService.openModal(type, sensor);
   }
 }

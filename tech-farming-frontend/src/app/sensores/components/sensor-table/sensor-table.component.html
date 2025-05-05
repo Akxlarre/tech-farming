@@ -1,3 +1,4 @@
+<!-- src/app/sensores/components/sensor-table/sensor-table.component.html -->
 <div class="overflow-x-auto hidden md:block rounded-xl shadow-sm bg-white border border-gray-100">
   <table class="table w-full">
     <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold tracking-wide">
@@ -12,28 +13,28 @@
       </tr>
     </thead>
     <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-      <tr *ngFor="let sensor of merged" class="hover:bg-gray-50 transition">
-        <td class="py-3 px-4">{{ sensor.id }}</td>
-        <td class="py-3 px-4">{{ sensor.nombre }}</td>
-        <td class="py-3 px-4">{{ sensor.tipo_sensor_id }}</td>
-        <td class="py-3 px-4">{{ sensor.invernadero_id }}</td>
+      <tr *ngFor="let s of merged" class="hover:bg-gray-50 transition">
+        <td class="py-3 px-4">{{ s.id }}</td>
+        <td class="py-3 px-4">{{ s.nombre }}</td>
+        <td class="py-3 px-4">{{ s.tipoNombre }}</td>
+        <td class="py-3 px-4">{{ s.invernaderoNombre || '—' }}</td>
         <td class="py-3 px-4">
           <span class="badge"
             [ngClass]="{
-              'badge-success': sensor.estado === 'Activo',
-              'badge-warning': sensor.estado === 'Advertencia',
-              'badge-error': sensor.estado === 'Error' || sensor.estado === 'Crítico'
+              'badge-success': s.estado === 'Activo',
+              'badge-warning': s.estado === 'Advertencia',
+              'badge-error': s.estado === 'Error' || s.estado === 'Crítico'
             }">
-            {{ sensor.estado }}
+            {{ s.estado }}
           </span>
         </td>
         <td class="py-3 px-4">
-          {{ sensor.timestamp ? (sensor.timestamp | date:'short') : '—' }}
+          {{ s.timestamp ? (s.timestamp | date:'short') : '—' }}
         </td>
         <td class="flex flex-wrap gap-2">
-          <button class="btn btn-sm btn-outline" (click)="view.emit(sensor)">👁️</button>
-          <button class="btn btn-sm btn-outline" (click)="edit.emit(sensor)">✏️</button>
-          <button class="btn btn-sm btn-error"   (click)="delete.emit(sensor)">🗑️</button>
+          <button class="btn btn-sm btn-outline" (click)="view.emit(s)">👁️</button>
+          <button class="btn btn-sm btn-outline" (click)="edit.emit(s)">✏️</button>
+          <button class="btn btn-sm btn-error"   (click)="delete.emit(s)">🗑️</button>
         </td>
       </tr>
     </tbody>
