@@ -3,8 +3,7 @@
   <table class="table w-full">
     <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold tracking-wide">
       <tr>
-        <th class="py-3 px-4">ID</th>
-        <th class="py-3 px-4">Nombre</th>
+        <th class="py-3 px-4">Sensor</th>
         <th class="py-3 px-4">Tipo</th>
         <th class="py-3 px-4">Invernadero</th>
         <th class="py-3 px-4">Estado</th>
@@ -13,34 +12,45 @@
       </tr>
     </thead>
     <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-      <tr *ngFor="let s of merged" class="hover:bg-gray-50 transition">
-        <td class="py-3 px-4">{{ s.id }}</td>
-        <td class="py-3 px-4">{{ s.nombre }}</td>
-        <td class="py-3 px-4">{{ s.tipoNombre }}</td>
-        <td class="py-3 px-4">{{ s.invernaderoNombre || '—' }}</td>
+      <tr *ngFor="let row of mergedLecturas" class="hover:bg-gray-50 transition">
+        <td class="py-3 px-4">{{ row.sensor?.nombre || '—' }}</td>
+        <td class="py-3 px-4">{{ row.tipoNombre }}</td>
+        <td class="py-3 px-4">{{ row.invernaderoNombre }}</td>
         <td class="py-3 px-4">
-          <span class="badge"
+          <span
+            class="badge"
             [ngClass]="{
-              'badge-success': s.estado === 'Activo',
-              'badge-warning': s.estado === 'Advertencia',
-              'badge-error': s.estado === 'Error' || s.estado === 'Crítico'
-            }">
-            {{ s.estado }}
+              'badge-success': row.sensor?.estado === 'Activo',
+              'badge-warning': row.sensor?.estado === 'Advertencia',
+              'badge-error': row.sensor?.estado === 'Error' || row.sensor?.estado === 'Crítico'
+            }"
+          >
+            {{ row.sensor?.estado || '—' }}
           </span>
         </td>
-        <td class="py-3 px-4">
-          {{ s.timestamp ? (s.timestamp | date:'short') : '—' }}
-        </td>
+        <td class="py-3 px-4">{{ row.lectura.timestamp | date: 'short' }}</td>
         <td class="flex flex-wrap gap-2">
-          <button class="btn btn-sm btn-outline" (click)="view.emit(s)">👁️</button>
-          <button class="btn btn-sm btn-outline" (click)="edit.emit(s)">✏️</button>
-          <button class="btn btn-sm btn-error"   (click)="delete.emit(s)">🗑️</button>
+          <button
+            class="btn btn-sm btn-outline"
+            (click)="view.emit(row.sensor!)"
+            [disabled]="!row.sensor"
+          >👁️</button>
+          <button
+            class="btn btn-sm btn-outline"
+            (click)="edit.emit(row.sensor!)"
+            [disabled]="!row.sensor"
+          >✏️</button>
+          <button
+            class="btn btn-sm btn-error"
+            (click)="delete.emit(row.sensor!)"
+            [disabled]="!row.sensor"
+          >🗑️</button>
         </td>
       </tr>
     </tbody>
   </table>
 
-  <!-- Paginación -->
+  <!-- Paginación (opcional) -->
   <div class="flex justify-end p-4 gap-2">
     <button class="btn btn-sm btn-outline rounded-full">⏮️</button>
     <button class="btn btn-sm btn-outline btn-active rounded-full">1</button>

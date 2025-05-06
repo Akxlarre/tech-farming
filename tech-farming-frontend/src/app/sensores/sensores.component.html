@@ -1,9 +1,11 @@
-<!-- src/app/sensores/sensores.component.html -->
 <section class="vista min-h-screen scroll-smooth px-4 sm:px-10 lg:px-16 space-y-[2.618rem]">
+  <!-- Encabezado -->
   <app-sensor-header />
 
+  <!-- Filtros -->
   <app-sensor-filters />
 
+  <!-- Tabla de escritorio -->
   <app-sensor-table
     [sensores]="sensores"
     [ultimasLecturas]="ultimasLecturas"
@@ -14,8 +16,10 @@
     (delete)="open('delete',$event)">
   </app-sensor-table>
 
+  <!-- Tarjetas móviles -->
   <app-sensor-card-list [sensores]="sensores" />
 
+  <!-- Modales -->
   <ng-container *ngIf="modalType">
     <app-sensor-modal-wrapper>
       <ng-container [ngSwitch]="modalType">

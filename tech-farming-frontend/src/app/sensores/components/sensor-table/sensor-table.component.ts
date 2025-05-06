@@ -1,5 +1,12 @@
 // src/app/sensores/components/sensor-table/sensor-table.component.ts
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Sensor } from '../../models/sensor.model';
 import { Invernadero } from '../../../invernaderos/models/invernadero.model';
@@ -9,7 +16,7 @@ import { UltimaLectura } from '../../../services/sensores.service';
 @Component({
   selector: 'app-sensor-table',
   standalone: true,
-  imports: [ CommonModule ],
+  imports: [CommonModule],
   templateUrl: './sensor-table.component.html',
   styleUrls: ['./sensor-table.component.css'],
 })
@@ -23,44 +30,57 @@ export class SensorTableComponent implements OnChanges {
   @Output() edit   = new EventEmitter<Sensor>();
   @Output() delete = new EventEmitter<Sensor>();
 
-  merged: Array<Sensor & {
+  /**
+   * Cada fila es una lectura individual (hasta 10),
+   * enriquecida con su sensor, tipo y invernadero.
+   */
+  mergedLecturas: Array<{
+    lectura: UltimaLectura;
+    sensor?: Sensor;
     tipoNombre: string;
-    invernaderoNombre?: string;
-    timestamp?: string;
+    invernaderoNombre: string;
   }> = [];
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['sensores'] ||
-        changes['invernaderos'] ||
-        changes['tiposSensor'] ||
-        changes['ultimasLecturas']) {
-      this.mergeDatos();
+    if (
+      changes['ultimasLecturas'] ||
+      changes['sensores'] ||
+      changes['invernaderos'] ||
+      changes['tiposSensor']
+    ) {
+      this.mergeLecturas();
     }
   }
 
-  private mergeDatos(): void {
-    this.merged = this.sensores.map(sensor => {
-      // Nombre de tipo (fallback a ID si no está en el array)
-      const tipoObj = this.tiposSensor.find(t => t.id === sensor.tipo_sensor_id);
-      let tipoNombre = tipoObj?.nombre ?? 
-                       (sensor.tipo_sensor_id === 1 ? 'De un parámetro' :
-                        sensor.tipo_sensor_id === 2 ? 'Multiparámetro' :
-                        '—');
+  private mergeLecturas(): void {
+    // 1) Ordenar por fecha descendente
+    const sorted = [...this.ultimasLecturas].sort((a, b) =>
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    // 2) Tomar las 10 primeras
+    const top10 = sorted.slice(0, 10);
 
-      // Nombre de invernadero
-      const inv = this.invernaderos.find(i => i.id === sensor.invernadero_id);
+    // 3) Enriquecer cada lectura
+    this.mergedLecturas = top10.map(l => {
+      // extraer número de sensor: S00x → x
+      const idNum = parseInt(l.sensor_id.replace(/^S0*/, ''), 10);
+      const sensor = this.sensores.find(s => s.id === idNum);
 
-      // Última lectura
-      const lectura = this.ultimasLecturas.find(l => {
-        const num = parseInt(l.sensor_id.replace(/^S0*/, ''), 10);
-        return num === sensor.id;
-      });
+      // nombre de tipo
+      const tipoObj = this.tiposSensor.find(t => t.id === sensor?.tipo_sensor_id);
+      const tipoNombre = tipoObj?.nombre ??
+        (sensor?.tipo_sensor_id === 1 ? 'De un parámetro' :
+         sensor?.tipo_sensor_id === 2 ? 'Multiparámetro' :
+         '—');
+
+      // nombre de invernadero
+      const inv = this.invernaderos.find(i => i.id === sensor?.invernadero_id);
 
       return {
-        ...sensor,
+        lectura: l,
+        sensor,
         tipoNombre,
-        invernaderoNombre: inv?.nombre,
-        timestamp: lectura?.timestamp
+        invernaderoNombre: inv?.nombre ?? '—'
       };
     });
   }

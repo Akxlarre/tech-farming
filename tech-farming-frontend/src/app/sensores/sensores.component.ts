@@ -1,4 +1,3 @@
-// src/app/sensores/sensores.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -42,10 +41,10 @@ export class SensoresComponent implements OnInit {
   modalType: 'view'|'edit'|'delete'|'create'|null = null;
   selectedSensor: Sensor | null = null;
 
-  sensores: Sensor[]           = [];
+  sensores: Sensor[]             = [];
   ultimasLecturas: UltimaLectura[] = [];
-  invernaderos: Invernadero[] = [];
-  tiposSensor: TipoSensor[]   = [];
+  invernaderos: Invernadero[]   = [];
+  tiposSensor: TipoSensor[]     = [];
 
   constructor(
     public  modalService: SensorModalService,
