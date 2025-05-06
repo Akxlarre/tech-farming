@@ -1,6 +1,6 @@
+// src/app/sensores/sensores.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { SensorHeaderComponent } from './components/sensor-header/sensor-header.component';
 import { SensorFiltersComponent } from './components/sensor-filters/sensor-filters.component';
 import { SensorTableComponent } from './components/sensor-table/sensor-table.component';
@@ -41,10 +41,10 @@ export class SensoresComponent implements OnInit {
   modalType: 'view'|'edit'|'delete'|'create'|null = null;
   selectedSensor: Sensor | null = null;
 
-  sensores: Sensor[]             = [];
+  sensores: Sensor[]           = [];
   ultimasLecturas: UltimaLectura[] = [];
-  invernaderos: Invernadero[]   = [];
-  tiposSensor: TipoSensor[]     = [];
+  invernaderos: Invernadero[] = [];
+  tiposSensor: TipoSensor[]   = [];
 
   constructor(
     public  modalService: SensorModalService,
@@ -58,48 +58,32 @@ export class SensoresComponent implements OnInit {
     this.modalService.modalType$.subscribe(t => this.modalType = t);
     this.modalService.selectedSensor$.subscribe(s => this.selectedSensor = s);
 
-    // 2) Sensores desde Supabase (vía API)
+    // 2) Cargar sensores
     this.sensoresService.getSensores().subscribe({
-      next: (data: Sensor[]) => {
-        console.log(data.length
-          ? `✅ ${data.length} sensores cargados:` 
-          : '⚠️ No se recibieron sensores', data);
-        this.sensores = data;
-      },
-      error: (err: any) => console.error('❌ Error cargando sensores:', err)
+      next: data => this.sensores = data,
+      error: err => console.error('❌ Error cargando sensores:', err)
     });
 
-    // 3) Invernaderos
+    // 3) Cargar invernaderos
     this.invernaderoService.obtenerInvernaderos().subscribe({
-      next: (data: Invernadero[]) => {
-        console.log(`✅ ${data.length} invernaderos cargados:`, data);
-        this.invernaderos = data;
-      },
-      error: (err: any) => console.error('❌ Error cargando invernaderos:', err)
+      next: data => this.invernaderos = data,
+      error: err => console.error('❌ Error cargando invernaderos:', err)
     });
 
-    // 4) Tipos de sensor
+    // 4) Cargar tipos de sensor
     this.tipoSensorService.obtenerTiposSensor().subscribe({
-      next: (data: TipoSensor[]) => {
-        console.log(`✅ ${data.length} tipos de sensor cargados:`, data);
-        this.tiposSensor = data;
-      },
-      error: (err: any) => console.error('❌ Error cargando tipos de sensor:', err)
+      next: data => this.tiposSensor = data,
+      error: err => console.error('❌ Error cargando tipos de sensor:', err)
     });
 
-    // 5) Últimas lecturas desde InfluxDB
-    this.sensoresService.getUltimasLecturas().subscribe({
-      next: (data: UltimaLectura[]) => {
-        console.log(data.length
-          ? `✅ ${data.length} lecturas cargadas:` 
-          : '⚠️ No se recibieron lecturas', data);
+    // 5) Cargar últimas lecturas Influx
+    this.sensoresService.getUltimasLecturas(5).subscribe({
+      next: data => {
         this.ultimasLecturas = data;
-
-        // Merge lecturas en cada sensor
+        // aquí fusionas lectura en cada sensor si lo necesitas…
         this.sensores.forEach(sensor => {
           const lectura = data.find(l =>
-            l.sensor_id === `S00${sensor.id}` ||
-            l.sensor_id === sensor.id?.toString()
+            l.sensor_id === `S00${sensor.id}` || l.sensor_id === sensor.id?.toString()
           );
           if (lectura) {
             sensor.parametro = lectura.parametro  ?? '';
@@ -108,8 +92,15 @@ export class SensoresComponent implements OnInit {
           }
         });
       },
-      error: (err: any) => console.error('❌ Error cargando lecturas:', err)
+      error: err => console.error('❌ Error cargando lecturas:', err)
     });
+
+    // ──────────── AÑADE ESTA SECCIÓN PARA DEBUG ────────────
+    this.sensoresService.getMergedLecturas(2).subscribe({
+      next: merged => console.log('🔀 MERGED LECTURAS (debug):', merged),
+      error: err    => console.error('❌ Error merged-lecturas:', err)
+    });
+    // ────────────────────────────────────────────────────────
   }
 
   open(type: 'view'|'edit'|'delete'|'create', sensor: Sensor): void {

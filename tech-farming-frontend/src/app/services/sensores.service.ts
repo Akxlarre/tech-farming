@@ -11,7 +11,6 @@ export interface UltimaLectura {
   zona?: string;
   invernadero_id?: string;
   parametro?: string;
-  unidad?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -20,7 +19,7 @@ export class SensoresService {
 
   constructor(private http: HttpClient) {}
 
-  /** 1) Listar sensores (Supabase vía API) */
+  /** 1) Listar sensores */
   getSensores(): Observable<Sensor[]> {
     return this.http.get<Sensor[]>(this.apiUrl);
   }
@@ -30,13 +29,20 @@ export class SensoresService {
     return this.http.post<{ sensor_id: number; token: string }>(this.apiUrl, sensor);
   }
 
-  /** 3) Últimas lecturas (InfluxDB) */
-  getUltimasLecturas(): Observable<UltimaLectura[]> {
-    return this.http.get<UltimaLectura[]>(`${this.apiUrl}/ultimas-lecturas`);
+  /** 3) Últimas lecturas */
+  getUltimasLecturas(limit: number = 5): Observable<UltimaLectura[]> {
+    return this.http.get<UltimaLectura[]>(`${this.apiUrl}/ultimas-lecturas?limit=${limit}`);
   }
 
-  /** 4) Enviar datos a InfluxDB */
+  /** 4) Datos a Influx */
   enviarDatosSensor(payload: { token: string; mediciones: { parametro: string; valor: number }[] }): Observable<any> {
     return this.http.post(`${this.apiUrl}/datos`, payload);
+  }
+
+  /** 5) Merge lecturas + sensores (debug) */
+  getMergedLecturas(limit: number = 2): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/merged-lecturas?limit=${limit}`
+    );
   }
 }
