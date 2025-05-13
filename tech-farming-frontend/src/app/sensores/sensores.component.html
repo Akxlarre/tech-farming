@@ -22,7 +22,12 @@
   </app-sensor-table>
 
   <!-- Tarjetas móviles -->
-  <app-sensor-card-list [sensores]="sensores"></app-sensor-card-list>
+  <app-sensor-card-list
+    [sensores]="sensores"
+    [invernaderos]="invernaderos"
+    [tiposSensor]="tiposSensor"
+    [ultimasLecturas]="filteredLecturas">
+  </app-sensor-card-list>
 
   <!-- Modales -->
   <ng-container *ngIf="modalType">
