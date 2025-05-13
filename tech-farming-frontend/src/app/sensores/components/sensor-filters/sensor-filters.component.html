@@ -1,35 +1,53 @@
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-[1.618rem] mb-[1.618rem]">
+<!-- src/app/sensores/components/sensor-filters/sensor-filters.component.html -->
+<div [formGroup]="filterForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-[1.618rem] mb-[1.618rem]">
   <!-- Invernadero -->
-  <select aria-label="Filtrar por invernadero" class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full">
-    <option selected>Filtrar por invernadero</option>
-    <option>Invernadero Norte</option>
-    <option>Invernadero Sur</option>
-    <option>Invernadero Este</option>
+  <select
+    formControlName="invernadero"
+    aria-label="Filtrar por invernadero"
+    class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full"
+  >
+    <option value="">Todos los invernaderos</option>
+    <option *ngFor="let inv of invernaderos" [ngValue]="inv.id">
+      {{ inv.nombre }}
+    </option>
   </select>
   
   <!-- Tipo -->
-  <select aria-label="Filtrar por tipo de sensor" class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full">
-    <option selected>Filtrar por tipo</option>
-    <option>Temperatura</option>
-    <option>Humedad</option>
-    <option>N</option>
-    <option>K</option>
+  <select
+    formControlName="tipoSensor"
+    aria-label="Filtrar por tipo de sensor"
+    class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full"
+  >
+    <option value="">Todos los tipos</option>
+    <option *ngFor="let t of tiposSensor" [value]="t.nombre">
+      {{ t.nombre }}
+    </option>
   </select>
 
   <!-- Estado -->
-  <select aria-label="Filtrar por estado" class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full">
-    <option selected>Filtrar por estado</option>
-    <option>Activo</option>
-    <option>Advertencia</option>
-    <option>Crítico</option>
-    <option>Error</option>
+  <select
+    formControlName="estado"
+    aria-label="Filtrar por estado"
+    class="select select-bordered rounded-xl shadow-sm transition focus:ring focus:ring-offset-2 focus:ring-green-500 w-full"
+  >
+    <option value="">Todos los estados</option>
+    <option value="Activo">Activo</option>
+    <option value="Advertencia">Advertencia</option>
+    <option value="Crítico">Crítico</option>
+    <option value="Error">Error</option>
   </select>
 
+  <!-- Espacio vacío para alineación en móvil/tablet -->
+  <div></div>
   
-
   <!-- Búsqueda -->
   <div class="relative">
     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">🔍</span>
-    <input type="text" placeholder="Buscar por nombre, ID o invernadero" class="input input-bordered pl-10 rounded-xl shadow-sm w-full focus:ring focus:ring-offset-2 focus:ring-green-500" />
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Buscar por nombre"
+      class="input input-bordered pl-10 rounded-xl shadow-sm w-full focus:ring focus:ring-offset-2 focus:ring-green-500"
+    />
   </div>
 </div>

@@ -3,14 +3,19 @@
   <app-sensor-header />
 
   <!-- Filtros -->
-  <app-sensor-filters />
+  <app-sensor-filters
+    [invernaderos]="invernaderos"
+    [tiposSensor]="tiposSensor"
+    (filtersChange)="onFiltersChange($event)">
+  </app-sensor-filters>
+
 
   <!-- Tabla de escritorio -->
   <app-sensor-table
     [sensores]="sensores"
     [invernaderos]="invernaderos"
     [tiposSensor]="tiposSensor"
-    [ultimasLecturas]="ultimasLecturas"
+    [ultimasLecturas]="filteredLecturas"
     (view)="open('view',$event)"
     (edit)="open('edit',$event)"
     (delete)="open('delete',$event)">

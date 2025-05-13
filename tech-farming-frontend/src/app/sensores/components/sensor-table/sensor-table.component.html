@@ -8,84 +8,89 @@
         <th class="py-3 px-4">Invernadero</th>
         <th class="py-3 px-4">Estado</th>
         <th class="py-3 px-4">Última lectura</th>
+        <th class="py-3 px-4">Parámetros</th>
+        <th class="py-3 px-4">Valores</th>
         <th class="py-3 px-4">Acciones</th>
       </tr>
     </thead>
     <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-  <tr *ngFor="let row of mergedLecturas" class="hover:bg-gray-50 transition">
-    <!-- Nombre del sensor -->
-    <td class="py-3 px-4">
-      {{ row.sensor?.nombre || '—' }}
-    </td>
-
-    <!-- Nombre legible del tipo -->
-    <td class="py-3 px-4">
-      {{ row.tipoNombre }}
-    </td>
-
-    <!-- Nombre del invernadero -->
-    <td class="py-3 px-4">
-      {{ row.invernaderoNombre || '—' }}
-    </td>
-
-    <!-- Estado con badge -->
-    <td class="py-3 px-4">
-      <span
-        class="badge"
-        [ngClass]="{
-          'badge-success': row.sensor?.estado === 'Activo',
-          'badge-warning': row.sensor?.estado === 'Advertencia',
-          'badge-error': row.sensor?.estado === 'Error' || row.sensor?.estado === 'Crítico'
-        }"
-      >
-        {{ row.sensor?.estado || '—' }}
-      </span>
-    </td>
-
-    <!-- Timestamp de la última lectura -->
-    <td class="py-3 px-4">
-      {{ row.lectura.timestamp | date: 'short' }}
-    </td>
-
-    <!-- Parámetros (todos los acumulados) -->
-    <td class="py-3 px-4">
-      {{ row.lectura.parametros.join(', ') || '—' }}
-    </td>
-
-    <!-- Valores (todos los acumulados) -->
-    <td class="py-3 px-4">
-      {{ row.lectura.valores.join(', ') || '—' }}
-    </td>
-
-    <!-- Botones de acción -->
-    <td class="flex flex-wrap gap-2 py-3 px-4">
-      <button
-        class="btn btn-sm btn-outline"
-        (click)="view.emit(row.sensor!)"
-        [disabled]="!row.sensor"
-      >👁️</button>
-      <button
-        class="btn btn-sm btn-outline"
-        (click)="edit.emit(row.sensor!)"
-        [disabled]="!row.sensor"
-      >✏️</button>
-      <button
-        class="btn btn-sm btn-error"
-        (click)="delete.emit(row.sensor!)"
-        [disabled]="!row.sensor"
-      >🗑️</button>
-    </td>
-  </tr>
-</tbody>
-
+      <tr *ngFor="let row of pagedLecturas; trackBy: trackBySensor" class="hover:bg-gray-50 transition">
+        <td class="py-3 px-4">{{ row.sensor?.nombre || '—' }}</td>
+        <td class="py-3 px-4">{{ row.tipoNombre }}</td>
+        <td class="py-3 px-4">{{ row.invernaderoNombre || '—' }}</td>
+        <td class="py-3 px-4">
+          <span
+            class="badge"
+            [ngClass]="{
+              'badge-success': row.sensor?.estado === 'Activo',
+              'badge-warning': row.sensor?.estado === 'Advertencia',
+              'badge-error': row.sensor?.estado === 'Error' || row.sensor?.estado === 'Crítico'
+            }"
+          >
+            {{ row.sensor?.estado || '—' }}
+          </span>
+        </td>
+        <td class="py-3 px-4">{{ row.lectura.timestamp | date: 'short' }}</td>
+        <td class="py-3 px-4">{{ row.lectura.parametros.join(', ') || '—' }}</td>
+        <td class="py-3 px-4">{{ row.lectura.valores.join(', ') || '—' }}</td>
+        <td class="flex flex-wrap gap-2 py-3 px-4">
+          <button
+            class="btn btn-sm btn-outline"
+            (click)="view.emit(row.sensor!)"
+            [disabled]="!row.sensor"
+          >👁️</button>
+          <button
+            class="btn btn-sm btn-outline"
+            (click)="edit.emit(row.sensor!)"
+            [disabled]="!row.sensor"
+          >✏️</button>
+          <button
+            class="btn btn-sm btn-error"
+            (click)="delete.emit(row.sensor!)"
+            [disabled]="!row.sensor"
+          >🗑️</button>
+        </td>
+      </tr>
+    </tbody>
   </table>
 
-  <!-- Paginación (puedes adaptarla) -->
-  <div class="flex justify-end p-4 gap-2">
-    <button class="btn btn-sm btn-outline rounded-full">⏮️</button>
-    <button class="btn btn-sm btn-outline btn-active rounded-full">1</button>
-    <button class="btn btn-sm btn-outline rounded-full">2</button>
-    <button class="btn btn-sm btn-outline rounded-full">3</button>
-    <button class="btn btn-sm btn-outline rounded-full">⏭️</button>
-  </div>
+  <!-- Paginación -->
+<div class="flex justify-end p-4 gap-2">
+  <button
+    class="btn btn-sm btn-outline rounded-full"
+    (click)="setPage(1)"
+    [disabled]="page === 1"
+  >«</button>
+  <button
+    class="btn btn-sm btn-outline rounded-full"
+    (click)="setPage(page - 1)"
+    [disabled]="page === 1"
+  >‹</button>
+
+  <!-- Itera sobre el getter pages -->
+  <ng-container *ngFor="let p of pages">
+    <button
+      class="btn btn-sm"
+      [ngClass]="{
+        'btn-active': page === p,
+        'btn-outline': page !== p
+      }"
+      (click)="setPage(p)"
+    >
+      {{ p }}
+    </button>
+  </ng-container>
+
+  <button
+    class="btn btn-sm btn-outline rounded-full"
+    (click)="setPage(page + 1)"
+    [disabled]="page === totalPages"
+  >›</button>
+  <button
+    class="btn btn-sm btn-outline rounded-full"
+    (click)="setPage(totalPages)"
+    [disabled]="page === totalPages"
+  >»</button>
+</div>
+
 </div>
