@@ -5,6 +5,21 @@
   <title>TechFarmingFrontend</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Script precoz para fijar el tema -->
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'darka' || theme === 'light') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (e) {
+        /* silent */
+      }
+    })();
+  </script>
+
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
