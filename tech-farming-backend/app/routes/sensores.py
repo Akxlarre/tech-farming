@@ -1,10 +1,11 @@
 # src/app/routers/sensores.py
 
 from flask import Blueprint, request, jsonify
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client import Point
 from datetime import datetime
+import dateutil.parser
 
+from app import influx_client as client, influx_write_api as write_api
 from app.config import Config
 from app.models.sensor import Sensor as SensorModel
 from app.models.tipo_sensor import TipoSensor
@@ -13,29 +14,18 @@ from app.queries.sensor_parametro_queries import insertar_sensor_parametros
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
 
-# Inicializa InfluxDB
-client    = InfluxDBClient(
-    url=Config.INFLUXDB_URL,
-    token=Config.INFLUXDB_TOKEN,
-    org=Config.INFLUXDB_ORG
-)
-write_api = client.write_api(write_options=SYNCHRONOUS)
-
 
 @router.route('/', methods=['GET'])
 def listar_sensores():
     """GET /api/sensores → devuelve todos los sensores desde Supabase/PostgreSQL"""
     try:
-        sensores = SensorModel.query.all()
-        salida = []
-        for s in sensores:
-            salida.append({
-                "id":              s.id,
-                "invernadero_id":  s.invernadero_id,
-                "nombre":          s.nombre,
-                "tipo_sensor_id":  s.tipo_sensor_id,
-                "estado":          s.estado
-            })
+        salida = [{
+            "id":              s.id,
+            "invernadero_id":  s.invernadero_id,
+            "nombre":          s.nombre,
+            "tipo_sensor_id":  s.tipo_sensor_id,
+            "estado":          s.estado
+        } for s in SensorModel.query.all()]
         return jsonify(salida), 200
     except Exception as e:
         return jsonify({"error": f"Error listando sensores: {e}"}), 500
@@ -52,14 +42,12 @@ def crear_sensor():
         return jsonify({"error": "Faltan campos requeridos"}), 400
 
     try:
-        # Selección automática de tipo de sensor
         nombre_tipo = "De un parámetro" if len(parametros) == 1 else "Multiparámetro"
         tipo = TipoSensor.query.filter_by(nombre=nombre_tipo).first()
         if not tipo:
             return jsonify({"error": "No se encontró el tipo de sensor adecuado"}), 400
 
         data["tipo_sensor_id"] = tipo.id
-        # Parsear fecha si viene como string
         if "fecha_instalacion" in data and isinstance(data["fecha_instalacion"], str):
             data["fecha_instalacion"] = datetime.strptime(data["fecha_instalacion"], "%Y-%m-%d").date()
 
@@ -93,23 +81,20 @@ def recibir_datos_sensor():
     for m in mediciones:
         if not m.get("parametro") or m.get("valor") is None:
             continue
-        punto = (
+        puntos.append(
             Point("lecturas_sensores")
-            .tag("sensor_id", sensor_info.id)
-            .field("parametro", m["parametro"])
-            .field("valor", float(m["valor"]))
-            .time(datetime.utcnow())
+              .tag("sensor_id", sensor_info.id)
+              .field("parametro", m["parametro"])
+              .field("valor", float(m["valor"]))
+              .time(datetime.utcnow())
         )
-        puntos.append(punto)
 
     if puntos:
-        write_api.write(bucket=Config.INFLUXDB_BUCKET, record=puntos)
+        write_api.write(bucket=Config.INFLUXDB_BUCKET, org=Config.INFLUXDB_ORG, record=puntos)
         return jsonify({"message": "Datos recibidos correctamente"}), 200
     else:
         return jsonify({"error": "No se procesaron datos válidos"}), 400
 
-
-# src/app/routers/sensores.py  (solo la parte de /ultimas-lecturas)
 
 @router.route('/ultimas-lecturas', methods=['GET'])
 def obtener_ultimas_lecturas():
@@ -126,7 +111,6 @@ def obtener_ultimas_lecturas():
                r._measurement == "lecturas_sensores" and
                (r._field == "valor" or r._field == "parametro")
              )
-          // conservamos tags y los dos campos/raw para pivot
           |> keep(columns: [
                "_time",
                "sensor_id",
@@ -146,26 +130,23 @@ def obtener_ultimas_lecturas():
         '''
 
         tables = query_api.query(flux)
-        resultados = []
-        for table in tables:
-            for rec in table.records:
-                v = rec.values
-                resultados.append({
-                    "sensor_id":      v.get("sensor_id"),
-                    "invernadero_id": v.get("invernadero_id"),
-                    "tipo_sensor":    v.get("tipo_sensor"),
-                    "zona":           v.get("zona"),
-                    "parametro":      v.get("parametro"),
-                    "valor":          v.get("valor"),
-                    "timestamp":      rec.get_time().isoformat()
-                })
+        resultados = [{
+            "sensor_id":      rec.values.get("sensor_id"),
+            "invernadero_id": rec.values.get("invernadero_id"),
+            "tipo_sensor":    rec.values.get("tipo_sensor"),
+            "zona":           rec.values.get("zona"),
+            "parametro":      rec.values.get("parametro"),
+            "valor":          rec.values.get("valor"),
+            "timestamp":      rec.get_time().isoformat()
+        } for table in tables for rec in table.records]
 
         return jsonify(resultados), 200
-        
+
     except Exception as e:
-        # para depurar, imprimimos el error completo en consola
         print("❌ Flux error:", e)
         return jsonify({"error": f"Error al consultar lecturas: {e}"}), 500
+
+
 def obtener_ultimas_lecturas_flux(limit: int = 10):
     """
     Lógica Flux + pivot para devolver las últimas `limit` lecturas.
@@ -210,48 +191,61 @@ def obtener_ultimas_lecturas_flux(limit: int = 10):
                 "timestamp":      rec.get_time().isoformat()
             })
     return lecturas
-#MERGED ES SOLO PARA PRUEBAS
+
+
 @router.route('/merged-lecturas', methods=['GET'])
 def merged_lecturas():
     """
     GET /api/sensores/merged-lecturas?limit=N
-    Devuelve max N lecturas fusionadas (sensor + su última lectura).
-    Útil para debug.
+    Devuelve max N lecturas fusionadas (sensor + sus lecturas),
+    agrupando en listas los parámetros y valores que compartan
+    exactamente el mismo timestamp.
     """
     try:
         lim = int(request.args.get("limit", 10))
 
-        # 1) Sensores desde Supabase (PostgreSQL via SQLAlchemy)
-        supa = [
-            {
-              "id":             s.id,
-              "nombre":         s.nombre,
-              "tipo_sensor_id": s.tipo_sensor_id,
-              "invernadero_id": s.invernadero_id,
-              "estado":         s.estado,
-            }
-            for s in SensorModel.query.all()
-        ]
+        # 1) Sensores desde Supa
+        supa = [{
+            "id":             s.id,
+            "nombre":         s.nombre,
+            "tipo_sensor_id": s.tipo_sensor_id,
+            "invernadero_id": s.invernadero_id,
+            "estado":         s.estado,
+        } for s in SensorModel.query.all()]
 
-        # 2) Lecturas desde Influx
+        # 2) Lecturas crudas de Influx
         lecturas = obtener_ultimas_lecturas_flux(lim)
 
-        # 3) Fusionar en memoria
-        merged = []
+        # 3) Agrupar por (sensor_id, timestamp sin micros)
+        agrupadas = {}
         for l in lecturas:
-            # convierto “S00x” → x
-            sid = int(l["sensor_id"].lstrip("S00"))
-            s = next((x for x in supa if x["id"] == sid), None)
-            if s:
-                merged.append({**s, **l})
+            dt = dateutil.parser.isoparse(l["timestamp"])
+            ts_seg = dt.replace(microsecond=0).isoformat()
+            key = (l["sensor_id"], ts_seg)
+            if key not in agrupadas:
+                agrupadas[key] = {
+                    **l,
+                    "timestamp": ts_seg,
+                    "parametros": [l["parametro"]],
+                    "valores":     [l["valor"]]
+                }
+            else:
+                agrupadas[key]["parametros"].append(l["parametro"])
+                agrupadas[key]["valores"].append(l["valor"])
 
-        # 4) APLICAR LIMIT final
+        # 4) Fusionar con datos de Supa y ordenar
+        merged = []
+        for (sid, ts), grp in agrupadas.items():
+            num = int(str(sid).lstrip("S0"))
+            sensor = next((s for s in supa if s["id"] == num), None)
+            if not sensor:
+                continue
+            merged.append({**sensor, **grp})
+
+        merged.sort(key=lambda x: x["timestamp"], reverse=True)
         merged = merged[:lim]
 
         return jsonify(merged), 200
 
     except Exception as e:
         return jsonify({"error": f"Error al obtener merged-lecturas: {e}"}), 500
-
-    
-    

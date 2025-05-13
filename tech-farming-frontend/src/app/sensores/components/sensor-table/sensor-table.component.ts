@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { Sensor } from '../../models/sensor.model';
 import { Invernadero } from '../../../invernaderos/models/invernadero.model';
 import { TipoSensor } from '../../models/tipos_sensor.model';
-import { UltimaLectura } from '../../../services/sensores.service';
+import { MergedLectura, UltimaLectura } from '../../../services/sensores.service';
 
 @Component({
   selector: 'app-sensor-table',
@@ -24,7 +24,7 @@ export class SensorTableComponent implements OnChanges {
   @Input() sensores: Sensor[] = [];
   @Input() invernaderos: Invernadero[] = [];
   @Input() tiposSensor: TipoSensor[] = [];
-  @Input() ultimasLecturas: UltimaLectura[] = [];
+  @Input() ultimasLecturas: MergedLectura[] = [];
 
   @Output() view   = new EventEmitter<Sensor>();
   @Output() edit   = new EventEmitter<Sensor>();
@@ -35,7 +35,7 @@ export class SensorTableComponent implements OnChanges {
    * enriquecida con su sensor, tipo y invernadero.
    */
   mergedLecturas: Array<{
-    lectura: UltimaLectura;
+    lectura: MergedLectura;
     sensor?: Sensor;
     tipoNombre: string;
     invernaderoNombre: string;

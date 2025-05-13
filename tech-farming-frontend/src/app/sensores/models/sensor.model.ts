@@ -14,4 +14,7 @@ export interface Sensor {
   parametro?: string;   // ej: "Temperatura", "Humedad", "N", "Potasio"
   unidad?: number;      // valor numérico medido
   timestamp?: string;   // fecha/hora de la última lectura
+  // Nuevos Campos para Merged-Lecturas
+  parametros?: string[];  // ej: ["T1", "T2"]
+  valores?: number[];
 }

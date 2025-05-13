@@ -1,3 +1,5 @@
+// src/app/services/sensores.service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -11,6 +13,21 @@ export interface UltimaLectura {
   zona?: string;
   invernadero_id?: string;
   parametro?: string;
+}
+
+
+export interface MergedLectura {
+  id: number;
+  nombre: string;
+  estado: string;
+  tipo_sensor: string | null;
+  tipo_sensor_id: number;
+  invernadero_id: number | null;
+  zona: string | null;
+  sensor_id: string;
+  timestamp: string;
+  parametros: string[];
+  valores: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -34,14 +51,14 @@ export class SensoresService {
     return this.http.get<UltimaLectura[]>(`${this.apiUrl}/ultimas-lecturas?limit=${limit}`);
   }
 
-  /** 4) Datos a Influx */
+  /** 4) Enviar datos a Influx */
   enviarDatosSensor(payload: { token: string; mediciones: { parametro: string; valor: number }[] }): Observable<any> {
     return this.http.post(`${this.apiUrl}/datos`, payload);
   }
 
-  /** 5) Merge lecturas + sensores (debug) */
-  getMergedLecturas(limit: number = 2): Observable<any[]> {
-    return this.http.get<any[]>(
+  /** 5) Lecturas fusionadas (agrupadas por sensor_id+timestamp) */
+  getMergedLecturas(limit: number = 5): Observable<MergedLectura[]> {
+    return this.http.get<MergedLectura[]>(
       `${this.apiUrl}/merged-lecturas?limit=${limit}`
     );
   }
