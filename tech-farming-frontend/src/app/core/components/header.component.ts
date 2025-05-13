@@ -1,24 +1,35 @@
 // src/app/core/components/header.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { AppLogoComponent } from './app-logo.component';
+import { ThemeToggleComponent } from './theme-toggle.component';
+import { ProfileMenuComponent } from './profile-menu.component';
+import { DesktopNavComponent } from './desktop-nav.component';
+import { MobileNavComponent } from './mobile-nav.component';
 
 @Component({
   standalone: true,
   selector: 'app-header',
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    AppLogoComponent,
+    ThemeToggleComponent,
+    ProfileMenuComponent,
+    DesktopNavComponent,
+    MobileNavComponent
+  ],
   templateUrl: './header.component.html'
 })
 export class HeaderComponent {
-    constructor(private router: Router) {}
-  
-    isActive(path: string): boolean {
-      return this.router.url.includes(path);
-    }
-
-    cerrarSesion() {
-        // Aquí puedes limpiar el token, cerrar sesión, redirigir, etc.
-        localStorage.clear();
-        this.router.navigate(['/login']);
-      }
-  }
+  navItems = [
+    { label: 'Dashboard',     path: '/dashboard'    },
+    { label: 'Sensores',      path: '/sensores'     },
+    { label: 'Invernaderos',  path: '/invernaderos' },
+    { label: 'Historial',     path: '/historial'    },
+    { label: 'Alertas',       path: '/alertas'      },
+    { label: 'Predicciones',  path: '/predicciones' },
+    { label: 'Usuarios',      path: '/admin'         },
+  ];
+}
