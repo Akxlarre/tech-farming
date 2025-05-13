@@ -1,24 +1,42 @@
 <section class="vista min-h-screen scroll-smooth px-4 sm:px-10 lg:px-16 space-y-[2.618rem]">
-  <!-- Encabezado de la vista de sensores -->
+  <!-- Encabezado -->
   <app-sensor-header />
 
-  <!-- Filtros por tipo, invernadero, estado y búsqueda -->
-  <app-sensor-filters />
+  <!-- Filtros -->
+  <app-sensor-filters
+    [invernaderos]="invernaderos"
+    [tiposSensor]="tiposSensor"
+    (filtersChange)="onFiltersChange($event)">
+  </app-sensor-filters>
 
-  <!-- Tabla para escritorio -->
-  <app-sensor-table [sensores]="sensores" />
 
-  <!-- Tarjetas para móviles con paginación -->
-  <app-sensor-card-list [sensores]="sensores" />
+  <!-- Tabla de escritorio -->
+  <app-sensor-table
+    [sensores]="sensores"
+    [invernaderos]="invernaderos"
+    [tiposSensor]="tiposSensor"
+    [ultimasLecturas]="filteredLecturas"
+    (view)="open('view',$event)"
+    (edit)="open('edit',$event)"
+    (delete)="open('delete',$event)">
+  </app-sensor-table>
 
-  <!-- Modales de acción (ver / editar / eliminar) -->
+  <!-- Tarjetas móviles -->
+  <app-sensor-card-list
+    [sensores]="sensores"
+    [invernaderos]="invernaderos"
+    [tiposSensor]="tiposSensor"
+    [ultimasLecturas]="filteredLecturas">
+  </app-sensor-card-list>
+
+  <!-- Modales -->
   <ng-container *ngIf="modalType">
     <app-sensor-modal-wrapper>
       <ng-container [ngSwitch]="modalType">
-        <app-sensor-edit-modal *ngSwitchCase="'edit'" />
-        <app-sensor-delete-modal *ngSwitchCase="'delete'" />
-        <app-sensor-view-modal *ngSwitchCase="'view'" />
-        <app-sensor-create-modal *ngSwitchCase="'create'" />
+        <app-sensor-edit-modal   *ngSwitchCase="'edit'"></app-sensor-edit-modal>
+        <app-sensor-delete-modal *ngSwitchCase="'delete'"></app-sensor-delete-modal>
+        <app-sensor-view-modal   *ngSwitchCase="'view'"></app-sensor-view-modal>
+        <app-sensor-create-modal *ngSwitchCase="'create'"></app-sensor-create-modal>
       </ng-container>
     </app-sensor-modal-wrapper>
   </ng-container>

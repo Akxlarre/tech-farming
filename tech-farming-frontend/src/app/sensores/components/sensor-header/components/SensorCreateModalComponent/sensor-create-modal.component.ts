@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SensorService } from '../../../../sensores.service';
+import { SensoresService } from '../../../../../services/sensores.service';
 import { SensorModalService } from '../../../SensorModalService/sensor-modal.service';
 import { Invernadero } from '../../../../../invernaderos/models/invernadero.model';
 import { InvernaderoService } from '../../../../../invernaderos/invernaderos.service';
@@ -31,7 +31,7 @@ export class SensorCreateModalComponent implements OnInit {
   constructor(
     private fb: FormBuilder, 
     private modalService: SensorModalService,
-    private sensorService: SensorService,
+    private sensorService: SensoresService,
     private invernaderoService: InvernaderoService,
     private tipoSensorService: TipoSensorService,
     private tipoParametroService: TipoParametroService,) {}
