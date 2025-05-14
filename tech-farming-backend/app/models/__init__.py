@@ -5,3 +5,5 @@ from .tipo_sensor import TipoSensor
 from .sensor_parametro import SensorParametro
 from .configuracion_umbral import ConfiguracionUmbral
 from .alerta import Alerta
+from .rol import Rol
+from .usuario_permiso import UsuarioPermiso

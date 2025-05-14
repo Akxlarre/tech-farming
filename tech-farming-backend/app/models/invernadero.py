@@ -16,3 +16,4 @@ class Invernadero(db.Model):
                      lazy=True
                   )
 
+    permisos = db.relationship('UsuarioPermiso', backref='invernadero', lazy=True)
