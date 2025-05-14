@@ -4,7 +4,9 @@ from flask import Blueprint, request, jsonify
 from influxdb_client import Point
 from datetime import datetime
 import dateutil.parser
-
+from sqlalchemy.orm import joinedload
+from app.models.zona import Zona as ZonaModel
+from app.models.invernadero import Invernadero as InvernaderoModel
 from app import influx_client as client, influx_write_api as write_api
 from app.config import Config
 from app.models.sensor import Sensor as SensorModel
@@ -17,18 +19,40 @@ router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
 
 @router.route('/', methods=['GET'])
 def listar_sensores():
-    """GET /api/sensores → devuelve todos los sensores desde Supabase/PostgreSQL"""
+    """GET /api/sensores → devuelve sensores con zona e invernadero (sin migraciones)."""
     try:
-        salida = [{
-            "id":              s.id,
-            "invernadero_id":  s.invernadero_id,
-            "nombre":          s.nombre,
-            "tipo_sensor_id":  s.tipo_sensor_id,
-            "estado":          s.estado
-        } for s in SensorModel.query.all()]
+        # 1) Precarga todas las zonas e invernaderos en memoria
+        zonas = { z.id: z for z in ZonaModel.query.all() }
+        invs  = { i.id: i for i in InvernaderoModel.query.all() }
+
+        salida = []
+        for s in SensorModel.query.all():
+            zona_obj = zonas.get(s.zona_id)
+            inv_id   = zona_obj.invernadero_id if zona_obj else None
+            inv_obj  = invs.get(inv_id)
+
+            salida.append({
+                "id":                  s.id,
+                "nombre":              s.nombre,
+                "descripcion":         s.descripcion,
+                "estado":              s.estado,
+                "fecha_instalacion":   s.fecha_instalacion.isoformat() if s.fecha_instalacion else None,
+                "pos_x":               s.pos_x,
+                "pos_y":               s.pos_y,
+                "tipo_sensor_id":      s.tipo_sensor_id,
+                "token":               s.token,
+                # campos nuevos basados en zona_id
+                "zona_id":             s.zona_id,
+                "zona_nombre":         zona_obj.nombre if zona_obj else None,
+                "invernadero_id":      inv_id,
+                "invernadero_nombre":  inv_obj.nombre if inv_obj else None,
+            })
         return jsonify(salida), 200
+
     except Exception as e:
         return jsonify({"error": f"Error listando sensores: {e}"}), 500
+
+
 
 
 @router.route('/', methods=['POST'])
@@ -195,57 +219,60 @@ def obtener_ultimas_lecturas_flux(limit: int = 10):
 
 @router.route('/merged-lecturas', methods=['GET'])
 def merged_lecturas():
-    """
-    GET /api/sensores/merged-lecturas?limit=N
-    Devuelve max N lecturas fusionadas (sensor + sus lecturas),
-    agrupando en listas los parámetros y valores que compartan
-    exactamente el mismo timestamp.
-    """
     try:
         lim = int(request.args.get("limit", 10))
 
-        # 1) Sensores desde Supa
+        # 1) Precarga zonas e invernaderos
+        zonas = { z.id: z for z in ZonaModel.query.all() }
+        invs  = { i.id: i for i in InvernaderoModel.query.all() }
+
+        # 2) Trae sensores básicos
         supa = [{
             "id":             s.id,
             "nombre":         s.nombre,
-            "tipo_sensor_id": s.tipo_sensor_id,
-            "invernadero_id": s.invernadero_id,
             "estado":         s.estado,
+            "tipo_sensor_id": s.tipo_sensor_id,
+            "zona_id":        s.zona_id
         } for s in SensorModel.query.all()]
 
-        # 2) Lecturas crudas de Influx
+        # 3) Lecturas crudas de Influx
         lecturas = obtener_ultimas_lecturas_flux(lim)
 
-        # 3) Agrupar por (sensor_id, timestamp sin micros)
+        # 4) Agrupar por sensor_id + timestamp
         agrupadas = {}
         for l in lecturas:
-            dt = dateutil.parser.isoparse(l["timestamp"])
-            ts_seg = dt.replace(microsecond=0).isoformat()
-            key = (l["sensor_id"], ts_seg)
+            ts = dateutil.parser.isoparse(l["timestamp"]).replace(microsecond=0).isoformat()
+            key = (l["sensor_id"], ts)
             if key not in agrupadas:
-                agrupadas[key] = {
-                    **l,
-                    "timestamp": ts_seg,
-                    "parametros": [l["parametro"]],
-                    "valores":     [l["valor"]]
-                }
+                agrupadas[key] = { **l, "timestamp": ts, "parametros":[l["parametro"]], "valores":[l["valor"]] }
             else:
                 agrupadas[key]["parametros"].append(l["parametro"])
                 agrupadas[key]["valores"].append(l["valor"])
 
-        # 4) Fusionar con datos de Supa y ordenar
+        # 5) Fusionar con datos de supa + nombres
         merged = []
         for (sid, ts), grp in agrupadas.items():
-            num = int(str(sid).lstrip("S0"))
-            sensor = next((s for s in supa if s["id"] == num), None)
+            num    = int(sid.lstrip("S0"))
+            sensor = next((x for x in supa if x["id"] == num), None)
             if not sensor:
                 continue
-            merged.append({**sensor, **grp})
 
+            zona_obj = zonas.get(sensor["zona_id"])
+            inv_id   = zona_obj.invernadero_id if zona_obj else None
+            inv_obj  = invs.get(inv_id)
+
+            merged.append({
+                **sensor,
+                **grp,
+                "zona_nombre":        zona_obj.nombre        if zona_obj else None,
+                "invernadero_id":     inv_id,
+                "invernadero_nombre": inv_obj.nombre         if inv_obj else None
+            })
+
+        # 6) Ordenar y limitar
         merged.sort(key=lambda x: x["timestamp"], reverse=True)
-        merged = merged[:lim]
-
-        return jsonify(merged), 200
+        return jsonify(merged[:lim]), 200
 
     except Exception as e:
         return jsonify({"error": f"Error al obtener merged-lecturas: {e}"}), 500
+
