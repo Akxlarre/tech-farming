@@ -99,15 +99,12 @@ export class SensoresComponent implements OnInit {
   console.log('Filtros recibidos:', f);
 
   this.filteredLecturas = this.ultimasLecturas.filter(l => {
-    // 1) Encontrar el sensor “padre” para esta lectura
-    const sensor = this.sensores.find(s =>
-      `S00${s.id}` === l.sensor_id || s.id?.toString() === l.sensor_id
-    );
+    // 1) Ahora no hace falta buscar el sensor para invId
+    const invId = l.invernadero_id;
 
-    // 2) Extraer los valores confiables de sensor
-    const invId      = sensor?.invernadero_id;
+    // 2) El tipo sigue buscándose en sensores
     const tipoNombre = this.tiposSensor
-      .find(t => t.id === sensor?.tipo_sensor_id)?.nombre || '';
+      .find(t => t.id === l.tipo_sensor_id)?.nombre || '';
 
     // Debug de invernadero
     console.log(
@@ -121,13 +118,17 @@ export class SensoresComponent implements OnInit {
     const matchEst  = !f.estado       || l.estado === f.estado;
 
     // 4) Filtrado por búsqueda libre
-    const invNombre   = this.invernaderos.find(i => i.id === invId)?.nombre || '';
-    const texto       = (l.nombre + ' ' + l.sensor_id + ' ' + invNombre).toLowerCase();
+    const texto = (
+      l.nombre + ' ' +
+      l.sensor_id + ' ' +
+      (l.invernadero_nombre || '')
+    ).toLowerCase();
     const matchSearch = !f.search || texto.includes(f.search.toLowerCase());
 
     return matchInv && matchTipo && matchEst && matchSearch;
   });
 }
+
 
 
 

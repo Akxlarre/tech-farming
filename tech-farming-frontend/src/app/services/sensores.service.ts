@@ -17,18 +17,23 @@ export interface UltimaLectura {
 
 
 export interface MergedLectura {
-  id: number;
-  nombre: string;
-  estado: string;
-  tipo_sensor: string | null;
-  tipo_sensor_id: number;
-  invernadero_id: number | null;
-  zona: string | null;
-  sensor_id: string;
-  timestamp: string;
-  parametros: string[];
-  valores: number[];
+  id:              number;
+  nombre:          string;
+  estado:          string;
+  tipo_sensor:     string | null;
+  tipo_sensor_id:  number;
+
+  // Nuevos campos que envía el backend:
+  zona_nombre:         string | null;
+  invernadero_id:      number | null;
+  invernadero_nombre:  string | null;
+
+  sensor_id:       string;
+  timestamp:       string;
+  parametros:      string[];
+  valores:         number[];
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class SensoresService {

@@ -5,6 +5,7 @@
       <tr>
         <th class="py-3 px-4">Sensor</th>
         <th class="py-3 px-4">Tipo</th>
+        <th class="py-3 px-4">Zona</th>
         <th class="py-3 px-4">Invernadero</th>
         <th class="py-3 px-4">Estado</th>
         <th class="py-3 px-4">Última lectura</th>
@@ -14,10 +15,11 @@
       </tr>
     </thead>
     <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-      <tr *ngFor="let row of pagedLecturas; trackBy: trackBySensor" class="hover:bg-gray-50 transition">
+      <tr *ngFor="let row of pagedLecturas; let i = index; trackBy: trackBySensor" class="hover:bg-gray-50 transition">
         <td class="py-3 px-4">{{ row.sensor?.nombre || '—' }}</td>
         <td class="py-3 px-4">{{ row.tipoNombre }}</td>
-        <td class="py-3 px-4">{{ row.invernaderoNombre || '—' }}</td>
+        <td class="py-3 px-4">{{ row.lectura.zona_nombre || '—' }}</td>
+        <td class="py-3 px-4">{{ row.lectura.invernadero_nombre || '—' }}</td>
         <td class="py-3 px-4">
           <span
             class="badge"
@@ -30,7 +32,7 @@
             {{ row.sensor?.estado || '—' }}
           </span>
         </td>
-        <td class="py-3 px-4">{{ row.lectura.timestamp | date: 'short' }}</td>
+        <td class="py-3 px-4">{{ row.lectura.timestamp | date:'short' }}</td>
         <td class="py-3 px-4">{{ row.lectura.parametros.join(', ') || '—' }}</td>
         <td class="py-3 px-4">{{ row.lectura.valores.join(', ') || '—' }}</td>
         <td class="flex flex-wrap gap-2 py-3 px-4">
@@ -55,42 +57,38 @@
   </table>
 
   <!-- Paginación -->
-<div class="flex justify-end p-4 gap-2">
-  <button
-    class="btn btn-sm btn-outline rounded-full"
-    (click)="setPage(1)"
-    [disabled]="page === 1"
-  >«</button>
-  <button
-    class="btn btn-sm btn-outline rounded-full"
-    (click)="setPage(page - 1)"
-    [disabled]="page === 1"
-  >‹</button>
-
-  <!-- Itera sobre el getter pages -->
-  <ng-container *ngFor="let p of pages">
+  <div class="flex justify-end p-4 gap-2">
     <button
-      class="btn btn-sm"
-      [ngClass]="{
-        'btn-active': page === p,
-        'btn-outline': page !== p
-      }"
-      (click)="setPage(p)"
-    >
-      {{ p }}
-    </button>
-  </ng-container>
+      class="btn btn-sm btn-outline rounded-full"
+      (click)="setPage(1)"
+      [disabled]="page === 1"
+    >«</button>
+    <button
+      class="btn btn-sm btn-outline rounded-full"
+      (click)="setPage(page - 1)"
+      [disabled]="page === 1"
+    >‹</button>
 
-  <button
-    class="btn btn-sm btn-outline rounded-full"
-    (click)="setPage(page + 1)"
-    [disabled]="page === totalPages"
-  >›</button>
-  <button
-    class="btn btn-sm btn-outline rounded-full"
-    (click)="setPage(totalPages)"
-    [disabled]="page === totalPages"
-  >»</button>
-</div>
+    <ng-container *ngFor="let p of pages">
+      <button
+        class="btn btn-sm"
+        [ngClass]="{
+          'btn-active': page === p,
+          'btn-outline': page !== p
+        }"
+        (click)="setPage(p)"
+      >{{ p }}</button>
+    </ng-container>
 
+    <button
+      class="btn btn-sm btn-outline rounded-full"
+      (click)="setPage(page + 1)"
+      [disabled]="page === totalPages"
+    >›</button>
+    <button
+      class="btn btn-sm btn-outline rounded-full"
+      (click)="setPage(totalPages)"
+      [disabled]="page === totalPages"
+    >»</button>
+  </div>
 </div>
