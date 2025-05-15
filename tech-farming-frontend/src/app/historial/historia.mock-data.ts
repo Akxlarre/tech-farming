@@ -1,4 +1,4 @@
-//historial/historia.mock-data.ts
+// src/app/historial/historia.mock-data.ts
 import { Invernadero, Zona, Sensor, HistorialParams, HistorialData, TipoParametro } from '../models';
 import { addDays, formatISO } from 'date-fns';
 
@@ -32,27 +32,29 @@ export const MOCK_TIPOS_PARAMETRO: TipoParametro[] = [
   { id: 5, nombre: 'Potasio',     unidad: 'mg/kg' }
 ];
 
-// 5) Helper para generar historial
+// 5) Generador de historial de ejemplo
 export function generateMockHistorial(params: HistorialParams): HistorialData {
   const { fechaDesde, fechaHasta } = params;
-  const days = Math.ceil((fechaHasta.getTime() - fechaDesde.getTime())/(1000*60*60*24));
+  const days = Math.ceil((fechaHasta.getTime() - fechaDesde.getTime()) / (1000*60*60*24));
+
   const series = Array.from({ length: days + 1 }).map((_, i) => {
     const date = addDays(fechaDesde, i);
-    const value = Math.round(10 + Math.random() * 20);
+    const value = Math.round(10 + Math.random()*20);
     return { timestamp: formatISO(date), value };
   });
+
   const valores = series.map(s => s.value);
-  const avg = valores.reduce((a,b) => a+b,0)/valores.length;
+  const avg = valores.reduce((a, b) => a + b, 0) / valores.length;
   const min = Math.min(...valores), max = Math.max(...valores);
   const idxMin = valores.indexOf(min), idxMax = valores.indexOf(max);
-  const std = Math.sqrt(valores.reduce((sum,v)=>sum + (v-avg)**2,0)/valores.length);
+  const std = Math.sqrt(valores.reduce((sum, v) => sum + (v - avg)**2, 0) / valores.length);
 
   return {
     series,
     stats: {
       promedio: parseFloat(avg.toFixed(1)),
-      minimo:  { value: min,  fecha: series[idxMin].timestamp },
-      maximo:  { value: max,  fecha: series[idxMax].timestamp },
+      minimo:   { value: min, fecha: series[idxMin].timestamp },
+      maximo:   { value: max, fecha: series[idxMax].timestamp },
       desviacion: parseFloat(std.toFixed(1))
     }
   };

@@ -1,43 +1,82 @@
+// src/app/models.ts
+
 export interface Invernadero {
-    id: number;
-    nombre: string;
-  }
-  
-  export interface Zona {
-    id: number;
-    nombre: string;
-    invernaderoId: number;
-  }
-  
-  export interface Sensor {
-    id: number;
-    nombre: string;
-    zonaId: number;
-    tipo: 'temperatura'|'humedad'|'p'|'n'|'k';
-  }
-  
-  export interface TipoParametro {
-    id: number;
-    nombre: string;
-    unidad: string;
-  }
-  
-  export interface HistorialParams {
-    invernaderoId?: number;
-    zonaId?: number;
-    sensorId?: number;
-    tipoParametroId: number;
-    fechaDesde: Date;
-    fechaHasta: Date;
-  }
-  
-  export interface HistorialData {
-    series: Array<{ timestamp: string; value: number }>;
-    stats: {
-      promedio: number;
-      minimo: { value: number; fecha: string };
-      maximo: { value: number; fecha: string };
-      desviacion: number;
-    };
-  }
-  
+  id: number;
+  nombre: string;
+}
+
+export interface Zona {
+  id: number;
+  nombre: string;
+  invernaderoId: number;
+}
+
+export interface Sensor {
+  id: number;
+  nombre: string;
+  zonaId: number;
+  tipo: 'temperatura' | 'humedad' | 'p' | 'n' | 'k';
+}
+
+export interface TipoParametro {
+  id: number;
+  nombre: string;
+  unidad: string;
+}
+
+// Parámetros y datos para Historial
+export interface HistorialParams {
+  invernaderoId?: number;
+  zonaId?:        number;
+  sensorId?:      number;
+  tipoParametroId: number;
+  fechaDesde:     Date;
+  fechaHasta:     Date;
+}
+
+export interface HistorialData {
+  series: Array<{ timestamp: string; value: number }>;
+  stats: {
+    promedio: number;
+    minimo:  { value: number; fecha: string };
+    maximo:  { value: number; fecha: string };
+    desviacion: number;
+  };
+}
+
+// Modelos para Predicciones
+/** Un punto de datos en una serie */
+export interface SeriesPoint {
+  timestamp: string; // ISO date string
+  value:     number;
+}
+
+/** Parámetros para solicitar predicciones */
+export interface PredicParams {
+  invernaderoId: number;
+  zonaId?:       number;
+  horas:         6 | 12 | 24;
+}
+
+/** Resumen de la predicción */
+export interface Summary {
+  updated: string;
+  text:    string;
+  action?: string;
+}
+
+/** Descripción de tendencia */
+export interface Trend {
+  text:       string;
+  comparison: string;
+  icon:       'chart-line' | 'arrow-up' | 'arrow-down' | 'info-circle';
+  color?:     'success' | 'warning' | 'error' | 'info';
+}
+
+/** Resultado completo de la API de predicciones */
+export interface PredicResult {
+  historical: SeriesPoint[];
+  future:     SeriesPoint[];
+  summary:    Summary;
+  trend:      Trend;
+}

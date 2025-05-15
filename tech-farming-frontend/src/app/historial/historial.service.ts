@@ -1,41 +1,69 @@
-//historial/historial.service.ts
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+// src/app/historial/historial.service.ts
+import { Injectable }                 from '@angular/core';
+import { HttpClient, HttpParams }     from '@angular/common/http';
+import { Observable }                 from 'rxjs';
+
 import {
   Invernadero,
   Zona,
   Sensor,
+  TipoParametro,
   HistorialParams,
-  HistorialData,
-  TipoParametro
+  HistorialData
 } from '../models';
-import {
-  MOCK_INVERNADEROS,
-  MOCK_ZONAS,
-  MOCK_SENSORES,
-  MOCK_TIPOS_PARAMETRO,
-  generateMockHistorial
-} from './historia.mock-data';
+//import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class HistorialService {
+  private readonly API = `${'url.por.defecto'}/v1`; // Cambiar por la URL de la API
+
+  constructor(private http: HttpClient) {}
+
+  /** GET  /invernaderos */
   getInvernaderos(): Observable<Invernadero[]> {
-    return of(MOCK_INVERNADEROS);
+    return this.http.get<Invernadero[]>(`${this.API}/invernaderos`);
   }
 
-  getZonasByInvernadero(id: number): Observable<Zona[]> {
-    return of(MOCK_ZONAS.filter(z => z.invernaderoId === id));
+  /** GET  /invernaderos/{id}/zonas */
+  getZonasByInvernadero(invernaderoId: number): Observable<Zona[]> {
+    return this.http.get<Zona[]>(
+      `${this.API}/invernaderos/${invernaderoId}/zonas`
+    );
   }
 
-  getSensoresByZona(id: number): Observable<Sensor[]> {
-    return of(MOCK_SENSORES.filter(s => s.zonaId === id));
+  /** GET  /zonas/{id}/sensores */
+  getSensoresByZona(zonaId: number): Observable<Sensor[]> {
+    return this.http.get<Sensor[]>(
+      `${this.API}/zonas/${zonaId}/sensores`
+    );
   }
 
+  /** GET  /parametros */
   getTiposParametro(): Observable<TipoParametro[]> {
-    return of(MOCK_TIPOS_PARAMETRO);
+    return this.http.get<TipoParametro[]>(`${this.API}/parametros`);
   }
 
+  /**
+   * GET  /historial
+   *
+   * Query params:
+   *   invernaderoId  (required)
+   *   desde          (required, ISO string)
+   *   hasta          (required, ISO string)
+   *   tipoParametroId(required)
+   *   zonaId         (optional)
+   *   sensorId       (optional)
+   */
   getHistorial(params: HistorialParams): Observable<HistorialData> {
-    return of(generateMockHistorial(params));
+    let qp = new HttpParams()
+      .set('invernaderoId',   params.invernaderoId!.toString())
+      .set('desde',           params.fechaDesde.toISOString())
+      .set('hasta',           params.fechaHasta.toISOString())
+      .set('tipoParametroId', params.tipoParametroId.toString());
+
+    if (params.zonaId != null)   qp = qp.set('zonaId',   params.zonaId.toString());
+    if (params.sensorId != null) qp = qp.set('sensorId', params.sensorId.toString());
+
+    return this.http.get<HistorialData>(`${this.API}/historial`, { params: qp });
   }
 }
