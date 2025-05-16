@@ -13,7 +13,6 @@ import {
   
   @Component({
     selector: 'app-logo',
-    standalone: true,
     imports: [CommonModule, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
@@ -120,7 +119,7 @@ import {
         100% { opacity: 0;   transform: translate(-50%, -0.11em) scaleX(0.7); }
       }
     `]
-  })
+})
   export class AppLogoComponent {
     private themeService = inject(ThemeService);
     private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));

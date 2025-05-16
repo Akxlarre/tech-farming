@@ -4,11 +4,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 
 @Component({
-  standalone: true,
-  selector: 'app-desktop-nav',
-  imports: [CommonModule, RouterModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-desktop-nav',
+    imports: [CommonModule, RouterModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <nav class="flex-1 hidden lg:flex justify-center">
       <ul class="flex space-x-6">
         <li *ngFor="let item of navItems" class="relative">

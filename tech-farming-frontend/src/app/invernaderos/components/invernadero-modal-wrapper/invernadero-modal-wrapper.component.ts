@@ -4,11 +4,10 @@ import { InvernaderoModalService } from '../invernaderoModalService/invernadero-
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-invernadero-modal-wrapper',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './invernadero-modal-wrapper.component.html',
-  styleUrls: ['./invernadero-modal-wrapper.component.css']
+    selector: 'app-invernadero-modal-wrapper',
+    imports: [CommonModule],
+    templateUrl: './invernadero-modal-wrapper.component.html',
+    styleUrls: ['./invernadero-modal-wrapper.component.css']
 })
 export class InvernaderoModalWrapperComponent implements OnInit, OnDestroy {
   closing = false;

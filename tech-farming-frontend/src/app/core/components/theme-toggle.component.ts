@@ -20,7 +20,6 @@ import {
   } from '@angular/animations';
   
   @Component({
-    standalone: true,
     selector: 'app-theme-toggle',
     imports: [CommonModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,44 +83,32 @@ import {
       }
     `],
     animations: [
-      trigger('iconSwap', [
-        transition('light => dark', [
-          group([
-            query('.moon', [
-              animate(
-                '200ms ease-in',
-                style({ opacity: 0, transform: 'scale(0.5) rotate(90deg)' })
-              )
-            ], { optional: true }),
-            query('.sun', [
-              style({ opacity: 0, transform: 'scale(0.5) rotate(-90deg)' }),
-              animate(
-                '200ms 100ms ease-out',
-                style({ opacity: 1, transform: 'scale(1) rotate(0deg)' })
-              )
-            ], { optional: true })
-          ])
-        ]),
-        transition('dark => light', [
-          group([
-            query('.sun', [
-              animate(
-                '200ms ease-in',
-                style({ opacity: 0, transform: 'scale(0.5) rotate(90deg)' })
-              )
-            ], { optional: true }),
-            query('.moon', [
-              style({ opacity: 0, transform: 'scale(0.5) rotate(-90deg)' }),
-              animate(
-                '200ms 100ms ease-out',
-                style({ opacity: 1, transform: 'scale(1) rotate(0deg)' })
-              )
-            ], { optional: true })
-          ])
-        ]),
-      ])
+        trigger('iconSwap', [
+            transition('light => dark', [
+                group([
+                    query('.moon', [
+                        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.5) rotate(90deg)' }))
+                    ], { optional: true }),
+                    query('.sun', [
+                        style({ opacity: 0, transform: 'scale(0.5) rotate(-90deg)' }),
+                        animate('200ms 100ms ease-out', style({ opacity: 1, transform: 'scale(1) rotate(0deg)' }))
+                    ], { optional: true })
+                ])
+            ]),
+            transition('dark => light', [
+                group([
+                    query('.sun', [
+                        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.5) rotate(90deg)' }))
+                    ], { optional: true }),
+                    query('.moon', [
+                        style({ opacity: 0, transform: 'scale(0.5) rotate(-90deg)' }),
+                        animate('200ms 100ms ease-out', style({ opacity: 1, transform: 'scale(1) rotate(0deg)' }))
+                    ], { optional: true })
+                ])
+            ]),
+        ])
     ]
-  })
+})
   export class ThemeToggleComponent implements OnInit, OnDestroy {
     private platformId = inject(PLATFORM_ID);
     private themeSub!: Subscription;

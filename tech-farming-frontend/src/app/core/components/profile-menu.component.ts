@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 
 @Component({
-  standalone: true,
-  selector: 'app-profile-menu',
-  imports: [CommonModule, RouterModule],
-  template: `
+    selector: 'app-profile-menu',
+    imports: [CommonModule, RouterModule],
+    template: `
     <div class="relative" #menuContainer>
       <button (click)="toggleMenu()"
               aria-label="Perfil"

@@ -9,11 +9,10 @@ import { TipoSensor } from '../../models/tipos_sensor.model';
 import { MergedLectura } from '../../../services/sensores.service';
 
 @Component({
-  selector: 'app-sensor-card-list',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sensor-card-list.component.html',
-  styleUrls: ['./sensor-card-list.component.css']
+    selector: 'app-sensor-card-list',
+    imports: [CommonModule],
+    templateUrl: './sensor-card-list.component.html',
+    styleUrls: ['./sensor-card-list.component.css']
 })
 export class SensorCardListComponent implements OnChanges {
   @Input() sensores: Sensor[]               = [];

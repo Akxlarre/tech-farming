@@ -23,22 +23,21 @@ import { TipoSensorService } from './tipos_sensor.service';
 import { TipoSensor } from './models/tipos_sensor.model';
 
 @Component({
-  selector: 'app-sensores',
-  standalone: true,
-  imports: [
-    CommonModule,
-    SensorHeaderComponent,
-    SensorFiltersComponent,
-    SensorTableComponent,
-    SensorCardListComponent,
-    SensorModalWrapperComponent,
-    SensorEditModalComponent,
-    SensorDeleteModalComponent,
-    SensorViewModalComponent,
-    SensorCreateModalComponent,
-  ],
-  templateUrl: './sensores.component.html',
-  styleUrls: ['./sensores.component.css'],
+    selector: 'app-sensores',
+    imports: [
+        CommonModule,
+        SensorHeaderComponent,
+        SensorFiltersComponent,
+        SensorTableComponent,
+        SensorCardListComponent,
+        SensorModalWrapperComponent,
+        SensorEditModalComponent,
+        SensorDeleteModalComponent,
+        SensorViewModalComponent,
+        SensorCreateModalComponent,
+    ],
+    templateUrl: './sensores.component.html',
+    styleUrls: ['./sensores.component.css']
 })
 export class SensoresComponent implements OnInit {
   modalType: 'view' | 'edit' | 'delete' | 'create' | null = null;

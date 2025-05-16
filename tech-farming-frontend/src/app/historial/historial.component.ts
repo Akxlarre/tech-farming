@@ -25,19 +25,18 @@ import { LineChartComponent       } from './components/line-chart.component';
 import { StatsCardComponent       } from './components/stats-card.component';
 
 @Component({
-  selector: 'app-historial',
-  standalone: true,
-  imports: [
-    CommonModule, FormsModule,
-    MatFormFieldModule, MatSelectModule,
-    MatDatepickerModule, MatNativeDateModule,
-    MatCardModule, MatButtonModule,
-    FiltroSelectComponent,
-    FiltroDateRangeComponent,
-    LineChartComponent,
-    StatsCardComponent
-  ],
-  template: `
+    selector: 'app-historial',
+    imports: [
+        CommonModule, FormsModule,
+        MatFormFieldModule, MatSelectModule,
+        MatDatepickerModule, MatNativeDateModule,
+        MatCardModule, MatButtonModule,
+        FiltroSelectComponent,
+        FiltroDateRangeComponent,
+        LineChartComponent,
+        StatsCardComponent
+    ],
+    template: `
     <div class="p-6 space-y-6 bg-base-200 rounded-lg shadow">
 
       <!-- HEADER -->
@@ -160,7 +159,7 @@ import { StatsCardComponent       } from './components/stats-card.component';
 
     </div>
   `,
-  styles: [`
+    styles: [`
     :host { display: block; }
     .chart-wrapper {
       /* Alto mínimo y máximo */

@@ -11,11 +11,10 @@ import { TipoParametro } from '../../../../models/tipos_parametro.model';
 import { TipoParametroService } from '../../../../tipos_parametro.service';
 
 @Component({
-  selector: 'app-sensor-create-modal',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './sensor-create-modal.component.html',
-  styleUrls: ['./sensor-create-modal.component.css']
+    selector: 'app-sensor-create-modal',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './sensor-create-modal.component.html',
+    styleUrls: ['./sensor-create-modal.component.css']
 })
 export class SensorCreateModalComponent implements OnInit {
   form!: FormGroup;

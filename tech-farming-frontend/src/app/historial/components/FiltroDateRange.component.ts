@@ -3,10 +3,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule }                          from '@angular/common';
 
 @Component({
-  selector: 'app-filtro-date-range',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-filtro-date-range',
+    imports: [CommonModule],
+    template: `
     <div class="flex gap-4">
       <!-- Desde -->
       <label class="flex-1 block">

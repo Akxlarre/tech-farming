@@ -5,11 +5,10 @@ import { Sensor } from '../../models/sensor.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-sensor-edit-modal',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './sensor-edit-modal.component.html',
-  styleUrls: ['./sensor-edit-modal.component.css']
+    selector: 'app-sensor-edit-modal',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './sensor-edit-modal.component.html',
+    styleUrls: ['./sensor-edit-modal.component.css']
 })
 export class SensorEditModalComponent implements OnInit {
   editForm!: FormGroup;

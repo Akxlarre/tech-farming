@@ -15,11 +15,10 @@ import { TipoSensor } from '../../models/tipos_sensor.model';
 import { MergedLectura } from '../../../services/sensores.service';
 
 @Component({
-  selector: 'app-sensor-table',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sensor-table.component.html',
-  styleUrls: ['./sensor-table.component.css'],
+    selector: 'app-sensor-table',
+    imports: [CommonModule],
+    templateUrl: './sensor-table.component.html',
+    styleUrls: ['./sensor-table.component.css']
 })
 export class SensorTableComponent implements OnChanges {
   @Input() sensores: Sensor[] = [];

@@ -7,11 +7,10 @@ import { SensorStatusComponent } from './components/estado-sensores/sensor-statu
 import { SensorMapComponent } from './components/mapa-invernaderos/sensor-map.component'; 
 import { NextPredictionComponent } from './components/prediccion-resumen/next-prediction.component';
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, VariableCardsComponent,TrendChartComponent, AlertPanelComponent, SensorStatusComponent,SensorMapComponent, NextPredictionComponent],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'] 
+    selector: 'app-dashboard',
+    imports: [CommonModule, VariableCardsComponent, TrendChartComponent, AlertPanelComponent, SensorStatusComponent, SensorMapComponent, NextPredictionComponent],
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent {
 }

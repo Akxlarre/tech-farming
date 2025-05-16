@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-invernadero-create-modal',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './invernadero-create-modal.component.html',  // <- corregido aquí
-  styleUrls: ['./invernadero-create-modal.component.css']
+    selector: 'app-invernadero-create-modal',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './invernadero-create-modal.component.html', // <- corregido aquí
+    styleUrls: ['./invernadero-create-modal.component.css']
 })
 export class InvernaderoCreateModalComponent {
   formulario: FormGroup;

@@ -3,10 +3,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule }                            from '@angular/common';
 
 @Component({
-  selector: 'app-filtro-select',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-filtro-select',
+    imports: [CommonModule],
+    template: `
     <label class="block">
       <span class="block text-sm font-medium text-base-content mb-1">{{ label }}</span>
       <select

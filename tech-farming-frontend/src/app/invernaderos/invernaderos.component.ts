@@ -11,19 +11,18 @@ import { InvernaderoTableComponent } from './components/invernadero-table/invern
 import { InvernaderoCardListComponent } from './components/invernadero-card-list/invernadero-card-list.component';
 
 @Component({
-  selector: 'app-invernaderos',
-  standalone: true,
-  imports: [
-    CommonModule,
-    InvernaderoHeaderComponent,
-    InvernaderoModalWrapperComponent,
-    InvernaderoCreateModalComponent,
-    InvernaderoFiltersComponent,
-    InvernaderoTableComponent,
-    InvernaderoCardListComponent
-  ],
-  templateUrl: './invernaderos.component.html',
-  styleUrls: ['./invernaderos.component.css']
+    selector: 'app-invernaderos',
+    imports: [
+        CommonModule,
+        InvernaderoHeaderComponent,
+        InvernaderoModalWrapperComponent,
+        InvernaderoCreateModalComponent,
+        InvernaderoFiltersComponent,
+        InvernaderoTableComponent,
+        InvernaderoCardListComponent
+    ],
+    templateUrl: './invernaderos.component.html',
+    styleUrls: ['./invernaderos.component.css']
 })
 export class InvernaderosComponent implements OnInit {
   modalType: InvernaderoModalType = null;

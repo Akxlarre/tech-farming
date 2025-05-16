@@ -14,11 +14,10 @@ export interface SensorFilter {
 }
 
 @Component({
-  selector: 'app-sensor-filters',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './sensor-filters.component.html',
-  styleUrls: ['./sensor-filters.component.css']
+    selector: 'app-sensor-filters',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './sensor-filters.component.html',
+    styleUrls: ['./sensor-filters.component.css']
 })
 export class SensorFiltersComponent implements OnInit {
   @Input() invernaderos: Invernadero[] = [];

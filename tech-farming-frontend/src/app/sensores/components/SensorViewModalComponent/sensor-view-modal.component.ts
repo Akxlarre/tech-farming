@@ -4,11 +4,10 @@ import { SensorModalService } from '../../components/SensorModalService/sensor-m
 import { Sensor } from '../../models/sensor.model';
 
 @Component({
-  selector: 'app-sensor-view-modal',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sensor-view-modal.component.html',
-  styleUrls: ['./sensor-view-modal.component.css']
+    selector: 'app-sensor-view-modal',
+    imports: [CommonModule],
+    templateUrl: './sensor-view-modal.component.html',
+    styleUrls: ['./sensor-view-modal.component.css']
 })
 export class SensorViewModalComponent implements OnInit {
   sensor!: Sensor;

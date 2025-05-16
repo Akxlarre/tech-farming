@@ -9,18 +9,17 @@ import { DesktopNavComponent } from './desktop-nav.component';
 import { MobileNavComponent } from './mobile-nav.component';
 
 @Component({
-  standalone: true,
-  selector: 'app-header',
-  imports: [
-    CommonModule,
-    RouterModule,
-    AppLogoComponent,
-    ThemeToggleComponent,
-    ProfileMenuComponent,
-    DesktopNavComponent,
-    MobileNavComponent
-  ],
-  templateUrl: './header.component.html'
+    selector: 'app-header',
+    imports: [
+        CommonModule,
+        RouterModule,
+        AppLogoComponent,
+        ThemeToggleComponent,
+        ProfileMenuComponent,
+        DesktopNavComponent,
+        MobileNavComponent
+    ],
+    templateUrl: './header.component.html'
 })
 export class HeaderComponent {
   navItems = [

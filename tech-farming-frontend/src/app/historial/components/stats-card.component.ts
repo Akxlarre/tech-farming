@@ -4,10 +4,9 @@ import { CommonModule }      from '@angular/common';
 import { MatCardModule }     from '@angular/material/card';
 
 @Component({
-  selector: 'app-stats-card',
-  standalone: true,
-  imports: [CommonModule, MatCardModule],
-  template: `
+    selector: 'app-stats-card',
+    imports: [CommonModule, MatCardModule],
+    template: `
     <mat-card class="stats-card relative overflow-hidden rounded-2xl shadow-xl p-6 flex flex-col justify-between">
       <!-- Degradado de fondo -->
       <div
@@ -50,7 +49,7 @@ import { MatCardModule }     from '@angular/material/card';
       </div>
     </mat-card>
   `,
-  styles: [`
+    styles: [`
     :host { display: block; }
 
     .stats-card {

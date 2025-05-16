@@ -2,11 +2,10 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-variable-card',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './variable-card.component.html',
-  styleUrls: ['./variable-card.component.css']
+    selector: 'app-variable-card',
+    imports: [CommonModule],
+    templateUrl: './variable-card.component.html',
+    styleUrls: ['./variable-card.component.css']
 })
 export class VariableCardsComponent {
     temperatura = { nombre: 'Temperatura', valor: '22°C', icon: '🌡️' };

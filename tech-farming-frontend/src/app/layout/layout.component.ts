@@ -6,15 +6,14 @@ import { SplashComponent } from '../core/components/splash/splash.component';
 import { AuthService } from '../services/auth.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-layout',
-  imports: [
-    CommonModule,
-    RouterModule,
-    HeaderComponent,
-    SplashComponent,
-  ],
-  templateUrl: './layout.component.html',
+    selector: 'app-layout',
+    imports: [
+        CommonModule,
+        RouterModule,
+        HeaderComponent,
+        SplashComponent,
+    ],
+    templateUrl: './layout.component.html'
 })
 export class LayoutComponent {
   constructor(public authService: AuthService) {}

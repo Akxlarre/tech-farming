@@ -4,11 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-trend-chart',
-  standalone: true,
-  imports: [CommonModule , FormsModule],
-  templateUrl: './trend-chart.component.html',
-  styleUrls: ['./trend-chart.component.css']
+    selector: 'app-trend-chart',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './trend-chart.component.html',
+    styleUrls: ['./trend-chart.component.css']
 })
 export class TrendChartComponent {
   @Input() variable: string = 'Temperatura';

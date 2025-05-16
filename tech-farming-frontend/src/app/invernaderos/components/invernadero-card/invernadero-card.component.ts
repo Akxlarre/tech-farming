@@ -2,11 +2,10 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-invernadero-card',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './invernadero-card.component.html',
-  styleUrls: ['./invernadero-card.component.css']
+    selector: 'app-invernadero-card',
+    imports: [CommonModule],
+    templateUrl: './invernadero-card.component.html',
+    styleUrls: ['./invernadero-card.component.css']
 })
 export class InvernaderoCardComponent {
   @Input() invernadero: any;

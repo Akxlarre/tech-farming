@@ -2,11 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-sensor-status',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sensor-status.component.html',
-  styleUrls: ['./sensor-status.component.css']
+    selector: 'app-sensor-status',
+    imports: [CommonModule],
+    templateUrl: './sensor-status.component.html',
+    styleUrls: ['./sensor-status.component.css']
 })
 export class SensorStatusComponent {
   estadoSensores = {

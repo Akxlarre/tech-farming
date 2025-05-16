@@ -5,10 +5,9 @@ import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  templateUrl: './login.component.html',
-  imports: [CommonModule, ReactiveFormsModule], 
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    imports: [CommonModule, ReactiveFormsModule]
 })
 export class LoginComponent {
   loginForm: FormGroup;

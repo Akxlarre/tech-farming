@@ -4,11 +4,10 @@ import { SensorModalService } from '../../components/SensorModalService/sensor-m
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-sensor-modal-wrapper',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sensor-modal-wrapper.component.html',
-  styleUrls: ['./sensor-modal-wrapper.component.css']
+    selector: 'app-sensor-modal-wrapper',
+    imports: [CommonModule],
+    templateUrl: './sensor-modal-wrapper.component.html',
+    styleUrls: ['./sensor-modal-wrapper.component.css']
 })
 export class SensorModalWrapperComponent implements OnInit, OnDestroy {
   closing = false;

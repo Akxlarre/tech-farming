@@ -4,11 +4,10 @@ import { SensorModalService } from '../SensorModalService/sensor-modal.service';
 import { Sensor } from '../../models/sensor.model';
 
 @Component({
-  selector: 'app-sensor-delete-modal',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sensor-delete-modal.component.html',
-  styleUrls: ['./sensor-delete-modal.component.css']
+    selector: 'app-sensor-delete-modal',
+    imports: [CommonModule],
+    templateUrl: './sensor-delete-modal.component.html',
+    styleUrls: ['./sensor-delete-modal.component.css']
 })
 export class SensorDeleteModalComponent implements OnInit {
   sensor: Sensor | null = null;

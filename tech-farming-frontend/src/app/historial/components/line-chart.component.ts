@@ -15,11 +15,10 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
 
 @Component({
-  selector: 'app-line-chart',
-  standalone: true,
-  imports: [CommonModule],
-  template: `<canvas #chartCanvas *ngIf="isBrowser"></canvas>`,
-  styles: [`
+    selector: 'app-line-chart',
+    imports: [CommonModule],
+    template: `<canvas #chartCanvas *ngIf="isBrowser"></canvas>`,
+    styles: [`
     :host { display: block; height: 100%; }
     canvas { width: 100% !important; height: 100% !important; }
   `]
