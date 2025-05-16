@@ -1,10 +1,10 @@
 <!-- layout.component.html -->
 
 <!-- Splash -->
-<app-splash *ngIf="showSplash" class="fixed inset-0 z-[9999]"></app-splash>
+<app-splash *ngIf="showSplash()" class="fixed inset-0 z-[9999]"></app-splash>
 
 <!-- Contenido principal (se oculta mientras el splash está activo) -->
-<ng-container *ngIf="!showSplash">
+<ng-container *ngIf="!showSplash()">
   <app-header></app-header>
 
   <!-- Aquí cambiamos bg-[#F4F6F8] → bg-base-200 -->
@@ -33,7 +33,7 @@
           Cancelar
         </label>
         <button
-          (click)="authService.cerrarSesion()"
+          (click)="logout()"
           class="btn bg-pink-600 hover:bg-pink-700 text-white font-semibold shadow-md transition-all duration-200"
         >
           <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión

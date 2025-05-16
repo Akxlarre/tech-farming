@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../core/components/header.component';
@@ -17,13 +17,20 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
-  constructor(public authService: AuthService) {}
+  showSplash = signal(true);
+  showToast = signal(false);
+  authService = inject(AuthService);
 
-  showSplash = true;
+  constructor() {
+    this.authService.isLoading().subscribe((loading) => {
+      this.showSplash.set(loading);
+    });
+  }
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.showSplash = false;
-    }, 4000);
+  logout() {
+    this.authService.logout();
+    this.showToast.set(true);
+    setTimeout(() => this.showToast.set(false), 3000);
   }
 }
+
