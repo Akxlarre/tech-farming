@@ -1,5 +1,3 @@
-// src/app/models.ts
-
 export interface Invernadero {
   id: number;
   nombre: string;
@@ -79,4 +77,30 @@ export interface PredicResult {
   future:     SeriesPoint[];
   summary:    Summary;
   trend:      Trend;
+}
+export interface Alerta {
+  id: number;
+  sensor_parametro_id: number;
+  tipo: string;
+  nivel: 'advertencia' | 'critico';
+  valor_detectado: number;
+  fecha_hora: string;
+  mensaje: string;
+  estado: 'activo' | 'resuelta';
+  resuelta_en?: string;
+  resuelta_por?: number;
+}
+
+// Modelos para Umbrales
+export interface Umbral {
+  id: number;
+  tipo_parametro_id: number | null;
+  invernadero_id: number | null;
+  sensor_parametro_id: number | null;
+  advertencia_min: number;
+  advertencia_max: number;
+  critico_min?: number;
+  critico_max?: number;
+  activo: boolean;
+  creado_en: string;
 }
