@@ -53,7 +53,7 @@ export class SensorCreateModalComponent implements OnInit {
   }
 
   cargarInvernaderos(): void {
-    this.invernaderoService.obtenerInvernaderos().subscribe({
+    this.invernaderoService.getInvernaderos().subscribe({
       next: (res) => this.invernaderos = res,
       error: (err) => console.error('Error al cargar invernaderos:', err)
     });

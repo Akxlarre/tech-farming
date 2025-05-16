@@ -1,14 +1,17 @@
 // src/app/invernaderos/invernaderos.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InvernaderoHeaderComponent } from './components/invernadero-header/invernadero-header.component';
-import { InvernaderoModalService, InvernaderoModalType } from './components/invernaderoModalService/invernadero-modal.service';
-import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper/invernadero-modal-wrapper.component';
-import { InvernaderoCreateModalComponent } from './components/invernadero-create-modal/invernadero-create-modal.component';
-import { InvernaderoFiltersComponent } from './components/invernadero-filters/invernadero-filters.component';
-import { InvernaderoTableComponent } from './components/invernadero-table/invernadero-table.component';
-import { InvernaderoCardListComponent } from './components/invernadero-card-list/invernadero-card-list.component';
+import { Invernadero } from './models/invernadero.model';
+import { InvernaderoService } from './invernaderos.service';
+import { InvernaderoModalService } from './invernadero-modal.service';
+import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper.component';
+import { InvernaderoHeaderComponent } from './components/invernadero-header.component';
+import { InvernaderoFiltersComponent } from './components/invernadero-filters.component';
+import { InvernaderoTableComponent } from './components/invernadero-table.component';
+import { InvernaderoCardListComponent } from './components/invernadero-card-list.component';
+import { InvernaderoViewModalComponent } from './components/invernadero-view-modal.component';
+import { InvernaderoCreateEditModalComponent } from './components/invernadero-create-edit-modal.component';
+import { InvernaderoDeleteModalComponent } from './components/invernadero-delete-modal.component';
 
 @Component({
   selector: 'app-invernaderos',
@@ -16,40 +19,82 @@ import { InvernaderoCardListComponent } from './components/invernadero-card-list
   imports: [
     CommonModule,
     InvernaderoHeaderComponent,
-    InvernaderoModalWrapperComponent,
-    InvernaderoCreateModalComponent,
     InvernaderoFiltersComponent,
     InvernaderoTableComponent,
-    InvernaderoCardListComponent
+    InvernaderoCardListComponent,
+    InvernaderoModalWrapperComponent,
+    InvernaderoViewModalComponent,
+    InvernaderoCreateEditModalComponent,
+    InvernaderoDeleteModalComponent
   ],
-  templateUrl: './invernaderos.component.html',
-  styleUrls: ['./invernaderos.component.css']
+  template: `
+    <section class="min-h-screen px-4 sm:px-10 lg:px-16 space-y-8">
+      <!-- Header con botón Crear -->
+      <app-invernadero-header (create)="open('create')"></app-invernadero-header>
+
+      <!-- Filtros -->
+      <app-invernadero-filters (filtersChange)="onFiltersChange($event)"></app-invernadero-filters>
+
+      <!-- Tabla para escritorio -->
+      <app-invernadero-table
+        [invernaderos]="filtered"
+        (viewInvernadero)="open('view', $event)"
+        (editInvernadero)="open('edit', $event)"
+        (deleteInvernadero)="open('delete', $event)">
+      </app-invernadero-table>
+
+      <!-- Cards para móvil -->
+      <app-invernadero-card-list
+        [invernaderos]="filtered">
+      </app-invernadero-card-list>
+
+      <!-- Modales -->
+      <ng-container *ngIf="modalType">
+        <app-invernadero-modal-wrapper>
+          <ng-container [ngSwitch]="modalType">
+            <app-invernadero-view-modal   *ngSwitchCase="'view'"></app-invernadero-view-modal>
+            <app-invernadero-create-edit-modal *ngSwitchCase="'create'"></app-invernadero-create-edit-modal>
+            <app-invernadero-create-edit-modal *ngSwitchCase="'edit'"></app-invernadero-create-edit-modal>
+            <app-invernadero-delete-modal *ngSwitchCase="'delete'"></app-invernadero-delete-modal>
+          </ng-container>
+        </app-invernadero-modal-wrapper>
+      </ng-container>
+    </section>
+  `
 })
 export class InvernaderosComponent implements OnInit {
-  modalType: InvernaderoModalType = null;
-  selectedInvernadero: any = null;
+  invernaderos: Invernadero[] = [];
+  filtered: Invernadero[] = [];
+  modalType: 'view'|'create'|'edit'|'delete'|null = null;
 
-  invernaderos = [
-    {
-      id: 'I001',
-      nombre: 'Invernadero Norte',
-      sensoresActivos: 4,
-      estado: 'Normal',
-      fechaCreacion: '2024-04-10'
-    },
-    {
-      id: 'I002',
-      nombre: 'Invernadero Hidropónico',
-      sensoresActivos: 2,
-      estado: 'Crítico',
-      fechaCreacion: '2024-03-15'
-    }
-  ];
+  constructor(
+    private svc: InvernaderoService,
+    public  modal: InvernaderoModalService
+  ) {}
 
-  constructor(public invernaderoModalService: InvernaderoModalService) {}
+  ngOnInit() {
+    this.svc.getInvernaderos().subscribe({
+      next: list => {
+        this.invernaderos = list;
+        this.filtered     = list;
+      },
+      error: err => console.error('Error al cargar invernaderos', err)
+    });
 
-  ngOnInit(): void {
-    this.invernaderoModalService.modalType$.subscribe(tipo => this.modalType = tipo);
-    this.invernaderoModalService.selectedInvernadero$.subscribe(invernadero => this.selectedInvernadero = invernadero);
+    this.modal.modalType$.subscribe(t => this.modalType = t);
+  }
+
+  open(
+    type: 'view'|'create'|'edit'|'delete',
+    inv: Invernadero|null = null
+  ) {
+    this.modal.openModal(type, inv);
+  }
+
+  onFiltersChange(f: { estado: string; search: string }) {
+    this.filtered = this.invernaderos.filter(inv =>
+      (!f.estado || inv.estado === f.estado)
+      && (!f.search || inv.nombre.toLowerCase().includes(f.search.toLowerCase()))
+    );
   }
 }

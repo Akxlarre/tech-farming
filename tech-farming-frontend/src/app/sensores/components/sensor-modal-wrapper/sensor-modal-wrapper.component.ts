@@ -26,16 +26,13 @@ export class SensorModalWrapperComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  // Cierre con ESC
-  @HostListener('document:keydown.escape', ['$event'])
-  onEsc(event: KeyboardEvent) {
+  @HostListener('document:keydown.escape')
+  onEsc() {
     this.modalService.closeWithAnimation();
   }
 
-  // Cierre al hacer clic fuera
   onOverlayClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!this.modalContent.nativeElement.contains(target)) {
+    if (!this.modalContent.nativeElement.contains(event.target)) {
       this.modalService.closeWithAnimation();
     }
   }

@@ -69,7 +69,7 @@ export class SensoresComponent implements OnInit {
     });
 
     // 3) Cargar invernaderos
-    this.invernaderoService.obtenerInvernaderos().subscribe({
+    this.invernaderoService.getInvernaderos().subscribe({
       next: data => this.invernaderos = data,
       error: err => console.error('❌ Error cargando invernaderos:', err)
     });
