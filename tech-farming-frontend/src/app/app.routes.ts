@@ -1,12 +1,12 @@
 // src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { DashboardComponent } from './dashboard/dashboard.component'; // ejemplo
-import { AuthGuard } from './guards/auth.guard';
+import { privateGuard, publicGuard } from './guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [privateGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent), /* canActivate: [AuthGuard] */},
@@ -20,6 +20,11 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [publicGuard],
     loadComponent: () => import('./auth/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: '**',
+    redirectTo: '/login'
   }
 ];

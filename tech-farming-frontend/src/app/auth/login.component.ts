@@ -1,57 +1,56 @@
-import { Component, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+
 import { AuthService } from '../services/auth.service';
-import { CommonModule } from '@angular/common';
+
+interface LoginForm {
+  email: FormControl<null | string>;
+  password: FormControl<null | string>;
+}
 
 @Component({
+  standalone: true,
     selector: 'app-login',
+    imports: [ReactiveFormsModule, RouterLink],
     templateUrl: './login.component.html',
-    imports: [CommonModule, ReactiveFormsModule]
 })
 export class LoginComponent {
-  loginForm: FormGroup;
-  splashActivo = signal(true);
-  loginVisible = signal(false);
-  cargando = signal(false);
+  private _formBuilder = inject(FormBuilder);
 
-  constructor(
-    private router: Router,
-    private fb: FormBuilder,
-    public authService: AuthService
-  ) {
-    this.loginForm = this.fb.group({
-      correo: ['', [Validators.required, Validators.email]],
-      clave: ['', Validators.required],
-    });
+  private _authService = inject(AuthService);
 
-    this.iniciarAnimacionSplash();
-  }
+  private _router = inject(Router);
 
-  iniciarAnimacionSplash() {
-    setTimeout(() => {
-      this.splashActivo.set(false);
-      setTimeout(() => {
-        this.loginVisible.set(true);
-      }, 100);
-    }, 2200);
-  }
+  form = this._formBuilder.group<LoginForm>({
+    email: this._formBuilder.control(null, [
+      Validators.required,
+      Validators.email,
+    ]),
+    password: this._formBuilder.control(null, [Validators.required]),
+  });
 
-  onSubmit() {
-    if (this.loginForm.invalid) return;
+  async submit() {
+    if (this.form.invalid) return;
 
-    const { correo, clave } = this.loginForm.value;
-    this.cargando.set(true);
-
-    setTimeout(() => {
-      this.authService.iniciarSesion({ email: correo, password: clave }).subscribe({
-        next: () => this.router.navigateByUrl('/dashboard'),
-        error: (err: unknown) => {
-          console.error('Error al iniciar sesión:', err);
-          alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
-          this.cargando.set(false);
-        },
+    try {
+      const { error } = await this._authService.login({
+        email: this.form.value.email ?? '',
+        password: this.form.value.password ?? '',
       });
-    }, 1500);
+
+      if (error) throw error;
+
+      this._router.navigateByUrl('/');
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error);
+      }
+    }
   }
 }

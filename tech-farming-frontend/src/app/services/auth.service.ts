@@ -1,25 +1,20 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'; 
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { SupabaseService } from '../services/supabase.service';
+import { SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private router: Router, private http: HttpClient) {}
+  private _supabaseClient = inject(SupabaseService).supabase;
 
-  iniciarSesion(datos: { email: string; password: string }): Observable<any> {
-    return this.http.post('/api/login', datos); // <-- Ahora sí funciona correctamente
+  session() {
+    return this._supabaseClient.auth.getSession();
   }
 
-  cerrarSesion() {
-    localStorage.clear();
-    const toast = document.getElementById('toast-logout');
-    if (toast) {
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3000);
-    }
-    this.router.navigate(['/login']);
+  login(credentials: SignUpWithPasswordCredentials) {
+    return this._supabaseClient.auth.signInWithPassword(credentials);
+  }
+
+  logout() {
+    return this._supabaseClient.auth.signOut();
   }
 }

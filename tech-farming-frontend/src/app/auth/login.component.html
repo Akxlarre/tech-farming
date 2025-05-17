@@ -13,7 +13,7 @@
       </div>
   
       <!-- Formulario Reactivo -->
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Correo</label>
           <input type="email" formControlName="email"
