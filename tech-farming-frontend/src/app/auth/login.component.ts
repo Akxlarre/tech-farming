@@ -1,67 +1,112 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '../services/auth.service';
+import {
+  FormBuilder,
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+import { AuthService } from '../services/auth.service';
+
+interface LoginForm {
+  email: FormControl<null | string>;
+  password: FormControl<null | string>;
+}
 
 @Component({
-  selector: 'app-login',
   standalone: true,
+  selector: 'app-login',
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './login.component.html',
-  imports: [CommonModule, ReactiveFormsModule],
 })
+
 export class LoginComponent {
-  loginForm: FormGroup;
-  splashActivo = signal(true);
-  loginVisible = signal(false);
+  private _formBuilder = inject(FormBuilder);
+
+  private _authService = inject(AuthService);
+
+  private _router = inject(Router);
+
   cargando = signal(false);
-  fb = inject(FormBuilder);
-  router = inject(Router);
-  authService = inject(AuthService);
+  loginErrorMessage = signal<string | null>(null);
+  resetErrorMessage = signal<string | null>(null);
+  showResetPasswordModal = signal(false);
+  resetEmail = '';
 
-  constructor(
-  ) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
-    });
+  form = this._formBuilder.group<LoginForm>({
+    email: this._formBuilder.control(null, [
+      Validators.required,
+      Validators.email,
+    ]),
+    password: this._formBuilder.control(null, [Validators.required]),
+  });
 
-    this.iniciarAnimacionSplash();
-  }
+  resetForm = this._formBuilder.group({
+    email: ['', [Validators.required, Validators.email]]
+  });
 
-  iniciarAnimacionSplash() {
-    setTimeout(() => {
-      this.splashActivo.set(false);
-      setTimeout(() => {
-        this.loginVisible.set(true);
-      }, 100);
-    }, 2200);
-  }
+  async submit() {
+    if (this.form.invalid) return;
 
-  onSubmit() {
-    if (this.loginForm.invalid) return;
-
-    const { email, password } = this.loginForm.value;
     this.cargando.set(true);
+    this.loginErrorMessage.set(null);
 
-    this.authService.login(email, password).subscribe({
-      next: (response) => {
-        if (response.error) {
-          alert('Correo o contraseña incorrectos');
-          this.cargando.set(false);
-          return;
-        }
+    try {
+      const inicioExitoso = await this._authService.login({
+        email: this.form.value.email ?? '',
+        password: this.form.value.password ?? '',
+      });
 
-        this.router.navigateByUrl('/dashboard');
-      },
-      error: (err) => {
-        console.error('Error al iniciar sesión:', err);
-        alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
-        this.cargando.set(false);
-      },
-      complete: () => {
-        this.cargando.set(false);
+      if (inicioExitoso.error) {
+        this.loginErrorMessage.set('Correo o contraseña incorrectos.');
+      } else {
+        this._router.navigateByUrl('/dashboard');
       }
-    });
+    } catch (error) {
+      this.loginErrorMessage.set('Hubo un problema al iniciar sesión. Intenta de nuevo.');
+      console.error('Error en el inicio de sesión:', error);
+    } finally {
+      this.cargando.set(false);
+    }
+  }
+
+  openResetPasswordModal(event: Event) {
+    event.preventDefault();
+    this.showResetPasswordModal.set(true);
+  }
+
+  closeResetPasswordModal() {
+    this.showResetPasswordModal.set(false);
+    this.resetForm.reset();
+  }
+
+  async sendResetPasswordEmail() {
+    this.resetErrorMessage.set(null);
+
+    if (this.resetForm.invalid) {
+      this.resetErrorMessage.set('Ingresa un correo válido.');
+      return;
+    }
+
+    const email = this.resetForm.get('email')?.value ?? '';
+
+    try {
+      const { error } = await this._authService.resetPassword(email);
+
+      if (error) {
+        console.error("Error en Supabase:", error);
+        this.resetErrorMessage.set('Hubo un problema al enviar el correo. Verifica tu correo e inténtalo de nuevo.');
+        return;
+      }
+
+      alert('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
+      this.closeResetPasswordModal();
+    } catch (error) {
+      this.resetErrorMessage.set('Error al enviar el correo de recuperación.');
+      console.error(error);
+    }
   }
 }
