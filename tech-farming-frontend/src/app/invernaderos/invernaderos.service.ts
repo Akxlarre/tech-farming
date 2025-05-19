@@ -6,6 +6,7 @@ import { Invernadero } from './models/invernadero.model';
 
 @Injectable({ providedIn: 'root' })
 export class InvernaderoService {
+
   private apiUrl = 'http://localhost:5000/api/invernaderos';
 
   constructor(private http: HttpClient) {}
@@ -34,5 +35,9 @@ export class InvernaderoService {
   /** 4) Eliminar un invernadero (y sus zonas por cascade) */
   eliminarInvernadero(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getAllInvernaderos(): Observable<Invernadero[]> {
+    return this.http.get<Invernadero[]>(this.apiUrl);
   }
 }

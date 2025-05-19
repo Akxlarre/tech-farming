@@ -1,4 +1,3 @@
-// src/app/invernaderos/components/invernadero-table.component.ts
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Invernadero } from '../models/invernadero.model';
@@ -8,24 +7,24 @@ import { Invernadero } from '../models/invernadero.model';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="overflow-x-auto hidden md:block rounded-xl shadow-sm bg-white border border-gray-100">
-      <table class="table w-full">
-        <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold tracking-wide">
+    <div class="overflow-x-auto hidden md:block">
+      <table class="table table-zebra w-full">
+        <thead>
           <tr>
-            <th class="py-3 px-4">Nombre de Invernadero</th>
-            <th class="py-3 px-4">Sensores Activos</th>
-            <th class="py-3 px-4">Estado</th>
-            <th class="py-3 px-4">Fecha de Creación</th>
-            <th class="py-3 px-4">Acciones</th>
+            <th>Nombre</th>
+            <th>Sensores Activos</th>
+            <th>Estado</th>
+            <th>Creación</th>
+            <th>Acciones</th>
           </tr>
         </thead>
-        <tbody class="text-gray-800 text-sm divide-y divide-gray-100">
-          <tr *ngFor="let inv of invernaderos" class="hover:bg-gray-50 transition">
-            <td class="py-3 px-4">{{ inv.nombre }}</td>
-            <td class="py-3 px-4">{{ inv.sensoresActivos ?? 0 }}</td>
-            <td class="py-3 px-4">
+        <tbody>
+          <tr *ngFor="let inv of invernaderos" class="hover">
+            <td>{{ inv.nombre }}</td>
+            <td>{{ inv.sensoresActivos ?? 0 }}</td>
+            <td>
               <span
-                class="badge"
+                class="badge badge-md"
                 [ngClass]="{
                   'badge-success': inv.estado === 'Activo',
                   'badge-warning': inv.estado === 'Inactivo',
@@ -35,19 +34,22 @@ import { Invernadero } from '../models/invernadero.model';
                 {{ inv.estado }}
               </span>
             </td>
-            <td class="py-3 px-4">{{ inv.creado_en | date:'short' }}</td>
-            <td class="flex flex-wrap gap-2 py-3 px-4">
+            <td>{{ inv.creado_en | date:'short' }}</td>
+            <td class="space-x-2">
               <button
-                class="btn btn-sm btn-outline"
+                class="btn btn-sm btn-ghost"
                 (click)="viewInvernadero.emit(inv)"
+                aria-label="Ver"
               >👁️</button>
               <button
-                class="btn btn-sm btn-outline"
+                class="btn btn-sm btn-ghost"
                 (click)="editInvernadero.emit(inv)"
+                aria-label="Editar"
               >✏️</button>
               <button
-                class="btn btn-sm btn-error text-white"
+                class="btn btn-sm btn-error"
                 (click)="deleteInvernadero.emit(inv)"
+                aria-label="Eliminar"
               >🗑️</button>
             </td>
           </tr>
@@ -55,13 +57,13 @@ import { Invernadero } from '../models/invernadero.model';
       </table>
     </div>
   `,
-  styles: [
-    `:host { display: block; }`
-  ]
+  styles: [`
+    :host { display: block; }
+  `]
 })
 export class InvernaderoTableComponent {
   @Input() invernaderos: Invernadero[] = [];
-  @Output() viewInvernadero = new EventEmitter<Invernadero>();
-  @Output() editInvernadero = new EventEmitter<Invernadero>();
+  @Output() viewInvernadero   = new EventEmitter<Invernadero>();
+  @Output() editInvernadero   = new EventEmitter<Invernadero>();
   @Output() deleteInvernadero = new EventEmitter<Invernadero>();
 }

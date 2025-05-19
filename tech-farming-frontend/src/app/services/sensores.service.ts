@@ -1,7 +1,7 @@
 // src/app/services/sensores.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Sensor } from '../sensores/models/sensor.model';
 
@@ -66,5 +66,12 @@ export class SensoresService {
     return this.http.get<MergedLectura[]>(
       `${this.apiUrl}/merged-lecturas?limit=${limit}`
     );
+  }
+  /** 6) traer todos los sensores de un invernadero por parametro (se debe aplicar en el backend!!!!!) */
+  getSensoresPorFiltro(invernaderoId: number, tipoParametroId: number): Observable<Sensor[]> {
+    const params = new HttpParams()
+      .set('invernadero_id', invernaderoId.toString())
+      .set('tipo_parametro_id', tipoParametroId.toString());
+    return this.http.get<Sensor[]>(`${this.apiUrl}`, { params });
   }
 }
