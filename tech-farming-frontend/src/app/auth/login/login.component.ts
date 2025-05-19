@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 interface LoginForm {
   email: FormControl<null | string>;
@@ -34,6 +34,7 @@ export class LoginComponent {
   loginErrorMessage = signal<string | null>(null);
   resetErrorMessage = signal<string | null>(null);
   showResetPasswordModal = signal(false);
+  showSuccessModal = signal(false);
   resetEmail = '';
 
   form = this._formBuilder.group<LoginForm>({
@@ -84,29 +85,35 @@ export class LoginComponent {
   }
 
   async sendResetPasswordEmail() {
-    this.resetErrorMessage.set(null);
+  this.resetErrorMessage.set(null);
 
-    if (this.resetForm.invalid) {
-      this.resetErrorMessage.set('Ingresa un correo válido.');
+  if (this.resetForm.invalid) {
+    this.resetErrorMessage.set('Ingresa un correo válido.');
+    return;
+  }
+
+  const email = this.resetForm.get('email')?.value ?? '';
+
+  try {
+    const { error } = await this._authService.resetPassword(email);
+
+    if (error) {
+      console.error("Error en Supabase:", error);
+      this.resetErrorMessage.set('Hubo un problema al enviar el correo. Verifica tu correo e inténtalo de nuevo.');
       return;
     }
 
-    const email = this.resetForm.get('email')?.value ?? '';
+    this.showResetPasswordModal.set(false);
+    this.showSuccessModal.set(true);
+    this.resetForm.reset();
 
-    try {
-      const { error } = await this._authService.resetPassword(email);
-
-      if (error) {
-        console.error("Error en Supabase:", error);
-        this.resetErrorMessage.set('Hubo un problema al enviar el correo. Verifica tu correo e inténtalo de nuevo.');
-        return;
-      }
-
-      alert('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
-      this.closeResetPasswordModal();
-    } catch (error) {
-      this.resetErrorMessage.set('Error al enviar el correo de recuperación.');
-      console.error(error);
-    }
+    setTimeout(() => {
+      this.showSuccessModal.set(false);
+    }, 5000);
+  } catch (error) {
+    this.resetErrorMessage.set('Error al enviar el correo de recuperación.');
+    console.error(error);
   }
+}
+
 }

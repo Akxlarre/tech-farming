@@ -1,7 +1,6 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { privateGuard, publicGuard } from './guards/auth.guard';
+import { privateGuard, publicGuard, resetPasswordGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -22,7 +21,12 @@ export const routes: Routes = [
   {
     path: 'login',
     canActivate: [publicGuard],
-    loadComponent: () => import('./auth/login.component').then(m => m.LoginComponent)
+    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'reset-password',
+    canActivate: [resetPasswordGuard],
+    loadComponent: () => import('./auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
   },
   {
     path: '**',
