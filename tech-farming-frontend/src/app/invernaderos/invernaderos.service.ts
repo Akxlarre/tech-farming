@@ -37,7 +37,8 @@ export class InvernaderoService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  getAllInvernaderos(): Observable<Invernadero[]> {
-    return this.http.get<Invernadero[]>(this.apiUrl);
+  /** 5) Obtener un invernadero por ID */
+  obtenerInvernaderoPorId(id: number): Observable<Invernadero> {
+    return this.http.get<Invernadero>(`${this.apiUrl}/${id}`);
   }
 }

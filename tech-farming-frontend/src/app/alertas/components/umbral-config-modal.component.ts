@@ -143,7 +143,7 @@ export class UmbralConfigModalComponent implements OnInit {
     });
 
     // Cargar datos iniciales
-    this.invSvc.getAllInvernaderos().subscribe(list => this.invernaderos = list);
+    this.invSvc.getInvernaderos().subscribe(list => this.invernaderos = list);
     this.tpSvc.obtenerTiposParametro().subscribe(list => this.tiposParametro = list);
 
     // Reactividad entre campos
