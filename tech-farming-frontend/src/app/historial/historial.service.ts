@@ -1,7 +1,7 @@
 // src/app/historial/historial.service.ts
-import { Injectable }                 from '@angular/core';
-import { HttpClient, HttpParams }     from '@angular/common/http';
-import { Observable }                 from 'rxjs';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import {
   Invernadero,
@@ -11,36 +11,39 @@ import {
   HistorialParams,
   HistorialData
 } from '../models';
-//import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class HistorialService {
-  private readonly API = `${'url.por.defecto'}/v1`; // Cambiar por la URL de la API
+  // URLs raíz para cada recurso
+  private invernaderoUrl     = 'http://localhost:5000/api/invernaderos';
+  private zonaUrl            = 'http://localhost:5000/api/zonas';
+  private parametroUrl       = 'http://localhost:5000/api/parametros';
+  private historialUrl       = 'http://localhost:5000/api/historial';
 
   constructor(private http: HttpClient) {}
 
   /** GET  /invernaderos */
   getInvernaderos(): Observable<Invernadero[]> {
-    return this.http.get<Invernadero[]>(`${this.API}/invernaderos`);
+    return this.http.get<Invernadero[]>(this.invernaderoUrl);
   }
 
   /** GET  /invernaderos/{id}/zonas */
   getZonasByInvernadero(invernaderoId: number): Observable<Zona[]> {
     return this.http.get<Zona[]>(
-      `${this.API}/invernaderos/${invernaderoId}/zonas`
+      `${this.invernaderoUrl}/${invernaderoId}/zonas`
     );
   }
 
   /** GET  /zonas/{id}/sensores */
   getSensoresByZona(zonaId: number): Observable<Sensor[]> {
     return this.http.get<Sensor[]>(
-      `${this.API}/zonas/${zonaId}/sensores`
+      `${this.zonaUrl}/${zonaId}/sensores`
     );
   }
 
   /** GET  /parametros */
   getTiposParametro(): Observable<TipoParametro[]> {
-    return this.http.get<TipoParametro[]>(`${this.API}/parametros`);
+    return this.http.get<TipoParametro[]>(this.parametroUrl);
   }
 
   /**
@@ -61,9 +64,13 @@ export class HistorialService {
       .set('hasta',           params.fechaHasta.toISOString())
       .set('tipoParametroId', params.tipoParametroId.toString());
 
-    if (params.zonaId != null)   qp = qp.set('zonaId',   params.zonaId.toString());
-    if (params.sensorId != null) qp = qp.set('sensorId', params.sensorId.toString());
+    if (params.zonaId != null)   {
+      qp = qp.set('zonaId',   params.zonaId.toString());
+    }
+    if (params.sensorId != null) {
+      qp = qp.set('sensorId', params.sensorId.toString());
+    }
 
-    return this.http.get<HistorialData>(`${this.API}/historial`, { params: qp });
+    return this.http.get<HistorialData>(this.historialUrl, { params: qp });
   }
 }
