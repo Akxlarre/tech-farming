@@ -5,6 +5,9 @@ import { TipoParametro } from './models/tipos_parametro.model';
 
 @Injectable({ providedIn: 'root' })
 export class TipoParametroService {
+  getAll() {
+    throw new Error('Method not implemented.');
+  }
   private apiUrl = 'http://localhost:5000/api/tipos-parametro';
 
   constructor(private http: HttpClient) {}

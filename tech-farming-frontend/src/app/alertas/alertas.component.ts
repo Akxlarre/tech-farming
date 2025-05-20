@@ -9,6 +9,7 @@ import { AlertsHistoryComponent } from './components/alertas-historial.component
 import { UmbralModalWrapperComponent } from './components/umbral-modal-wrapper.component';
 import { UmbralConfigModalComponent } from './components/umbral-config-modal.component';
 import { Invernadero, Zona } from '../models/index';
+import { UmbralListComponent } from './components/umbral-list.component';
 
 @Component({
   selector: 'app-alertas',
@@ -18,9 +19,10 @@ import { Invernadero, Zona } from '../models/index';
     ReactiveFormsModule,
     ActiveAlertsComponent,
     AlertsHistoryComponent,
-    UmbralModalWrapperComponent,
-    UmbralConfigModalComponent
-  ],
+    UmbralConfigModalComponent,
+    UmbralListComponent,
+    UmbralModalWrapperComponent
+],
   template: `
     <div class="p-6 bg-base-100">
       <h1 class="text-3xl font-bold mb-6">Gestión de Alertas</h1>
@@ -90,9 +92,14 @@ import { Invernadero, Zona } from '../models/index';
         <app-alerts-history [alertas]="alertas"></app-alerts-history>
       </div>
 
-      <!-- Modal configuración Umbrales -->
+      <!-- Modal de configuración de Umbrales -->
       <app-umbral-modal-wrapper *ngIf="modal.modalType$ | async as tipo">
-        <app-umbral-config-modal *ngIf="tipo === 'create' || tipo === 'edit'"></app-umbral-config-modal>
+        <!-- 1) Lista de umbrales -->
+        <app-umbral-list *ngIf="tipo === 'view'"></app-umbral-list>
+        <!-- 2) Formulario de Crear/Editar -->
+        <app-umbral-config-modal 
+            *ngIf="tipo === 'create' || tipo === 'edit'">
+        </app-umbral-config-modal>
       </app-umbral-modal-wrapper>
     </div>
   `
@@ -142,6 +149,6 @@ export class AlertasComponent implements OnInit {
   }
 
   abrirConfiguracionUmbrales() {
-    this.modal.openModal('create');
+    this.modal.openModal('view');
   }
 }
