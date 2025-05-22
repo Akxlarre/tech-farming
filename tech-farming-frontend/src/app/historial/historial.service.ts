@@ -69,7 +69,12 @@ export class HistorialService {
     }
     if (params.sensorId != null) {
       qp = qp.set('sensorId', params.sensorId.toString());
-    }
+    }   
+  // —— DEBUG: imprime la URL completa con query params ——  
+    const urlDebug = `${this.historialUrl}?${qp.toString()}`;
+    console.log('[DEBUG] URL Historial:', urlDebug);
+  // ——————————————————————————————————————————————
+    
 
     return this.http.get<HistorialData>(this.historialUrl, { params: qp });
   }

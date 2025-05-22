@@ -6,6 +6,8 @@ from app.routes.tipos_parametro import router as tipos_parametro_bp
 from app.routes.zona import router as zonas_bp
 from app.routes.zonas_sensores import router as zonas_sensores_bp
 from app.routes.historial import router as historial_bp
+from app.routes.sensor_parametros import router as sensor_parametros_bp
+
 
 def register_routes(app):
     app.register_blueprint(api_bp, url_prefix='/api')
@@ -16,3 +18,4 @@ def register_routes(app):
     app.register_blueprint(zonas_bp, url_prefix='/api/invernaderos')
     app.register_blueprint(zonas_sensores_bp, url_prefix='/api/zonas')
     app.register_blueprint(historial_bp, url_prefix='/api')
+    app.register_blueprint(sensor_parametros_bp)

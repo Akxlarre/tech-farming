@@ -1,48 +1,70 @@
-# app/routers/historial.py
+# app/routes/historial.py
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app, abort
 from dateutil.parser import isoparse
+from influxdb_client.client.exceptions import InfluxDBError
+from app.queries.historial_queries import obtener_historial as helper_historial
+from app.models.tipo_parametro import TipoParametro as TipoParametroModel
+from app import influx_client
+from app.config import Config
 
-router = Blueprint('historial', __name__)
+router = Blueprint('historial', __name__, url_prefix='/api')
 
 @router.route('/historial', methods=['GET'])
 def get_historial():
-    """
-    GET /api/historial?
-       invernaderoId=<int>&
-       desde=<ISO8601>&
-       hasta=<ISO8601>&
-       tipoParametroId=<int>&
-       [zonaId=<int>&]
-       [sensorId=<int>]
-    """
+    # 1) Parámetros obligatorios
+    inv_id    = request.args.get('invernaderoId',    type=int)
+    desde_s   = request.args.get('desde',             type=str)
+    hasta_s   = request.args.get('hasta',             type=str)
+    tp_id     = request.args.get('tipoParametroId',   type=int)
+
+    if None in (inv_id, desde_s, hasta_s, tp_id):
+        abort(400, description="Faltan parámetros obligatorios: invernaderoId, desde, hasta, tipoParametroId")
+
+    # 2) Parsear y validar fechas
     try:
-        # 1) Parámetros obligatorios
-        inv_id  = request.args.get('invernaderoId', type=int)
-        desde   = request.args.get('desde')
-        hasta   = request.args.get('hasta')
-        tp_id   = request.args.get('tipoParametroId', type=int)
+        dt_desde = isoparse(desde_s).isoformat()
+        dt_hasta = isoparse(hasta_s).isoformat()
+    except (ValueError, TypeError):
+        abort(400, description="Formato de fecha inválido. Usa ISO 8601, p.ej. 2025-05-21T12:00:00Z")
+    if dt_desde > dt_hasta:
+        abort(400, description="'desde' no puede ser posterior a 'hasta'")
 
-        if not all([inv_id, desde, hasta, tp_id]):
-            raise ValueError("Faltan uno o más parámetros obligatorios")
+    # 3) Obtener nombre de parámetro
+    tp = TipoParametroModel.query.get(tp_id)
+    if not tp:
+        abort(400, description=f"Tipo de parámetro {tp_id} no existe")
+    nombre_parametro = tp.nombre
 
-        # Convertir fechas a datetime
-        dt_desde = isoparse(desde)
-        dt_hasta = isoparse(hasta)
+    # 4) Parámetros opcionales
+    zona_id   = request.args.get('zonaId',   type=int)
+    sensor_id = request.args.get('sensorId', type=int)
 
-        # 2) Parámetros opcionales
-        zona_id   = request.args.get('zonaId',   type=int)
-        sensor_id = request.args.get('sensorId', type=int)
+    # 5) Llamar al helper con manejo de errores
+    try:
+        result = helper_historial(
+            query_api=      influx_client.query_api(),
+            bucket=         Config.INFLUXDB_BUCKET,
+            org=            Config.INFLUXDB_ORG,
+            invernadero_id= inv_id,
+            tipo_parametro= nombre_parametro,
+            desde=          dt_desde,
+            hasta=          dt_hasta,
+            zona_id=        zona_id,
+            sensor_id=      sensor_id
+        )
+    except InfluxDBError as e:
+        current_app.logger.error(f"InfluxDBError en /api/historial: {e}")
+        abort(502, description="Error al consultar InfluxDB")
+    except Exception as e:
+        current_app.logger.exception("Error inesperado en /api/historial")
+        abort(500, description="Error interno del servidor")
 
-        # (por ahora sólo devolvemos parámetros en JSON de prueba)
+    # 6) Si no hay datos, devolvemos estructuras vacías
+    if not result.get("series"):
         return jsonify({
-            "invernaderoId":  inv_id,
-            "desde":          dt_desde.isoformat(),
-            "hasta":          dt_hasta.isoformat(),
-            "tipoParametroId": tp_id,
-            "zonaId":         zona_id,
-            "sensorId":       sensor_id,
+            "series": [],
+            "stats":  {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}
         }), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    return jsonify(result), 200
