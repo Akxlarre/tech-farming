@@ -5,6 +5,7 @@ from dateutil.parser import isoparse
 from influxdb_client.client.exceptions import InfluxDBError
 from app.queries.historial_queries import obtener_historial as helper_historial
 from app.models.tipo_parametro import TipoParametro as TipoParametroModel
+from app.models.zona import Zona as ZonaModel
 from app import influx_client
 from app.config import Config
 
@@ -40,6 +41,16 @@ def get_historial():
     zona_id   = request.args.get('zonaId',   type=int)
     sensor_id = request.args.get('sensorId', type=int)
 
+    #  —> Prioridad: sensor > zona > invernadero
+    if sensor_id is not None:
+        zona_id = None
+
+    #  —> Si hay zona, validar que pertenezca al invernadero
+    if zona_id is not None:
+        zona = ZonaModel.query.get(zona_id)
+        if not zona or zona.invernadero_id != inv_id:
+            abort(400, description=f"La zona {zona_id} no pertenece al invernadero {inv_id}")
+
     # 5) Llamar al helper con manejo de errores
     try:
         result = helper_historial(
@@ -56,7 +67,7 @@ def get_historial():
     except InfluxDBError as e:
         current_app.logger.error(f"InfluxDBError en /api/historial: {e}")
         abort(502, description="Error al consultar InfluxDB")
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Error inesperado en /api/historial")
         abort(500, description="Error interno del servidor")
 

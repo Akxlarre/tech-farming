@@ -1,39 +1,60 @@
 // src/app/shared/filtro-select.component.ts
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule }                            from '@angular/common';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule }  from '@angular/forms';
 
 @Component({
   selector: 'app-filtro-select',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <label class="block">
-      <span class="block text-sm font-medium text-base-content mb-1">{{ label }}</span>
+      <span class="block text-sm font-medium text-base-content mb-1">
+        {{ label }}
+      </span>
       <select
         class="select select-bordered w-full bg-base-100 text-base-content"
-        [value]="selectedId"
-        (change)="onChange($event)"
+        [(ngModel)]="selectedId"
+        (ngModelChange)="onSelect($event)"
       >
-        <option
-          *ngFor="let o of options"
-          [value]="o.id"
-        >{{ o.label }}</option>
+        <!-- Placeholder / “Todas” -->
+        <option [ngValue]="undefined">— No especifica —</option>
+        <!-- Opciones reales -->
+        <option *ngFor="let o of options" [ngValue]="o.id">
+          {{ o.label }}
+        </option>
       </select>
     </label>
   `
 })
-export class FiltroSelectComponent {
+export class FiltroSelectComponent implements OnChanges {
   /** Texto que aparece encima */
   @Input() label!: string;
   /** Opciones a mostrar */
   @Input() options: Array<{ id: number; label: string }> = [];
   /** Id actualmente seleccionado */
   @Input() selectedId?: number;
-  /** Emite el nuevo id (número) al cambiar */
-  @Output() selectionChange = new EventEmitter<number>();
+  /** Emite el nuevo id (número) o undefined al cambiar */
+  @Output() selectionChange = new EventEmitter<number|undefined>();
 
-  onChange(event: Event) {
-    const value = +(event.target as HTMLSelectElement).value;
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['options'] && this.selectedId != null) {
+      const exists = this.options.some(o => o.id === this.selectedId);
+      if (!exists) {
+        this.selectedId = undefined;
+        this.selectionChange.emit(undefined);
+      }
+    }
+  }
+
+  onSelect(value: number|undefined) {
     this.selectionChange.emit(value);
   }
 }

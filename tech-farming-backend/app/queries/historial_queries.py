@@ -3,7 +3,7 @@
 from typing import Optional, Dict, Any
 from influxdb_client import QueryApi
 from app.models.sensor import Sensor as SensorModel
-from app.models.zona import Zona as ZonaModel
+from app.models.zona   import Zona   as ZonaModel
 import dateutil.parser
 
 def obtener_historial(
@@ -24,8 +24,8 @@ def obtener_historial(
     3) Devuelve series y stats.
     """
 
-    # 1) Cálculo de sensor_ids (solo ID para evitar columnas faltantes)
-    if sensor_id:
+    # 1) Prioridad de filtros: sensor > zona > invernadero
+    if sensor_id is not None:
         ids = [sensor_id]
     else:
         q = SensorModel.query
@@ -33,7 +33,6 @@ def obtener_historial(
             q = q.filter_by(zona_id=zona_id)
         else:
             q = q.join(ZonaModel).filter(ZonaModel.invernadero_id == invernadero_id)
-        # Traemos solo el campo id:
         ids = [row[0] for row in q.with_entities(SensorModel.id).all()]
 
     # ——— DEBUG-REL: qué IDs enteros devolvió SQL ———
@@ -45,7 +44,6 @@ def obtener_historial(
             "stats": {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}
         }
 
-    # Formateo a etiquetas Influx: "S001", "S002", ...
     sensor_ids = [f"S{id_:03d}" for id_ in ids]
     print(f"[DEBUG-REL] Sensor IDs (tags Influx) a consultar: {sensor_ids}")
 
@@ -113,6 +111,5 @@ from(bucket: "{bucket}")
         }
     else:
         stats = {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}
-
 
     return {"series": series, "stats": stats}
