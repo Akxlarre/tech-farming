@@ -5,14 +5,17 @@ from datetime import datetime
 API_URL = "http://localhost:5000/api/sensores/datos" 
 SENSOR_TOKEN = "your_sensor_token_here"
 
-df = pd.read_csv("//home/akxlarre/Escritorio/IoTProcessed_Data.csv")
+# df = pd.read_csv("//home/akxlarre/Escritorio/IoTProcessed_Data.csv")
+df = pd.read_csv("D:\\DatosSimulados\\IoTProcessed_Data.csv")
+
+print(df.head())
 
 
 if 'tempreature' in df.columns:
     df.rename(columns={'tempreature': 'temperature'}, inplace=True)
 
 
-parametros_usados = ["temperature", "humidity", "water_level", "N", "P", "K"]
+parametros_usados = ["temperature", "humidity", "N", "P", "K"]
 
 
 for index, row in df.iterrows():

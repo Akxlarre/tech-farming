@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-splash',
   standalone: true,
   templateUrl: './splash.component.html',
-  styleUrls: ['./splash.component.scss'],
+  styleUrls: ['./splash.component.css'],
 })
 export class SplashComponent {}
