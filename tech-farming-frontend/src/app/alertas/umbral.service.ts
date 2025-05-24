@@ -5,8 +5,13 @@ import { Observable } from 'rxjs';
 export interface Umbral {
   id: number;
   tipo_parametro_id: number | null;
+  tipo_parametro_nombre: string;
+  tipo_parametro_unidad: string;
   invernadero_id: number | null;
+  invernadero_nombre: string | null;
   sensor_parametro_id: number | null;
+  sensor_nombre: string | null;
+  sensor_invernadero_nombre: string | null;
   advertencia_min: number;
   advertencia_max: number;
   critico_min?: number;
@@ -19,7 +24,7 @@ export interface Umbral {
   providedIn: 'root'
 })
 export class UmbralService {
-  private baseUrl = '/api/umbrales';
+  private baseUrl = 'http://localhost:5000/api/umbrales';
 
   constructor(private http: HttpClient) {}
 

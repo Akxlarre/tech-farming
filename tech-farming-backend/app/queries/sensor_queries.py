@@ -1,6 +1,8 @@
 from app import db
 from app.models.sensor import Sensor
 from datetime import date
+from app.models.sensor import Sensor as SensorModel
+from app.models.sensor_parametro import SensorParametro
 import secrets
 
 def obtener_sensor(token):
@@ -26,6 +28,7 @@ def insertar_sensor(data):
         db.session.rollback()
         print(f"Error al insertar sensor: {e}")
         return None
+    
 def obtener_sensores_por_zona(zona_id: int) -> list[dict]:
     """
     Devuelve una lista de sensores para una zona dada,
@@ -49,3 +52,21 @@ def obtener_sensores_por_zona(zona_id: int) -> list[dict]:
         })
     return salida    
     
+
+def obtener_sensores_por_invernadero_y_parametro(invernadero_id: int, tipo_parametro_id: int) -> list[dict]:
+    """
+    Devuelve una lista de sensores instalados en un invernadero
+    que tienen asociado un tipo de parámetro específico.
+    """
+    sensores = (
+        SensorModel.query
+        .join(SensorParametro, SensorParametro.sensor_id == SensorModel.id)
+        .filter(
+            SensorModel.zona.has(invernadero_id=invernadero_id),
+            SensorParametro.tipo_parametro_id == tipo_parametro_id
+        )
+        .order_by(SensorModel.nombre)
+        .all()
+    )
+
+    return [{"id": s.id, "nombre": s.nombre} for s in sensores]

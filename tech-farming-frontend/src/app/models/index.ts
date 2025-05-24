@@ -86,7 +86,7 @@ export interface Alerta {
   valor_detectado: number;
   fecha_hora: string;
   mensaje: string;
-  estado: 'activo' | 'resuelta';
+  estado: 'activo' | 'historico';
   resuelta_en?: string;
   resuelta_por?: number;
 }
@@ -95,8 +95,13 @@ export interface Alerta {
 export interface Umbral {
   id: number;
   tipo_parametro_id: number | null;
+  tipo_parametro_nombre: string;
+  tipo_parametro_unidad: string;
   invernadero_id: number | null;
+  invernadero_nombre: string | null;
   sensor_parametro_id: number | null;
+  sensor_nombre: string | null;
+  sensor_invernadero_nombre: string | null;
   advertencia_min: number;
   advertencia_max: number;
   critico_min?: number;

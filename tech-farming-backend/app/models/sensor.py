@@ -18,7 +18,6 @@ class Sensor(db.Model):
                        'Zona',
                        back_populates='sensores'
                     )
-    tipo_sensor  = db.relationship('TipoSensor')
     parametros   = db.relationship(
                        'SensorParametro',
                        backref='sensor',

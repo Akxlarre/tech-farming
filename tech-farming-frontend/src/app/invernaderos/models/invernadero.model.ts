@@ -9,7 +9,6 @@ export interface Zona {
 
 export interface Invernadero {
   id?: number;
-  usuario_id?: number;
   nombre: string;
   descripcion?: string;
   creado_en?: string;           // ISO timestamp string

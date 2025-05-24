@@ -1,15 +1,15 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { DashboardComponent } from './dashboard/dashboard.component'; // ejemplo
-import { AuthGuard } from './guards/auth.guard';
+import { privateGuard, publicGuard, resetPasswordGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [privateGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent), /* canActivate: [AuthGuard] */},
+      { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)},
       { path: 'sensores', loadComponent: () => import('./sensores/sensores.component').then(m => m.SensoresComponent) },
       { path: 'invernaderos', loadComponent: () => import('./invernaderos/invernaderos.component').then(m => m.InvernaderosComponent) },
       { path: 'alertas', loadComponent: () => import('./alertas/alertas.component').then(m => m.AlertasComponent) },
@@ -20,6 +20,16 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./auth/login.component').then(m => m.LoginComponent)
+    canActivate: [publicGuard],
+    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'reset-password',
+    canActivate: [resetPasswordGuard],
+    loadComponent: () => import('./auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+  },
+  {
+    path: '**',
+    redirectTo: '/login'
   }
 ];
