@@ -24,8 +24,10 @@ import { FormsModule }  from '@angular/forms';
         [(ngModel)]="selectedId"
         (ngModelChange)="onSelect($event)"
       >
-        <!-- Placeholder / “Todas” -->
-        <option [ngValue]="undefined">— No especifica —</option>
+        <!-- Placeholder / “No especifica” -->
+        <option *ngIf="allowUndefined" [ngValue]="undefined">
+          — No especifica —
+        </option>
         <!-- Opciones reales -->
         <option *ngFor="let o of options" [ngValue]="o.id">
           {{ o.label }}
@@ -42,6 +44,7 @@ export class FiltroSelectComponent implements OnChanges {
   /** Id actualmente seleccionado */
   @Input() selectedId?: number;
   /** Emite el nuevo id (número) o undefined al cambiar */
+  @Input() allowUndefined = true;            // ← por defecto true
   @Output() selectionChange = new EventEmitter<number|undefined>();
 
   ngOnChanges(changes: SimpleChanges) {

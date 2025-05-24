@@ -57,22 +57,23 @@ import { StatsCardComponent       } from './components/stats-card.component';
           label="Invernadero"
           [options]="optInvernadero"
           [selectedId]="selectedInvernadero"
-          (selectionChange)="onInvernaderoChange($event)">
-        </app-filtro-select>
+          (selectionChange)="onInvernaderoChange($event)"
+          [allowUndefined]="false"
+        ></app-filtro-select>
 
         <app-filtro-select
           label="Zona"
           [options]="optZona"
           [selectedId]="selectedZona"
-          (selectionChange)="onZonaChange($event)">
-        </app-filtro-select>
+          (selectionChange)="onZonaChange($event)"
+        ></app-filtro-select>
 
         <app-filtro-select
           label="Sensor"
           [options]="optSensor"
           [selectedId]="selectedSensor"
-          (selectionChange)="onSensorChange($event)">
-        </app-filtro-select>
+          (selectionChange)="onSensorChange($event)"
+        ></app-filtro-select>
 
         <app-filtro-select
           label="Parámetro"
