@@ -6,11 +6,11 @@ import { Sensor } from './models/sensor.model';
 
 export interface SensorFilters {
   invernadero?: number;
-  zona?:        number;
-  tipoSensor?:  number;
-  estado?:      string;
-  sortBy?:      string;
-  search?:      string;
+  zona?: number;
+  tipoSensor?: number;
+  estado?: string;
+  sortBy?: string; // ej. 'nombre' | '-nombre' | 'fecha_instalacion' | '-fecha_instalacion'
+  search?: string;
 }
 
 interface PagedResponse {
@@ -48,7 +48,7 @@ export interface EditarSensorPayload {
 export class SensoresService {
   private base = 'http://localhost:5000/api/sensores';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getSensoresPage(
     page: number,
@@ -64,6 +64,17 @@ export class SensoresService {
     });
 
     return this.http.get<PagedResponse>(this.base, { params });
+      
+  /** Ahora sí devuelve un Observable */
+  getSensoresPorFiltro(invernaderoId: number, tipoParametroId: number): Observable<Sensor[]> {
+    return this.http.get<Sensor[]>(`${this.base}/sensores/filtro`,
+      {
+        params: {
+          invernadero_id: invernaderoId,
+          tipo_parametro_id: tipoParametroId
+        }
+      }
+    );
   }
 
   crearSensor(payload: CrearSensorPayload): Observable<CrearSensorResponse> {

@@ -11,6 +11,7 @@ from app.models.zona import Zona as ZonaModel
 from app.models.invernadero import Invernadero as InvernaderoModel
 from app.models.sensor_parametro import SensorParametro as SensorParametroModel
 from app.models.tipo_parametro import TipoParametro as TipoParametroModel
+from app.queries.sensor_queries import obtener_sensores_por_invernadero_y_parametro
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
 
@@ -373,6 +374,22 @@ def ultima_lectura_sensor(sensor_id):
         "time":       ultima_time
     }), 200
 
+@router.route('/filtro', methods=['GET'])
+def listar_sensores_filtrados():
+    """
+    GET /api/sensores/filtro?invernadero_id=1&tipo_parametro_id=2
+    """
+    try:
+        invernadero_id = request.args.get('invernadero_id', type=int)
+        tipo_parametro_id = request.args.get('tipo_parametro_id', type=int)
+
+        if not invernadero_id or not tipo_parametro_id:
+            return jsonify({"error": "Faltan parámetros"}), 400
+
+        sensores = obtener_sensores_por_invernadero_y_parametro(invernadero_id, tipo_parametro_id)
+        return jsonify(sensores), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @router.route('/datos', methods=['POST'])
 def recibir_datos():

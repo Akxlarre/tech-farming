@@ -14,4 +14,9 @@ class Invernadero(db.Model):
                      cascade="all, delete-orphan",
                      lazy=True
                   )
-
+    umbrales   = db.relationship(
+                       'ConfiguracionUmbral',
+                       backref='invernadero',
+                       cascade="all, delete-orphan",
+                       lazy=True
+                    )

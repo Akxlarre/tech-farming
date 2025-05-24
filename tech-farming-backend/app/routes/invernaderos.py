@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from app.queries.invernadero_queries import obtener_invernaderos
 
 router = Blueprint('invernaderos', __name__)

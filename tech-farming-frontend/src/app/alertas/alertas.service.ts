@@ -10,14 +10,14 @@ export interface Alerta {
   valor_detectado: number;
   fecha_hora: string;
   mensaje: string;
-  estado: 'activo' | 'resuelta';
+  estado: 'activo' | 'historico';
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AlertService {
-  private baseUrl = '/api/alertas';
+  private baseUrl = 'http://localhost:5000/api/alertas';
 
   constructor(private http: HttpClient) {}
 

@@ -5,8 +5,10 @@ class Usuario(db.Model):
     __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
-    correo = db.Column(db.String(100), unique=True)
-    contraseña_hash = db.Column(db.String(128))
-    rol = db.Column(db.String(50))
+    rol_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    usuario_admin_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    supabase_uid = db.Column(db.UUID(as_uuid=True), unique=True, nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
 
+    administrador = db.relationship('Usuario', remote_side=[id], backref='trabajadores', lazy=True)
+    permisos = db.relationship('UsuarioPermiso', backref='usuario', lazy=True)

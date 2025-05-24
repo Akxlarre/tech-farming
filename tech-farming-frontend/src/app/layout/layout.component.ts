@@ -14,16 +14,16 @@ import { AuthService } from '../services/auth.service';
     HeaderComponent,
     SplashComponent,
   ],
-  templateUrl: './layout.component.html',
+  templateUrl: './layout.component.html'
 })
 export class LayoutComponent {
-  constructor(public authService: AuthService) {}
+  constructor(public authService: AuthService) { }
 
   showSplash = true;
 
   ngOnInit() {
     setTimeout(() => {
       this.showSplash = false;
-    }, 4000);
+    }, 2000);
   }
 }

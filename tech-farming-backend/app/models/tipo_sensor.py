@@ -6,4 +6,4 @@ class TipoSensor(db.Model):
     nombre = db.Column(db.String(50))
     descripcion = db.Column(db.Text)
 
-    #sensores = db.relationship('Sensor', backref='tipo_sensor', cascade="all, delete-orphan", lazy=True)
+    sensores = db.relationship('Sensor', backref='tipo_sensor', cascade="all, delete-orphan", lazy=True)

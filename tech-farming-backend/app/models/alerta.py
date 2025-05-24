@@ -10,3 +10,8 @@ class Alerta(db.Model):
     valor_detectado = db.Column(db.Numeric)
     fecha_hora = db.Column(db.DateTime, default=datetime.utcnow)
     nivel = db.Column(db.String(20))
+    estado = db.Column(db.String(20), default="activo")
+    resuelta_en = db.Column(db.DateTime, nullable=True)
+    resuelta_por = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+
+    usuario_resolutor = db.relationship("Usuario", foreign_keys=[resuelta_por])
