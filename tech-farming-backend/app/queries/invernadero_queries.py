@@ -7,7 +7,6 @@ def obtener_invernaderos():
         return [
             {
                 "id": inv.id,
-                "usuario_id": inv.usuario_id,
                 "nombre": inv.nombre,
                 "descripcion": inv.descripcion,
                 "creado_en": inv.creado_en.isoformat() if inv.creado_en else None
