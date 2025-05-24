@@ -8,7 +8,7 @@ import { InvernaderoService } from '../../invernaderos/invernaderos.service';
 import { Invernadero } from '../../invernaderos/models/invernadero.model';
 import { TipoParametroService } from '../../sensores/tipos_parametro.service';
 import { TipoParametro } from '../../sensores/models/tipos_parametro.model';
-import { SensoresService } from '../../services/sensores.service';
+import { SensoresService } from '../../sensores/sensores.service';
 import { Sensor } from '../../sensores/models/sensor.model';
 
 @Component({

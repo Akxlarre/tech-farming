@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { SensoresComponent } from './sensores.component';
 
 describe('SensoresComponent', () => {
