@@ -1,4 +1,4 @@
-// historial/components/stats-card.component.ts
+// src/app/historial/components/stats-card.component.ts
 import { Component, Input } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { MatCardModule }     from '@angular/material/card';
@@ -32,9 +32,9 @@ import { MatCardModule }     from '@angular/material/card';
           {{ title }}
         </h3>
 
-        <!-- Valor -->
+        <!-- Valor formateado a 2 decimales -->
         <p class="value text-2xl font-extrabold text-primary-content mb-4">
-          {{ value }}
+          {{ value | number:'1.2-2' }}
         </p>
       </div>
 

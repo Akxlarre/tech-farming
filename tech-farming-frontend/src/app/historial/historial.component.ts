@@ -1,13 +1,13 @@
 // src/app/historial/historial.component.ts
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule }  from '@angular/forms';
-import { MatFormFieldModule }  from '@angular/material/form-field';
-import { MatSelectModule }     from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatCardModule }       from '@angular/material/card';
-import { MatButtonModule }     from '@angular/material/button';
+import { CommonModule }      from '@angular/common';
+import { FormsModule }       from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule }    from '@angular/material/select';
+import { MatDatepickerModule }from '@angular/material/datepicker';
+import { MatNativeDateModule }from '@angular/material/core';
+import { MatCardModule }      from '@angular/material/card';
+import { MatButtonModule }    from '@angular/material/button';
 
 import { HistorialService } from './historial.service';
 import {
@@ -28,10 +28,14 @@ import { StatsCardComponent       } from './components/stats-card.component';
   selector: 'app-historial',
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    MatFormFieldModule, MatSelectModule,
-    MatDatepickerModule, MatNativeDateModule,
-    MatCardModule, MatButtonModule,
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCardModule,
+    MatButtonModule,
     FiltroSelectComponent,
     FiltroDateRangeComponent,
     LineChartComponent,
@@ -82,6 +86,7 @@ import { StatsCardComponent       } from './components/stats-card.component';
           [options]="optParametro"
           [selectedId]="selectedTipoParametroId"
           (selectionChange)="onParametroChange($event)"
+          [allowUndefined]="false"
         ></app-filtro-select>
 
         <app-filtro-date-range
@@ -101,10 +106,8 @@ import { StatsCardComponent       } from './components/stats-card.component';
         </button>
       </div>
 
-      <!-- ALERTA “NO HAY DATOS” (estilo DaisyUI/Tailwind) -->
-      <div *ngIf="noData"
-           class="border-l-4 border-yellow-500 bg-yellow-100 text-yellow-800 p-4 rounded"
-      >
+      <!-- ALERTA “NO HAY DATOS” -->
+      <div *ngIf="noData" class="border-l-4 border-yellow-500 bg-yellow-100 text-yellow-800 p-4 rounded">
         ⚠️ No hay datos disponibles para los filtros seleccionados.
       </div>
 
@@ -121,19 +124,25 @@ import { StatsCardComponent       } from './components/stats-card.component';
 
       <!-- ESTADÍSTICAS -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <app-stats-card title="Promedio" [value]="historial?.stats?.promedio ?? 0"></app-stats-card>
+        <app-stats-card title="Promedio"
+                        [value]="historial?.stats?.promedio ?? 0">
+        </app-stats-card>
+
         <app-stats-card title="Mínimo"
                         [value]="historial?.stats?.minimo?.value ?? 0"
                         [subtext]="historial?.stats?.minimo?.fecha ?? ''">
         </app-stats-card>
+
         <app-stats-card title="Máximo"
                         [value]="historial?.stats?.maximo?.value ?? 0"
                         [subtext]="historial?.stats?.maximo?.fecha">
         </app-stats-card>
+
         <app-stats-card title="Desvío estándar"
                         [value]="historial?.stats?.desviacion ?? 0">
         </app-stats-card>
       </div>
+
     </div>
   `,
   styles: [`
@@ -143,11 +152,11 @@ import { StatsCardComponent       } from './components/stats-card.component';
   `]
 })
 export class HistorialComponent implements OnInit {
-  invernaderos:   Invernadero[]   = [];
-  zonas:          Zona[]          = [];
-  sensores:       Sensor[]        = [];
+  invernaderos: Invernadero[]   = [];
+  zonas:        Zona[]          = [];
+  sensores:     Sensor[]        = [];
   tiposParametro: TipoParametro[] = [];
-  historial?:     HistorialData;
+  historial?:   HistorialData;
   noData = false;
 
   optInvernadero: Array<{id:number; label:string}> = [];
@@ -174,7 +183,7 @@ export class HistorialComponent implements OnInit {
     this.historialService.getTiposParametro()
       .subscribe(list => {
         this.tiposParametro = list;
-        this.optParametro = list.map(t => ({ id: t.id, label: t.nombre }));
+        this.optParametro   = list.map(t => ({ id: t.id, label: t.nombre }));
         if (list.length) this.selectedTipoParametroId = list[0].id;
       });
   }
@@ -186,8 +195,8 @@ export class HistorialComponent implements OnInit {
 
   onInvernaderoChange(id: number|undefined) {
     this.selectedInvernadero = id;
-    this.zonas = []; this.optZona = []; this.selectedZona = undefined;
-    this.sensores = []; this.optSensor = []; this.selectedSensor = undefined;
+    this.optZona = []; this.zonas = []; this.selectedZona = undefined;
+    this.optSensor = []; this.sensores = []; this.selectedSensor = undefined;
     this.noData = false;
     if (id != null) {
       this.historialService.getZonasByInvernadero(id)
@@ -201,7 +210,7 @@ export class HistorialComponent implements OnInit {
 
   onZonaChange(id: number|undefined) {
     this.selectedZona = id;
-    this.sensores = []; this.optSensor = []; this.selectedSensor = undefined;
+    this.optSensor = []; this.sensores = []; this.selectedSensor = undefined;
     this.noData = false;
     if (id != null) {
       this.historialService.getSensoresByZona(id)
@@ -226,39 +235,62 @@ export class HistorialComponent implements OnInit {
   }
 
   reloadHistorial() {
-    this.noData = false;
-    if (!this.selectedInvernadero || !this.selectedTipoParametroId) return;
+  // 1) Reset previo: todas las fechas en '' para respetar string
+  this.noData    = false;
+  this.historial = {
+    series: [],
+    stats: {
+      promedio: 0,
+      minimo:   { value: 0, fecha: '' },
+      maximo:   { value: 0, fecha: '' },
+      desviacion: 0
+    }
+  };
 
-    const p: HistorialParams = {
-      invernaderoId:   this.selectedInvernadero,
-      zonaId:          this.selectedZona,
-      sensorId:        this.selectedSensor,
-      tipoParametroId: this.selectedTipoParametroId,
-      fechaDesde:      this.rango.from,
-      fechaHasta:      this.rango.to
-    };
+  // 2) Validación básica
+  if (!this.selectedInvernadero || !this.selectedTipoParametroId) {
+    return;
+  }
 
-    this.historialService.getHistorial(p)
-      .subscribe(data => {
-        this.historial = data;
+  // 3) Preparo params
+  const p: HistorialParams = {
+    invernaderoId:   this.selectedInvernadero,
+    zonaId:          this.selectedZona,
+    sensorId:        this.selectedSensor,
+    tipoParametroId: this.selectedTipoParametroId,
+    fechaDesde:      this.rango.from,
+    fechaHasta:      this.rango.to
+  };
+
+  // 4) Llamada y manejo de respuesta
+  this.historialService.getHistorial(p)
+    .subscribe(
+      data => {
         if (data.series.length === 0) {
+          // no hay datos → mantengo el reset y muestro alerta
           this.noData = true;
           setTimeout(() => this.noData = false, 3000);
+        } else {
+          // datos reales
+          this.historial = data;
         }
-      }, err => {
+      },
+      err => {
         console.error('Error al cargar historial:', err);
         this.noData = true;
         setTimeout(() => this.noData = false, 3000);
-      });
-  }
+      }
+    );
+}
+
 
   exportCsv() {
     if (!this.historial) return;
     const csv = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+    const a   = document.createElement('a');
+    a.href    = url;
     a.download = 'historial.csv';
     a.click();
     URL.revokeObjectURL(url);

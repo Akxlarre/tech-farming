@@ -16,7 +16,7 @@ def obtener_historial(
     hasta:          str,
     zona_id:        Optional[int] = None,
     sensor_id:      Optional[int] = None,
-    window_every:   str = "1h"
+    window_every:   str = "5s"
 ) -> Dict[str, Any]:
     """
     1) Obtiene sólo los IDs de sensores según invernadero/zona/sensor.
