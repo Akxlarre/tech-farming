@@ -6,4 +6,5 @@ class TipoParametro(db.Model):
     nombre = db.Column(db.String(50))
     unidad = db.Column(db.String(20))
 
-    parametros = db.relationship('SensorParametro', backref='tipo_parametro', lazy=True)
+    umbral = db.relationship('ConfiguracionUmbral', backref='tipo_parametro', cascade="all, delete-orphan", lazy=True)
+    parametros = db.relationship('SensorParametro', backref='tipo_parametro', cascade="all, delete-orphan", lazy=True)
