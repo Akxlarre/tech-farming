@@ -1,3 +1,4 @@
+from app import db
 from app.models.configuracion_umbral import ConfiguracionUmbral
 
 def listar_umbrales(filtros):
@@ -15,7 +16,7 @@ def listar_umbrales(filtros):
     if sensor_parametro_id:
         query = query.filter(ConfiguracionUmbral.sensor_parametro_id == sensor_parametro_id)
 
-    # Filtro por "ambito"
+    # Filtro por ambito (global, invernadero, sensor)
     if ambito == "global":
         query = query.filter(
             ConfiguracionUmbral.tipo_parametro_id.isnot(None),
@@ -35,8 +36,6 @@ def listar_umbrales(filtros):
             "tipo_parametro_id": u.tipo_parametro_id,
             "invernadero_id": u.invernadero_id,
             "sensor_parametro_id": u.sensor_parametro_id,
-            "umbral_min": float(u.umbral_min) if u.umbral_min else None,
-            "umbral_max": float(u.umbral_max) if u.umbral_max else None,
             "advertencia_min": float(u.advertencia_min) if u.advertencia_min else None,
             "advertencia_max": float(u.advertencia_max) if u.advertencia_max else None,
             "critico_min": float(u.critico_min) if u.critico_min else None,
@@ -45,3 +44,67 @@ def listar_umbrales(filtros):
         }
         for u in resultados
     ]
+
+def crear_umbral(data):
+    try:
+        nuevo_umbral = ConfiguracionUmbral(
+            tipo_parametro_id = data.get("tipo_parametro_id"),
+            invernadero_id = data.get("invernadero_id"),
+            sensor_parametro_id = data.get("sensor_parametro_id"),
+            advertencia_min = data.get("advertencia_min"),
+            advertencia_max = data.get("advertencia_max"),
+            critico_min = data.get("critico_min"),
+            critico_max = data.get("critico_max"),
+            activo = True
+        )
+        db.session.add(nuevo_umbral)
+        db.session.commit()
+
+        return {
+            "id": nuevo_umbral.id,
+            "mensaje": "Umbral creado exitosamente"
+        }
+    except Exception as e:
+        db.session.rollback()
+        print(f"[ERROR] al crear umbral: {e}")
+        return {"error": str(e)}
+    
+def actualizar_umbral(umbral_id, data):
+    try:
+        umbral = ConfiguracionUmbral.query.get(umbral_id)
+        if not umbral:
+            return {"error": "Umbral no encontrado"}
+
+        # Actualizar campos si vienen en el JSON
+        umbral.tipo_parametro_id = data.get("tipo_parametro_id", umbral.tipo_parametro_id)
+        umbral.invernadero_id = data.get("invernadero_id", umbral.invernadero_id)
+        umbral.sensor_parametro_id = data.get("sensor_parametro_id", umbral.sensor_parametro_id)
+        umbral.advertencia_min = data.get("advertencia_min", umbral.advertencia_min)
+        umbral.advertencia_max = data.get("advertencia_max", umbral.advertencia_max)
+        umbral.critico_min = data.get("critico_min", umbral.critico_min)
+        umbral.critico_max = data.get("critico_max", umbral.critico_max)
+
+        db.session.commit()
+
+        return {"mensaje": "Umbral actualizado correctamente"}
+    except Exception as e:
+        db.session.rollback()
+        print(f"[ERROR] al actualizar umbral: {e}")
+        return {"error": str(e)}
+    
+def eliminar_umbral(umbral_id):
+    try:
+        umbral = ConfiguracionUmbral.query.get(umbral_id)
+        if not umbral:
+            return {"error": "Umbral no encontrado"}
+
+        umbral.activo = False
+        db.session.commit()
+
+        return {"mensaje": "Umbral desactivado correctamente"}
+    except Exception as e:
+        db.session.rollback()
+        print(f"[ERROR] al eliminar umbral: {e}")
+        return {"error": str(e)}
+
+

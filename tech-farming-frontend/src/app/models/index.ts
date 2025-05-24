@@ -86,7 +86,7 @@ export interface Alerta {
   valor_detectado: number;
   fecha_hora: string;
   mensaje: string;
-  estado: 'activo' | 'resuelta';
+  estado: 'activo' | 'historico';
   resuelta_en?: string;
   resuelta_por?: number;
 }

@@ -10,8 +10,6 @@ class ConfiguracionUmbral(db.Model):
     tipo_parametro_id = db.Column(db.Integer, db.ForeignKey('tipos_parametro.id'), nullable=True)
     invernadero_id = db.Column(db.Integer, db.ForeignKey('invernaderos.id'), nullable=True)
 
-    umbral_min = db.Column(db.Numeric)
-    umbral_max = db.Column(db.Numeric)
     advertencia_min = db.Column(db.Numeric)
     advertencia_max = db.Column(db.Numeric)
     critico_min = db.Column(db.Numeric)
