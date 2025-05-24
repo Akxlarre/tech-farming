@@ -11,5 +11,4 @@ class Usuario(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
 
     administrador = db.relationship('Usuario', remote_side=[id], backref='trabajadores', lazy=True)
-    invernaderos = db.relationship('Invernadero', backref='usuario', lazy=True)
     permisos = db.relationship('UsuarioPermiso', backref='usuario', lazy=True)
