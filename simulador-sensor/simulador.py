@@ -1,43 +1,48 @@
 import requests
 import pandas as pd
 import time
-from datetime import datetime
-API_URL = "http://localhost:5000/api/sensores/datos" 
-SENSOR_TOKEN = "your_sensor_token_here"
 
-# df = pd.read_csv("//home/akxlarre/Escritorio/IoTProcessed_Data.csv")
-df = pd.read_csv("D:\\DatosSimulados\\IoTProcessed_Data.csv")
+API_URL = "http://localhost:5000/api/sensores/datos"
+SENSOR_TOKEN = "977f72b5545dace58664f27299844063"
 
-print(df.head())
+# 1) Carga el CSV y muestra sus columnas
+df = pd.read_csv("/home/akxlarre/Escritorio/IoTProcessed_Data.csv")
+print("Columnas originales:", df.columns.tolist())
 
-
+# 2) Renombrado de columnas según cómo vengan en tu CSV
 if 'tempreature' in df.columns:
-    df.rename(columns={'tempreature': 'temperature'}, inplace=True)
+    df.rename(columns={'tempreature': 'Temperatura'}, inplace=True)
+if 'humidity' in df.columns:
+    df.rename(columns={'humidity': 'Humedad'}, inplace=True)
 
+# 3) Parámetros que vas a enviar
+parametros_usados = ['Temperatura', 'Humedad']
 
-parametros_usados = ["temperature", "humidity", "N", "P", "K"]
-
-
+# 4) Itera fila por fila
 for index, row in df.iterrows():
     mediciones = []
     for parametro in parametros_usados:
-        if pd.notnull(row[parametro]):
+        # Verifica que la columna exista y no sea NaN
+        if parametro in row.index and pd.notnull(row[parametro]):
             mediciones.append({
-                "parametro": parametro,
-                "valor": float(row[parametro])
+                'parametro': parametro,
+                'valor':     float(row[parametro])
             })
 
     payload = {
-        "token": SENSOR_TOKEN,
-        "mediciones": mediciones
+        'token':       SENSOR_TOKEN,
+        'mediciones':  mediciones
     }
 
-    print(f"🔄 Enviando fila {index + 1}...")
-    response = requests.post(API_URL, json=payload)
-
-    if response.status_code == 200:
+    print(f"🔄 Enviando fila {index+1} con columnas {list(row.index)}")
+    try:
+        response = requests.post(API_URL, json=payload)
+        response.raise_for_status()
         print("✅ Datos enviados correctamente")
-    else:
-        print(f" Error {response.status_code}: {response.text}")
+    except requests.HTTPError as e:
+        print(f"❌ HTTP {response.status_code}: {response.text}")
+    except Exception as e:
+        print(f"❌ Error inesperado: {e}")
 
-    time.sleep(2)  
+    # 5) Espera 2 segundos antes de la siguiente iteración
+    time.sleep(2)
