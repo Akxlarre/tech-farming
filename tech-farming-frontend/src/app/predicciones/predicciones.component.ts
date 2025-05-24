@@ -37,10 +37,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     TrendCardComponent
   ],
   template: `
-    <div
-      class="flex flex-col"
-      style="height: calc(100vh - var(--header-height));"
-    >
+    <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
       <div class="flex items-center justify-between px-6 py-4 bg-base-200 border-b border-base-300">
         <h1 class="text-3xl font-bold text-base-content">Predicciones</h1>
@@ -56,59 +53,51 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
       </div>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
-        <!-- FILTROS (proporción áurea) -->
-        <div
-          class="grid gap-4"
-          style="grid-template-columns: calc(100% * var(--inv-phi)) 1fr minmax(auto, 20rem);"
-        >
+        <!-- FILTROS -->
+        <div class="grid gap-4" style="grid-template-columns: calc(100% * var(--inv-phi)) 1fr minmax(auto, 20rem);">
           <app-filtro-select
             label="Invernadero"
             [options]="optInvernadero"
             [selectedId]="selectedInvernadero"
-            (selectionChange)="onInvernaderoChange($event)">
-          </app-filtro-select>
+            (selectionChange)="onInvernaderoChange($event)"
+          ></app-filtro-select>
 
           <app-filtro-select
             label="Zona"
             [options]="optZona"
             [selectedId]="selectedZona"
-            (selectionChange)="onZonaChange($event)">
-          </app-filtro-select>
+            (selectionChange)="onZonaChange($event)"
+          ></app-filtro-select>
 
           <app-filtro-select
             label="Proyección"
             [options]="optProjection"
             [selectedId]="selectedProjection"
-            (selectionChange)="onProjectionChange($event)">
-          </app-filtro-select>
+            (selectionChange)="onProjectionChange($event)"
+          ></app-filtro-select>
         </div>
 
         <!-- GRÁFICO -->
         <mat-card class="bg-base-100 p-6 shadow-xl animate-fade-in-down">
-          <div
-            class="w-full"
-            style="height: min(max(300px, 40vh), 55vh);"
-          >
+          <div class="w-full" style="height: min(max(300px, 40vh), 55vh);">
             <app-prediction-chart
               [historical]="data?.historical ?? []"
               [future]    ="data?.future     ?? []"
-              [label]     ="selectedProjectionLabel">
-            </app-prediction-chart>
+              [label]     ="selectedProjectionLabel"
+            ></app-prediction-chart>
           </div>
         </mat-card>
 
         <!-- RESUMEN & TENDENCIA -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           <app-summary-card class="h-full" [summary]="data?.summary"></app-summary-card>
-          <app-trend-card    class="h-full" [trend]  ="uiTrend"></app-trend-card>
+          <app-trend-card    class="h-full" [trend]="uiTrend"></app-trend-card>
         </div>
       </div>
     </div>
   `,
   styles: [`
     :host { display: block; }
-
-    /* Define la proporción áurea y altura de header */
     :root {
       --phi: 1.618;
       --inv-phi: 0.618;
@@ -127,12 +116,13 @@ export class PrediccionesComponent implements OnInit {
     { id: 24, label: '24 horas' }
   ];
 
+  // Ahora aceptan undefined
   selectedInvernadero?: number;
   selectedZona?:         number;
   selectedProjection = 6;
 
-  data?: PredicResult;   // respuesta cruda de la API
-  uiTrend?: UITrend;     // adaptado a TrendCardComponent
+  data?: PredicResult;
+  uiTrend?: UITrend;
 
   constructor(private svc: PrediccionesService) {}
 
@@ -147,7 +137,9 @@ export class PrediccionesComponent implements OnInit {
     return this.optProjection.find(p => p.id === this.selectedProjection)?.label ?? '';
   }
 
-  onInvernaderoChange(id: number) {
+  // Métodos ahora aceptan number | undefined
+  onInvernaderoChange(id: number | undefined) {
+    if (id == null) return;
     this.selectedInvernadero = id;
     this.svc.getZonasByInvernadero(id).subscribe(list => {
       this.zonas   = list;
@@ -155,11 +147,13 @@ export class PrediccionesComponent implements OnInit {
     });
   }
 
-  onZonaChange(id: number) {
+  onZonaChange(id: number | undefined) {
+    if (id == null) return;
     this.selectedZona = id;
   }
 
-  onProjectionChange(h: number) {
+  onProjectionChange(h: number | undefined) {
+    if (h == null) return;
     this.selectedProjection = h as 6|12|24;
   }
 
@@ -170,11 +164,10 @@ export class PrediccionesComponent implements OnInit {
       zonaId:        this.selectedZona,
       horas:         this.selectedProjection as 6|12|24
     };
-    this.svc.getPredicciones(params)
-      .subscribe(res => {
-        this.data    = res;
-        this.uiTrend = this.mapTrend(res.trend);
-      });
+    this.svc.getPredicciones(params).subscribe(res => {
+      this.data    = res;
+      this.uiTrend = this.mapTrend(res.trend);
+    });
   }
 
   private mapTrend(api: APITrend): UITrend {
