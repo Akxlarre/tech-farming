@@ -14,8 +14,6 @@ def insertar_sensor(data):
             descripcion=data.get("descripcion"),
             estado=data.get("estado"),
             fecha_instalacion=data.get("fecha_instalacion", date.today()),
-            pos_x=data.get("pos_x"),
-            pos_y=data.get("pos_y"),
             tipo_sensor_id=data["tipo_sensor_id"],
             token=secrets.token_hex(16)
         )

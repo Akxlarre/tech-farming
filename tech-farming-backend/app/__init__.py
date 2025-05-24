@@ -1,3 +1,4 @@
+import logging
 import os
 import click
 from dotenv import load_dotenv
@@ -71,6 +72,7 @@ def cli_insertar_lectura(sensor_id, parametro, valor):
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.logger.setLevel(logging.DEBUG)
 
     # CORS
     CORS(app,
@@ -103,6 +105,6 @@ def create_app():
 
 if __name__ == "__main__":
     # Prueba de inserción rápida
-    escribir_dato("S003", "N", 69.5)
-    escribir_dato("S004", "Potasio", 9.8)
-    escribir_dato("S002", "Humedad", 65.2)
+    escribir_dato("3", "N", 69.5)
+    escribir_dato("4", "Potasio", 9.8)
+    escribir_dato("2", "Humedad", 65.2)

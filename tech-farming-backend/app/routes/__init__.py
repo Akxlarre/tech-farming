@@ -14,6 +14,7 @@ def register_routes(app):
     app.register_blueprint(sensores_bp)
     app.register_blueprint(invernaderos_bp, url_prefix='/api/invernaderos')
     app.register_blueprint(tipos_sensor_bp, url_prefix='/api/tipos-sensor')
+
     app.register_blueprint(tipos_parametro_bp, url_prefix='/api/parametros')
     app.register_blueprint(zonas_bp, url_prefix='/api/invernaderos')
     app.register_blueprint(zonas_sensores_bp, url_prefix='/api/zonas')
