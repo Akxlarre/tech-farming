@@ -85,7 +85,7 @@ def listar_sensores():
             inv  = zona.invernadero if zona else None
             params = [
                 {
-                    "id": sp.id,
+                    "id": sp.tipo_parametro.id,            
                     "nombre": sp.tipo_parametro.nombre,
                     "unidad": getattr(sp.tipo_parametro, "unidad", "")
                 }
@@ -179,6 +179,100 @@ def crear_sensor():
         db.session.rollback()
         abort(500, description="No se pudo crear el sensor")
 
+@router.route('/<int:sensor_id>', methods=['PUT'])
+def editar_sensor(sensor_id):
+    data = request.get_json() or {}
+
+    # Campos que aceptamos actualizar
+    nombre       = data.get('nombre')
+    descripcion  = data.get('descripcion')
+    estado       = data.get('estado')
+    tipo_id_raw  = data.get('tipo_sensor_id')
+    inv_id_raw   = data.get('invernadero_id')
+    zona_id_raw  = data.get('zona_id')
+    parametro_ids = data.get('parametro_ids', [])
+
+    # Validaciones básicas
+    if nombre is None or estado is None or tipo_id_raw is None or inv_id_raw is None:
+        abort(400, description="nombre, estado, tipo_sensor_id e invernadero_id son obligatorios")
+
+    try:
+        tipo_sensor_id = int(tipo_id_raw)
+        invernadero_id = int(inv_id_raw)
+    except ValueError:
+        abort(400, description="tipo_sensor_id e invernadero_id deben ser enteros")
+
+    zona_id = None
+    if zona_id_raw not in (None, '', 0):
+        try:
+            zona_id = int(zona_id_raw)
+        except ValueError:
+            abort(400, description="zona_id debe ser un entero válido")
+
+    if not isinstance(parametro_ids, list):
+        abort(400, description="parametro_ids debe ser una lista")
+
+    # Busca el sensor existente
+    sensor = SensorModel.query.get_or_404(sensor_id, description="Sensor no encontrado")
+
+    # Valida existencia de tipo_sensor e invernadero
+    if not InvernaderoModel.query.get(invernadero_id):
+        abort(404, description="Invernadero no encontrado")
+    # (Asumimos que tipo_sensor está correcto; puedes validar similarmente si quieres)
+
+    # Si vienen zona, valida pertenencia
+    if zona_id is not None:
+        zona = ZonaModel.query.get(zona_id)
+        if not zona or zona.invernadero_id != invernadero_id:
+            abort(400, description="Zona inválida para ese invernadero")
+
+    # Aplica cambios
+    sensor.nombre           = nombre
+    sensor.descripcion      = descripcion
+    sensor.estado           = estado
+    sensor.tipo_sensor_id   = tipo_sensor_id
+    sensor.invernadero_id   = invernadero_id
+    sensor.zona_id          = zona_id
+
+    # -- Actualiza parámetros: borramos y volvemos a crear --
+    # esto eliminará los hijos thanks al cascade definido en el modelo
+    sensor.parametros.clear()
+    for pid in parametro_ids:
+        try:
+            pid_int = int(pid)
+            sp = SensorParametroModel(sensor=sensor, tipo_parametro_id=pid_int)
+            sensor.parametros.append(sp)
+        except (TypeError, ValueError):
+            continue
+
+    try:
+        db.session.commit()
+        # Prepara la respuesta con la misma forma que listar_sensores devuelve
+        zona = sensor.zona
+        inv  = zona.invernadero if zona else None
+        params = [{
+            "id":       sp.tipo_parametro.id,
+            "nombre":   sp.tipo_parametro.nombre,
+            "unidad":   getattr(sp.tipo_parametro, "unidad", "")
+        } for sp in sensor.parametros]
+
+        return jsonify({
+            "id":                sensor.id,
+            "nombre":            sensor.nombre,
+            "descripcion":       sensor.descripcion,
+            "estado":            sensor.estado,
+            "fecha_instalacion": sensor.fecha_instalacion.isoformat() if sensor.fecha_instalacion else None,
+            "tipo_sensor":       {"id": sensor.tipo_sensor.id, "nombre": sensor.tipo_sensor.nombre},
+            "zona":              {"id": zona.id, "nombre": zona.nombre} if zona else None,
+            "invernadero":       {"id": inv.id, "nombre": inv.nombre}   if inv else None,
+            "parametros":        params
+        }), 200
+
+    except Exception:
+        current_app.logger.error("Error editar_sensor:\n" + traceback.format_exc())
+        db.session.rollback()
+        abort(500, description="No se pudo actualizar el sensor")
+              
 
 @router.route('/lecturas', methods=['GET'])
 def batch_lecturas():

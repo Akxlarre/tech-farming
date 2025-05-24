@@ -1,5 +1,4 @@
 // src/app/sensores/components/sensor-create-modal.component.ts
-
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -31,8 +30,8 @@ import { TipoParametroService } from '../tipos_parametro.service';
   template: `
     <ng-container *ngIf="!created; else instructions">
       <div class="p-8 space-y-5 bg-base-100 rounded-lg shadow-lg w-full max-w-2xl">
-        <h2 class="text-[1.625rem] font-bold text-green-700 flex items-center gap-2">
-          ➕ Crear Nuevo Sensor
+        <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
+          Crear Nuevo Sensor
         </h2>
 
         <form
@@ -58,30 +57,6 @@ import { TipoParametroService } from '../tipos_parametro.service';
             </span>
           </div>
 
-          <!-- Tipo de sensor -->
-          <div>
-            <label for="tipo_sensor_id" class="label">Tipo de sensor</label>
-            <select
-              id="tipo_sensor_id"
-              formControlName="tipo_sensor_id"
-              class="select select-bordered w-full"
-            >
-              <option [ngValue]="null" disabled>Seleccione uno</option>
-              <option *ngFor="let ts of tiposSensores" [value]="ts.id">
-                {{ ts.nombre }}
-              </option>
-            </select>
-            <span
-              *ngIf="
-                form.get('tipo_sensor_id')!.invalid &&
-                form.get('tipo_sensor_id')!.touched
-              "
-              class="text-error text-sm mt-1 block"
-            >
-              Selecciona un tipo de sensor.
-            </span>
-          </div>
-
           <!-- Invernadero -->
           <div>
             <label for="invernadero_id" class="label">Invernadero</label>
@@ -97,10 +72,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
               </option>
             </select>
             <span
-              *ngIf="
-                form.get('invernadero_id')!.invalid &&
-                form.get('invernadero_id')!.touched
-              "
+              *ngIf="form.get('invernadero_id')!.invalid && form.get('invernadero_id')!.touched"
               class="text-error text-sm mt-1 block"
             >
               Selecciona un invernadero.
@@ -157,31 +129,35 @@ import { TipoParametroService } from '../tipos_parametro.service';
             <label class="label">¿Qué mide el sensor?</label>
             <div class="flex flex-wrap gap-2">
               <ng-container *ngFor="let param of posiblesParametros">
-                <label class="cursor-pointer flex items-center">
+                <label class="inline-flex items-center cursor-pointer mt-2">
                   <input
                     type="checkbox"
+                    class="peer sr-only"
                     [value]="param.id"
                     (change)="toggleParametro(param.id, $event)"
                     [checked]="isParametroSeleccionado(param.id)"
-                    class="hidden peer"
                   />
                   <span
-                    class="px-3 py-1 rounded-full bg-gray-200 text-sm
-                      peer-checked:bg-green-600 peer-checked:text-white"
+                    class="badge badge-outline
+                          peer-checked:badge-success
+                          peer-checked:text-success
+                          transition-colors duration-150 ease-in-out"
                   >
                     {{ param.nombre }}
                   </span>
                 </label>
               </ng-container>
             </div>
-            <span
-              *ngIf="
-                parametrosSeleccionados.length === 0 && parametrosTouched
-              "
-              class="text-error text-sm mt-1 block"
-            >
-              Selecciona al menos un parámetro.
-            </span>
+
+            <!-- Área reservada para el mensaje de error -->
+            <div class="min-h-[1.25rem]">
+              <span
+                *ngIf="parametrosSeleccionados.length === 0 && parametrosTouched"
+                class="text-error text-sm mt-1 block"
+              >
+                Selecciona al menos un parámetro.
+              </span>
+            </div>
           </div>
 
           <!-- Botón Crear -->
@@ -189,9 +165,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
             <button
               type="submit"
               class="btn btn-primary"
-              [disabled]="
-                form.invalid || parametrosSeleccionados.length === 0
-              "
+              [disabled]="form.invalid || parametrosSeleccionados.length === 0"
             >
               Crear Sensor
             </button>
@@ -203,7 +177,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
     <!-- Paso 2: instrucciones y token -->
     <ng-template #instructions>
       <div class="p-8 space-y-5 bg-base-100 rounded-lg shadow-lg w-full max-w-2xl">
-        <h2 class="text-[1.625rem] font-bold text-green-700 flex items-center gap-2">
+        <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
           ✅ Sensor Creado con Éxito
         </h2>
 
@@ -240,7 +214,8 @@ import { TipoParametroService } from '../tipos_parametro.service';
     "Temperatura": 25.4,
     "Humedad": 80.2
   {{ '}' }}
-{{ '}' }}</code></pre>
+{{ '}' }}
+          </code></pre>
 
           <p>Parámetros válidos (deben escribirse exactamente):</p>
           <ul>
@@ -266,10 +241,10 @@ export class SensorCreateModalComponent implements OnInit {
   form!: FormGroup;
   invernaderos: Invernadero[] = [];
   zonas: Zona[] = [];
-  tiposSensores: TipoSensor[] = [];
   posiblesParametros: TipoParametro[] = [];
   parametrosSeleccionados: number[] = [];
   parametrosTouched = false;
+  tiposSensores: TipoSensor[] = [];
 
   created!: CrearSensorResponse;
   apiUrl = 'http://localhost:5000/api';
@@ -285,61 +260,63 @@ export class SensorCreateModalComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      nombre: ['', Validators.required],
-      descripcion: [''],
-      estado: ['Activo'],
-      tipo_sensor_id: [null, Validators.required],
-      invernadero_id: [null, Validators.required],
-      zona_id: [null]
+      nombre:           ['', Validators.required],
+      descripcion:      [''],
+      estado:           ['Activo'],
+      invernadero_id:   [null, Validators.required],
+      zona_id:          [null]
     });
 
-    this.invSvc.getInvernaderos().subscribe(list => (this.invernaderos = list));
-    this.tiposSvc.obtenerTiposSensor()
-      .subscribe(list => (this.tiposSensores = list));
-    this.paramSvc.obtenerTiposParametro()
-      .subscribe(list => (this.posiblesParametros = list));
+    this.invSvc.getInvernaderos().subscribe(inv => (this.invernaderos = inv));
+    this.tiposSvc.obtenerTiposSensor().subscribe(ts => (this.tiposSensores = ts));
+    this.paramSvc.obtenerTiposParametro().subscribe(tp => (this.posiblesParametros = tp));
   }
 
   onInvernaderoChange() {
-    const invId = this.form.get('invernadero_id')!.value;
+    const invId = this.form.value.invernadero_id;
     this.zonas = [];
     this.form.patchValue({ zona_id: null });
     if (invId) {
-      this.zonaSvc.getZonasByInvernadero(invId)
-        .subscribe(zs => (this.zonas = zs));
+      this.zonaSvc.getZonasByInvernadero(invId).subscribe(zs => (this.zonas = zs));
     }
   }
 
-  toggleEstado(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
+  toggleEstado(e: Event) {
+    const checked = (e.target as HTMLInputElement).checked;
     this.form.patchValue({ estado: checked ? 'Activo' : 'Inactivo' });
   }
 
-  toggleParametro(id: number, event: Event) {
+  toggleParametro(id: number, e: Event) {
     this.parametrosTouched = true;
-    const checked = (event.target as HTMLInputElement).checked;
-    if (checked) {
-      this.parametrosSeleccionados.push(id);
-    } else {
-      this.parametrosSeleccionados = this.parametrosSeleccionados.filter(x => x !== id);
-    }
+    const checked = (e.target as HTMLInputElement).checked;
+    if (checked) this.parametrosSeleccionados.push(id);
+    else this.parametrosSeleccionados = this.parametrosSeleccionados.filter(x => x !== id);
   }
 
-  isParametroSeleccionado(id: number): boolean {
+  isParametroSeleccionado(id: number) {
     return this.parametrosSeleccionados.includes(id);
   }
 
   onSubmit() {
     if (this.form.invalid || this.parametrosSeleccionados.length === 0) return;
 
+    // Determinamos tipo según cantidad de parámetros
+    const tipoName = this.parametrosSeleccionados.length > 1
+      ? 'Multiparámetro'
+      : 'De un parámetro';
+    const tipo = this.tiposSensores.find(t => t.nombre === tipoName);
+    if (!tipo) {
+      return alert(`❌ No existe el tipo "${tipoName}" en la configuración`);
+    }
+
     const payload: CrearSensorPayload = {
-      nombre: this.form.value.nombre,
-      descripcion: this.form.value.descripcion,
-      estado: this.form.value.estado,
-      tipo_sensor_id: this.form.value.tipo_sensor_id,
-      invernadero_id: this.form.value.invernadero_id,
-      zona_id: this.form.value.zona_id,
-      parametro_ids: this.parametrosSeleccionados
+      nombre:           this.form.value.nombre,
+      descripcion:      this.form.value.descripcion,
+      estado:           this.form.value.estado,
+      tipo_sensor_id:   tipo.id,
+      invernadero_id:   this.form.value.invernadero_id,
+      zona_id:          this.form.value.zona_id,
+      parametro_ids:    this.parametrosSeleccionados
     };
 
     this.svc.crearSensor(payload).subscribe({

@@ -1,29 +1,31 @@
 // src/app/sensores/sensores.component.ts
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { timer, Subscription, of } from 'rxjs';
-import { catchError, exhaustMap, tap } from 'rxjs/operators';
+import { isPlatformBrowser, CommonModule }           from '@angular/common';
+import { timer, Subscription, of }                   from 'rxjs';
+import { catchError, exhaustMap, tap }               from 'rxjs/operators';
 
 import {
   SensoresService,
   CrearSensorResponse,
   SensorFilters
 } from './sensores.service';
-import { TimeSeriesService, BatchLectura } from './time-series.service';
-import { Sensor } from './models/sensor.model';
-import { SensorModalService } from './sensor-modal.service';
+import { TimeSeriesService, BatchLectura }            from './time-series.service';
+import { Sensor }                                     from './models/sensor.model';
+import { SensorModalService, SensorModalType }                         from './sensor-modal.service';
 
-import { SensorHeaderComponent }           from './components/sensor-header.component';
-import { SensorFiltersComponent }          from './components/sensor-filters.component';
-import { SensorTableComponent }            from './components/sensor-table.component';
-import { SensorModalWrapperComponent }     from './components/sensor-modal-wrapper.component';
-import { SensorCreateModalComponent }      from './components/sensor-create-modal.component';
+import { SensorHeaderComponent }      from './components/sensor-header.component';
+import { SensorFiltersComponent }     from './components/sensor-filters.component';
+import { SensorTableComponent }       from './components/sensor-table.component';
+import { SensorModalWrapperComponent }from './components/sensor-modal-wrapper.component';
+import { SensorCreateModalComponent }from './components/sensor-create-modal.component';
+//import { SensorViewModalComponent }  from './components/sensor-view-modal.component';
+import { SensorEditModalComponent }  from './components/sensor-edit-modal.component';
 
-import { TipoSensorService }       from './tipos_sensor.service';
-import { InvernaderoService }      from '../invernaderos/invernaderos.service';
-import { ZonaService }             from '../invernaderos/zona.service';
-import { TipoSensor }              from './models/tipo-sensor.model';
-import { Invernadero, Zona }       from '../invernaderos/models/invernadero.model';
+import { TipoSensorService }         from './tipos_sensor.service';
+import { InvernaderoService }        from '../invernaderos/invernaderos.service';
+import { ZonaService }               from '../invernaderos/zona.service';
+import { TipoSensor }                from './models/tipo-sensor.model';
+import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
 
 @Component({
   selector: 'app-sensores',
@@ -34,11 +36,15 @@ import { Invernadero, Zona }       from '../invernaderos/models/invernadero.mode
     SensorFiltersComponent,
     SensorTableComponent,
     SensorModalWrapperComponent,
-    SensorCreateModalComponent
+    SensorCreateModalComponent,
+    //SensorViewModalComponent,
+    SensorEditModalComponent
   ],
   template: `
     <!-- HEADER -->
-    <app-sensor-header (create)="modal.openModal('create')"></app-sensor-header>
+    <app-sensor-header
+      (create)="modal.openModal('create')">
+    </app-sensor-header>
 
     <!-- FILTROS -->
     <app-sensor-filters
@@ -83,14 +89,25 @@ import { Invernadero, Zona }       from '../invernaderos/models/invernadero.mode
     </section>
 
     <!-- MODALES -->
-    <app-sensor-modal-wrapper *ngIf="modal.modalType$ | async as type">
+    <<app-sensor-modal-wrapper *ngIf="modal.modalType$ | async as type">
       <ng-container [ngSwitch]="type">
-        <app-sensor-create-modal
-          *ngSwitchCase="'create'"
-          (saved)="onCreated($event)"
-          (close)="onCloseModal()">
-        </app-sensor-create-modal>
-        <!-- otros modales aquí -->
+       <!-- EDITAR SENSOR -->
+        <ng-container *ngSwitchCase="'edit'">
+         <ng-container *ngIf="modal.selectedSensor$ | async as sel">
+           <app-sensor-edit-modal
+             [sensor]="sel"
+             (saved)="onEdited($event)"
+             (close)="onCloseModal()">
+           </app-sensor-edit-modal>
+         </ng-container>
+       </ng-container>
+        <!-- CREAR SENSOR -->
+        <ng-container *ngSwitchCase="'create'">
+          <app-sensor-create-modal
+            (saved)="onCreated($event)"
+            (close)="onCloseModal()">
+          </app-sensor-create-modal>
+        </ng-container>
       </ng-container>
     </app-sensor-modal-wrapper>
   `
@@ -100,15 +117,15 @@ export class SensoresComponent implements OnInit, OnDestroy {
   refreshSub?: Subscription;
 
   // paginación
-  pageSize     = 10;
+  pageSize     = 6;
   currentPage  = 1;
   totalSensors = 0;
 
   // datos para filtros
-  tiposSensores:           TipoSensor[]     = [];
-  invernaderosDisponibles: Invernadero[]    = [];
-  zonasDisponibles:        Zona[]           = [];
-  appliedFilters:          any              = {};
+  tiposSensores:           TipoSensor[]  = [];
+  invernaderosDisponibles: Invernadero[] = [];
+  zonasDisponibles:        Zona[]        = [];
+  appliedFilters:          any           = {};
 
   constructor(
     private svc: SensoresService,
@@ -123,7 +140,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // cargo los datos de los selects
+    // precarga selects
     this.tiposSvc.obtenerTiposSensor()
       .subscribe(list => this.tiposSensores = list);
 
@@ -133,7 +150,6 @@ export class SensoresComponent implements OnInit, OnDestroy {
         this.zonasDisponibles = list.flatMap(inv => inv.zonas || []);
       });
 
-    // cargo la página inicial
     this.loadPage(1);
   }
 
@@ -157,12 +173,13 @@ export class SensoresComponent implements OnInit, OnDestroy {
           this.sensoresConLectura = resp.data;
           this.totalSensors = resp.total;
         }),
-      exhaustMap(() =>
-        timer(0, 60000).pipe(
-          exhaustMap(() => this.updateLecturas().pipe(catchError(() => of([]))))
+        exhaustMap(() =>
+          timer(0, 60000).pipe(
+            exhaustMap(() => this.updateLecturas().pipe(catchError(() => of([]))))
+          )
         )
       )
-    ).subscribe();
+      .subscribe();
   }
 
   private updateLecturas() {
@@ -188,16 +205,16 @@ export class SensoresComponent implements OnInit, OnDestroy {
     const total = this.totalPages;
     const cur   = this.currentPage;
     const delta = 1;
-    const r: Array<number|string> = [];
+    const pages: Array<number|string> = [];
     let last = 0;
     for (let i = 1; i <= total; i++) {
       if (i === 1 || i === total || (i >= cur - delta && i <= cur + delta)) {
-        if (last && i - last > 1) r.push('…');
-        r.push(i);
+        if (last && i - last > 1) pages.push('…');
+        pages.push(i);
         last = i;
       }
     }
-    return r;
+    return pages;
   }
 
   get totalPages(): number {
@@ -209,14 +226,20 @@ export class SensoresComponent implements OnInit, OnDestroy {
     this.loadPage(p);
   }
 
-  onAccion(evt: { tipo: string; sensor: Sensor }) {
-    // por ejemplo: this.modal.openModal('view', evt.sensor);
+  onAccion(evt: { tipo: SensorModalType; sensor: Sensor }) {
+    this.modal.openModal(evt.tipo, evt.sensor);
   }
 
   onCreated(res: CrearSensorResponse) {
-    // se muestra la instrucción en el modal
+    // aquí manejas solo la creación (token), sin cerrar inmediatamente
   }
 
+ onEdited(updated: Sensor) {
+   // refresca la tabla tras guardar edición
+    this.modal.closeWithAnimation();
+    this.loadPage(this.currentPage);
+  }
+  
   onCloseModal() {
     this.modal.closeWithAnimation();
     this.loadPage(this.currentPage);
