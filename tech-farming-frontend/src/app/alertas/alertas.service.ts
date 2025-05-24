@@ -17,7 +17,7 @@ export interface Alerta {
   providedIn: 'root'
 })
 export class AlertService {
-  private baseUrl = '/api/alertas';
+  private baseUrl = 'http://localhost:5000/api/alertas';
 
   constructor(private http: HttpClient) {}
 

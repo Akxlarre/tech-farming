@@ -16,6 +16,18 @@ import { Sensor } from '../../sensores/models/sensor.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
+    <!-- Modal de Confirmación -->
+    <div *ngIf="confirmacionVisible"
+         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
+        <h3 class="text-xl font-semibold text-green-600">
+          ✅ ¡Éxito!
+        </h3>
+        <p>{{ mensajeConfirmacion }}</p>
+      </div>
+    </div>
+
+    <!-- Modal Principal -->
     <div class="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl space-y-6">
       <h2 class="text-2xl font-bold text-secondary">
         {{ isEdit ? 'Editar Umbral' : 'Crear Umbral' }}
@@ -43,10 +55,9 @@ import { Sensor } from '../../sensores/models/sensor.model';
         </div>
 
         <!-- Parámetro -->
-        <div *ngIf="form.value.ambito !== 'global'">
+        <div *ngIf="true">
           <label class="label"><span class="label-text">Parámetro</span></label>
-          <select formControlName="tipo_parametro_id" class="select select-bordered w-full"
-                  [disabled]="form.value.ambito === 'global'">
+          <select formControlName="tipo_parametro_id" class="select select-bordered w-full">
             <option value="">-- Selecciona Parámetro --</option>
             <option *ngFor="let tp of tiposParametro" [value]="tp.id">{{ tp.nombre }} ({{ tp.unidad }})</option>
           </select>
@@ -116,6 +127,9 @@ export class UmbralConfigModalComponent implements OnInit {
   sensores: Sensor[] = [];
   sensorEnabled = false;
 
+  confirmacionVisible = false;
+  mensajeConfirmacion = '';
+
   constructor(
     private fb: FormBuilder,
     private umbralService: UmbralService,
@@ -133,7 +147,7 @@ export class UmbralConfigModalComponent implements OnInit {
       id: [sel?.id || null],
       ambito: [sel ? this.getAmbito(sel) : 'global', Validators.required],
       invernadero_id: [sel?.invernadero_id || null],
-      tipo_parametro_id: [sel?.tipo_parametro_id || null],
+      tipo_parametro_id: [sel?.tipo_parametro_id || null, Validators.required],
       sensor_parametro_id: [sel?.sensor_parametro_id || null],
       advertencia_min: [sel?.advertencia_min || '', Validators.required],
       advertencia_max: [sel?.advertencia_max || '', Validators.required],
@@ -208,7 +222,15 @@ export class UmbralConfigModalComponent implements OnInit {
     obs.subscribe({
       next: () => {
         this.loading = false;
-        this.modal.closeWithAnimation();
+        this.mensajeConfirmacion = this.isEdit
+          ? 'Umbral actualizado correctamente.'
+          : 'Umbral creado correctamente.';
+        this.confirmacionVisible = true;
+
+        setTimeout(() => {
+          this.confirmacionVisible = false;
+          this.modal.closeWithAnimation();
+        }, 1500);
       },
       error: () => {
         this.loading = false;

@@ -2,6 +2,11 @@ from app import db
 from app.models.configuracion_umbral import ConfiguracionUmbral
 
 def listar_umbrales(filtros):
+    from app.models.tipo_parametro import TipoParametro
+    from app.models.sensor import Sensor
+    from app.models.invernadero import Invernadero
+    from app.models.sensor_parametro import SensorParametro
+
     query = ConfiguracionUmbral.query
 
     ambito = filtros.get("ambito")
@@ -24,29 +29,55 @@ def listar_umbrales(filtros):
             ConfiguracionUmbral.sensor_parametro_id.is_(None)
         )
     elif ambito == "invernadero":
-        query = query.filter(ConfiguracionUmbral.invernadero_id.isnot(None))
+        query = query.filter(
+            ConfiguracionUmbral.invernadero_id.isnot(None),
+            ConfiguracionUmbral.sensor_parametro_id.is_(None))
     elif ambito == "sensor":
         query = query.filter(ConfiguracionUmbral.sensor_parametro_id.isnot(None))
 
+    query = query.filter(ConfiguracionUmbral.activo == True)
     resultados = query.all()
+    data = []
+    
+    for u in resultados:
+        tipo_parametro = TipoParametro.query.get(u.tipo_parametro_id) if u.tipo_parametro_id else None
+        invernadero = Invernadero.query.get(u.invernadero_id) if u.invernadero_id else None
 
-    return [
-        {
+        sensor_nombre = None
+        sensor_invernadero_nombre = None
+        if u.sensor_parametro_id:
+            sensor_param = SensorParametro.query.get(u.sensor_parametro_id)
+            if sensor_param:
+                sensor = Sensor.query.get(sensor_param.sensor_id)
+                sensor_nombre = sensor.nombre if sensor else None
+                if sensor and sensor.zona:
+                    sensor_invernadero_nombre = sensor.zona.invernadero.nombre
+
+        
+        print(f"[DEBUG] ID umbral: {u.id} | tipo_parametro_id: {u.tipo_parametro_id} → {tipo_parametro.nombre if tipo_parametro else 'NULO'}")
+        data.append({
             "id": u.id,
             "tipo_parametro_id": u.tipo_parametro_id,
+            "tipo_parametro_nombre": tipo_parametro.nombre if tipo_parametro else None,
+            "tipo_parametro_unidad": tipo_parametro.unidad if tipo_parametro else None,
             "invernadero_id": u.invernadero_id,
+            "invernadero_nombre": invernadero.nombre if invernadero else None,
             "sensor_parametro_id": u.sensor_parametro_id,
+            "sensor_nombre": sensor_nombre,
+            "sensor_invernadero_nombre": sensor_invernadero_nombre,
             "advertencia_min": float(u.advertencia_min) if u.advertencia_min else None,
             "advertencia_max": float(u.advertencia_max) if u.advertencia_max else None,
             "critico_min": float(u.critico_min) if u.critico_min else None,
             "critico_max": float(u.critico_max) if u.critico_max else None,
             "activo": u.activo
-        }
-        for u in resultados
-    ]
+        })
+    return data
 
 def crear_umbral(data):
     try:
+        if not data.get("tipo_parametro_id"):
+            return {"error": "El campo tipo_parametro_id es obligatorio"}
+
         nuevo_umbral = ConfiguracionUmbral(
             tipo_parametro_id = data.get("tipo_parametro_id"),
             invernadero_id = data.get("invernadero_id"),
@@ -74,6 +105,8 @@ def actualizar_umbral(umbral_id, data):
         umbral = ConfiguracionUmbral.query.get(umbral_id)
         if not umbral:
             return {"error": "Umbral no encontrado"}
+        if "tipo_parametro_id" in data and data["tipo_parametro_id"] is None:
+            return {"error": "tipo_parametro_id no puede ser nulo"}
 
         # Actualizar campos si vienen en el JSON
         umbral.tipo_parametro_id = data.get("tipo_parametro_id", umbral.tipo_parametro_id)

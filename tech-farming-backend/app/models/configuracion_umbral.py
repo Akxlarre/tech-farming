@@ -6,8 +6,8 @@ from app import db
 class ConfiguracionUmbral(db.Model):
     __tablename__ = 'umbrales'
     id = db.Column(db.Integer, primary_key=True)
-    sensor_parametro_id = db.Column(db.Integer, db.ForeignKey('sensor_parametros.id'), nullable=False)
-    tipo_parametro_id = db.Column(db.Integer, db.ForeignKey('tipos_parametro.id'), nullable=True)
+    sensor_parametro_id = db.Column(db.Integer, db.ForeignKey('sensor_parametros.id'), nullable=True)
+    tipo_parametro_id = db.Column(db.Integer, db.ForeignKey('tipos_parametro.id'), nullable=False)
     invernadero_id = db.Column(db.Integer, db.ForeignKey('invernaderos.id'), nullable=True)
 
     advertencia_min = db.Column(db.Numeric)
