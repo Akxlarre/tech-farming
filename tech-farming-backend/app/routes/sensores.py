@@ -11,6 +11,7 @@ from app.models.zona import Zona as ZonaModel
 from app.models.invernadero import Invernadero as InvernaderoModel
 from app.models.sensor_parametro import SensorParametro as SensorParametroModel
 from app.models.tipo_parametro import TipoParametro as TipoParametroModel
+from app.models.tipo_sensor import TipoSensor as TipoSensorModel
 from app.queries.sensor_queries import obtener_sensores_por_invernadero_y_parametro
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
@@ -184,29 +185,28 @@ def editar_sensor(sensor_id):
     data = request.get_json() or {}
 
     # Campos que aceptamos actualizar
-    nombre       = data.get('nombre')
-    descripcion  = data.get('descripcion')
-    estado       = data.get('estado')
-    tipo_id_raw  = data.get('tipo_sensor_id')
-    inv_id_raw   = data.get('invernadero_id')
-    zona_id_raw  = data.get('zona_id')
+    nombre        = data.get('nombre')
+    descripcion   = data.get('descripcion')
+    estado        = data.get('estado')
+    inv_id_raw    = data.get('invernadero_id')
+    zona_id_raw   = data.get('zona_id')
     parametro_ids = data.get('parametro_ids', [])
 
     # Validaciones básicas
-    if nombre is None or estado is None or tipo_id_raw is None or inv_id_raw is None:
-        abort(400, description="nombre, estado, tipo_sensor_id e invernadero_id son obligatorios")
+    if nombre is None or estado is None or inv_id_raw is None:
+        abort(400, description="nombre, estado e invernadero_id son obligatorios")
 
     try:
-        tipo_sensor_id = int(tipo_id_raw)
         invernadero_id = int(inv_id_raw)
-    except ValueError:
-        abort(400, description="tipo_sensor_id e invernadero_id deben ser enteros")
+    except (TypeError, ValueError):
+        abort(400, description="invernadero_id debe ser un entero válido")
 
+    # Validar zona (si viene)
     zona_id = None
     if zona_id_raw not in (None, '', 0):
         try:
             zona_id = int(zona_id_raw)
-        except ValueError:
+        except (TypeError, ValueError):
             abort(400, description="zona_id debe ser un entero válido")
 
     if not isinstance(parametro_ids, list):
@@ -215,27 +215,31 @@ def editar_sensor(sensor_id):
     # Busca el sensor existente
     sensor = SensorModel.query.get_or_404(sensor_id, description="Sensor no encontrado")
 
-    # Valida existencia de tipo_sensor e invernadero
+    # Valida existencia de invernadero
     if not InvernaderoModel.query.get(invernadero_id):
         abort(404, description="Invernadero no encontrado")
-    # (Asumimos que tipo_sensor está correcto; puedes validar similarmente si quieres)
 
-    # Si vienen zona, valida pertenencia
+    # Valida pertenencia de zona
     if zona_id is not None:
         zona = ZonaModel.query.get(zona_id)
         if not zona or zona.invernadero_id != invernadero_id:
             abort(400, description="Zona inválida para ese invernadero")
 
-    # Aplica cambios
-    sensor.nombre           = nombre
-    sensor.descripcion      = descripcion
-    sensor.estado           = estado
-    sensor.tipo_sensor_id   = tipo_sensor_id
-    sensor.invernadero_id   = invernadero_id
-    sensor.zona_id          = zona_id
+    # Aplica cambios básicos
+    sensor.nombre         = nombre
+    sensor.descripcion    = descripcion
+    sensor.estado         = estado
+    sensor.invernadero_id = invernadero_id
+    sensor.zona_id        = zona_id
 
-    # -- Actualiza parámetros: borramos y volvemos a crear --
-    # esto eliminará los hijos thanks al cascade definido en el modelo
+    # --- Lógica automática de tipo de sensor según número de parámetros ---
+    tipo_nombre = "Multiparámetro" if len(parametro_ids) > 1 else "De un parámetro"
+    tipo_obj = TipoSensorModel.query.filter_by(nombre=tipo_nombre).first()
+    if not tipo_obj:
+        abort(500, description=f'Tipo de sensor "{tipo_nombre}" no está configurado')
+    sensor.tipo_sensor_id = tipo_obj.id
+
+    # Actualiza parámetros: borra y vuelve a crear
     sensor.parametros.clear()
     for pid in parametro_ids:
         try:
@@ -247,7 +251,7 @@ def editar_sensor(sensor_id):
 
     try:
         db.session.commit()
-        # Prepara la respuesta con la misma forma que listar_sensores devuelve
+        # Formatea la respuesta igual que en listar
         zona = sensor.zona
         inv  = zona.invernadero if zona else None
         params = [{
@@ -264,7 +268,7 @@ def editar_sensor(sensor_id):
             "fecha_instalacion": sensor.fecha_instalacion.isoformat() if sensor.fecha_instalacion else None,
             "tipo_sensor":       {"id": sensor.tipo_sensor.id, "nombre": sensor.tipo_sensor.nombre},
             "zona":              {"id": zona.id, "nombre": zona.nombre} if zona else None,
-            "invernadero":       {"id": inv.id, "nombre": inv.nombre}   if inv else None,
+            "invernadero":       {"id": inv.id,   "nombre": inv.nombre}   if inv else None,
             "parametros":        params
         }), 200
 
@@ -272,7 +276,27 @@ def editar_sensor(sensor_id):
         current_app.logger.error("Error editar_sensor:\n" + traceback.format_exc())
         db.session.rollback()
         abort(500, description="No se pudo actualizar el sensor")
-              
+
+@router.route('/<int:sensor_id>', methods=['DELETE'])
+def eliminar_sensor(sensor_id):
+    """
+    DELETE /api/sensores/{sensor_id}
+    Elimina completamente el sensor (y, gracias al cascade, sus parámetros asociados).
+    """
+    # 1) Busca o da 404
+    sensor = SensorModel.query.get_or_404(sensor_id, description="Sensor no encontrado")
+    try:
+        # 2) Borra y confirma
+        db.session.delete(sensor)
+        db.session.commit()
+        # 3) 204 No Content al cliente
+        return '', 204
+    except Exception:
+        # 4) Rollback y log de error
+        current_app.logger.error("Error eliminar_sensor:\n" + traceback.format_exc())
+        db.session.rollback()
+        abort(500, description="No se pudo eliminar el sensor")
+
 
 @router.route('/lecturas', methods=['GET'])
 def batch_lecturas():

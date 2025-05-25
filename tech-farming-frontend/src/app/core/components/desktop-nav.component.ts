@@ -15,8 +15,8 @@ import { RouterModule, Router } from '@angular/router';
           <a [routerLink]="item.path"
              class="px-1 py-2 transition-colors"
              [ngClass]="{
-               'text-accent border-b-2 border-accent': isActive(item.path),
-               'hover:text-accent': !isActive(item.path)
+               'text-success border-b-2 border-success': isActive(item.path),
+               'hover:text-success': !isActive(item.path)
              }">
             {{ item.label }}
           </a>

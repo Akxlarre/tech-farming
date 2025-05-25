@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="bg-base-200">
 <head>
   <meta charset="utf-8">
   <title>TechFarming</title>
@@ -8,21 +8,21 @@
 
   <!-- Script precoz para fijar el tema -->
   <script>
-    (function() {
+    (function () {
       try {
         const theme = localStorage.getItem('theme');
-        if (theme === 'darka' || theme === 'light') {
+        if (theme === 'dark' || theme === 'light') {
           document.documentElement.setAttribute('data-theme', theme);
         }
       } catch (e) {
-        /* silent */
+        // silent
       }
     })();
   </script>
 
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
-<body>
+<body class="bg-base-200">
   <app-root></app-root>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // src/app/sensores/components/sensor-filters.component.ts
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { TipoSensor }        from '../models/tipo-sensor.model';
 import { Zona, Invernadero } from '../../invernaderos/models/invernadero.model';
@@ -13,9 +13,9 @@ import { ZonaService }       from '../../invernaderos/zona.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <!-- Cabecera con icono -->
-    <div class="flex items-center gap-2 mb-4 px-6">
+    <div class="flex items-center gap-2 mb-4 px-6 text-basetext">
       <svg xmlns="http://www.w3.org/2000/svg"
-           class="w-5 h-5 text-gray-600"
+           class="w-5 h-5 text-basetext"
            fill="none"
            viewBox="0 0 24 24"
            stroke="currentColor"
@@ -28,18 +28,18 @@ import { ZonaService }       from '../../invernaderos/zona.service';
                  17v-3.586L3.293 6.707A1 1 0 013 6V4z"
         />
       </svg>
-      <h3 class="text-lg font-medium text-gray-700">Filtros</h3>
+      <h3 class="text-lg font-medium">Filtros</h3>
     </div>
 
     <div class="bg-base-200 px-6 rounded-xl mb-6">
       <!-- Formulario de filtros: 7 columnas en md -->
       <form [formGroup]="filterForm"
             (ngSubmit)="apply()"
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-4 items-end"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-4 items-end pb-3"
       >
         <!-- 1. Invernadero -->
         <div>
-          <label class="label">Invernadero</label>
+          <label class="label-basetext font-bold">Invernadero</label>
           <select formControlName="invernadero"
                   class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
           >
@@ -52,11 +52,12 @@ import { ZonaService }       from '../../invernaderos/zona.service';
 
         <!-- 2. Zona -->
         <div>
-        <label class="label">Zona</label>
+        <label class="label-basetext font-bold">Zona</label>
         <select
           formControlName="zona"
           class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500
-                disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          disabled:bg-base-200 disabled:text-base-content/50 disabled:border-base-300 disabled:cursor-not-allowed"
+
           [disabled]="!filterForm.get('invernadero')?.value"
           [attr.title]="!filterForm.get('invernadero')?.value ? 'Selecciona un invernadero primero' : null"
         >
@@ -71,7 +72,7 @@ import { ZonaService }       from '../../invernaderos/zona.service';
 
         <!-- 3. Tipo de sensor -->
         <div>
-          <label class="label">Tipo</label>
+          <label class="label-basetext font-bold">Tipo</label>
           <select formControlName="tipoSensor"
                   class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
           >
@@ -84,7 +85,7 @@ import { ZonaService }       from '../../invernaderos/zona.service';
 
         <!-- 4. Estado -->
         <div>
-          <label class="label">Estado</label>
+          <label class="label-basetext font-bold">Estado</label>
           <select formControlName="estado"
                   class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
           >
@@ -97,7 +98,7 @@ import { ZonaService }       from '../../invernaderos/zona.service';
 
         <!-- 5. Ordenar por -->
         <div>
-          <label class="label flex items-center gap-1">
+          <label class="label-basetext font-bold flex items-center gap-1">
             <span>⇅ Ordenar por</span>
           </label>
           <select formControlName="sortBy"
@@ -113,24 +114,36 @@ import { ZonaService }       from '../../invernaderos/zona.service';
 
         <!-- 6. Buscar -->
         <div>
-          <label class="label">Buscar</label>
+          <label class="label-basetext font-bold">Buscar</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
               🔍
             </span>
-            <input type="text"
-                   formControlName="search"
-                   placeholder="Nombre del sensor..."
-                   class="input input-bordered pl-10 rounded-lg w-full focus:ring focus:ring-green-500"
+            <input
+              type="text"
+              formControlName="search"
+              placeholder="Nombre del sensor..."
+              maxlength="15"
+              class="input input-bordered pl-10 rounded-lg w-full focus:ring focus:ring-green-500"
             />
           </div>
+          <p
+            *ngIf="searchControl.invalid && searchControl.hasError('maxlength')"
+            class="text-xs text-error mt-1"
+          >
+            Máximo 15 caracteres.
+          </p>
         </div>
+
 
         <!-- 7. Botón Aplicar -->
         <div class="flex justify-end md:justify-start">
-          <button type="submit"
-                  class="btn btn-outline btn-sm h-12 w-full md:w-auto"
-          >Aplicar</button>
+          <button
+            type="submit"
+            class="btn btn-outline btn-sm h-12 w-full md:w-auto border-success text-base-content hover:bg-success hover:text-base-content transition-colors duration-200"
+          >
+            Aplicar
+          </button>
         </div>
       </form>
 
@@ -198,7 +211,7 @@ export class SensorFiltersComponent implements OnInit {
       tipoSensor:  [''],
       estado:      [''],
       sortBy:      [''],
-      search:      ['']
+      search:       ['', [Validators.maxLength(15)]],  // límite 15 chars
     });
 
     this.filterForm.get('invernadero')!
@@ -258,6 +271,12 @@ export class SensorFiltersComponent implements OnInit {
     }
     return chips;
   }
+
+  get searchControl() {
+    return this.filterForm.get('search')!;
+  }
+
+
 
   removeFilter(key: string) {
     this.filterForm.patchValue({ [key]: '' });

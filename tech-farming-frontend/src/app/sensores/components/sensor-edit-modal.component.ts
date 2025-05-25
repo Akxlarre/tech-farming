@@ -16,12 +16,12 @@ import { TipoParametroService } from '../tipos_parametro.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="p-8 bg-base-100 rounded-lg shadow-lg max-w-2xl w-full space-y-5">
-      <h2 class="text-2xl font-bold">✏️ Editar Sensor</h2>
+      <h2 class="text-2xl font-bold text-success">Editar Sensor</h2>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <!-- Nombre -->
         <div class="sm:col-span-2">
-          <label class="label">Nombre</label>
+          <label class="label-base-content">Nombre</label>
           <input type="text" formControlName="nombre" class="input input-bordered w-full" />
           <div *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched"
                class="text-error text-sm mt-1">
@@ -31,7 +31,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
         <!-- Invernadero -->
         <div>
-          <label class="label">Invernadero</label>
+          <label class="label-base-content">Invernadero</label>
           <select formControlName="invernadero_id"
                   (change)="onInvernaderoChange()"
                   class="select select-bordered w-full">
@@ -42,7 +42,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
         <!-- Zona -->
         <div>
-          <label class="label">Zona (opcional)</label>
+          <label class="label-base-content">Zona (opcional)</label>
           <select formControlName="zona_id"
                   [disabled]="zonas.length===0"
                   class="select select-bordered w-full">
@@ -53,7 +53,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
         <!-- Descripción -->
         <div class="sm:col-span-2">
-          <label class="label">Descripción</label>
+          <label class="label-base-content">Descripción</label>
           <textarea formControlName="descripcion"
                     rows="3"
                     class="textarea textarea-bordered w-full"></textarea>
@@ -61,7 +61,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
         <!-- Estado -->
         <div class="flex items-center gap-2">
-          <label class="label">Activo</label>
+          <label class="label-base-content">Activo</label>
           <input type="checkbox"
                  [checked]="form.get('estado')?.value==='Activo'"
                  (change)="toggleEstado($event)"
@@ -70,7 +70,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
         <!-- Parámetros -->
         <div class="sm:col-span-2">
-          <label class="label">¿Qué mide?</label>
+          <label class="label-base-content">¿Qué mide?</label>
           <div class="flex flex-wrap gap-2">
             <label *ngFor="let p of posiblesParametros"
                    class="inline-flex items-center cursor-pointer">
@@ -78,7 +78,12 @@ import { TipoParametroService } from '../tipos_parametro.service';
                      [value]="p.id"
                      (change)="toggleParametro(p.id, $event)"
                      [checked]="isParametroSeleccionado(p.id)" />
-              <span class="badge badge-outline peer-checked:badge-success">
+              <span
+                  class="badge badge-outline
+                    peer-checked:badge-success
+                    peer-checked:text-base-content
+                    transition-colors duration-150 ease-in-out"
+                  >
                 {{ p.nombre }}
               </span>
             </label>
