@@ -35,53 +35,37 @@ def obtener_historial(
             q = q.join(ZonaModel).filter(ZonaModel.invernadero_id == invernadero_id)
         ids = [row[0] for row in q.with_entities(SensorModel.id).all()]
 
-    # ——— DEBUG-REL: qué IDs enteros devolvió SQL ———
-    print(f"[DEBUG-REL] Sensor IDs (enteros) desde SQL: {ids}")
-
     if not ids:
-        return {
-            "series": [],
-            "stats": {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}
-        }
+        return { "series": [], "stats": {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0} }
 
-    sensor_ids = [f"S{id_:03d}" for id_ in ids]
-    print(f"[DEBUG-REL] Sensor IDs (tags Influx) a consultar: {sensor_ids}")
+    # 2) Construcción del script Flux
+    sensor_ids = [str(id_) for id_ in ids]
+    lista      = ",".join(f'"{sid}"' for sid in sensor_ids)
 
-    # 2) Construcción del script Flux con pivot
-    lista = ",".join(f'"{sid}"' for sid in sensor_ids)
     flux = f'''
 from(bucket: "{bucket}")
   |> range(start: {desde}, stop: {hasta})
 
-  // 1) Traer tanto valor como parametro
   |> filter(fn: (r) =>
        r._measurement == "lecturas_sensores" and
        (r._field == "valor" or r._field == "parametro")
      )
 
-  // 2) Pivotar para tener valor y parametro en la misma fila
   |> pivot(
        rowKey:      ["_time","sensor_id"],
        columnKey:   ["_field"],
        valueColumn: "_value"
      )
 
-  // 3) Filtrar por sensor y por parámetro
   |> filter(fn: (r) => contains(value: r.sensor_id, set: [{lista}]) and
                       r.parametro == "{tipo_parametro}")
 
-  // 4) Agregar ventana sobre la columna 'valor'
   |> aggregateWindow(every: {window_every}, fn: mean, column: "valor")
   |> yield(name: "serie")
 '''
-    print("── FLUX CORREGIDO ───────────────────────────────────")
-    print(flux)
-    print("──────────────────────────────────────────────────")
 
-    # 3) Ejecuto Flux
+    # 3) Ejecutar Flux y compilar resultados
     tables = query_api.query(flux, org=org)
-
-    # 4) Compilo la serie leyendo de la columna "valor" y descartando None
     series = []
     for table in tables:
         for rec in table.records:
@@ -93,7 +77,7 @@ from(bucket: "{bucket}")
                 "value":     val
             })
 
-    # 5) Estadísticas (solo si hay valores válidos)
+    # 4) Estadísticas
     if series:
         vals  = [p["value"] for p in series]
         times = [dateutil.parser.isoparse(p["timestamp"]) for p in series]
@@ -112,4 +96,4 @@ from(bucket: "{bucket}")
     else:
         stats = {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}
 
-    return {"series": series, "stats": stats}
+    return { "series": series, "stats": stats }

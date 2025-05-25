@@ -41,7 +41,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
         >
           <!-- Nombre -->
           <div class="sm:col-span-2">
-            <label for="nombre" class="label">Nombre del sensor</label>
+            <label for="nombre" class="label-base-content">Nombre del sensor</label>
             <input
               id="nombre"
               type="text"
@@ -59,7 +59,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
           <!-- Invernadero -->
           <div>
-            <label for="invernadero_id" class="label">Invernadero</label>
+            <label for="invernadero_id" class="label-base-content">Invernadero</label>
             <select
               id="invernadero_id"
               formControlName="invernadero_id"
@@ -81,7 +81,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
           <!-- Zona -->
           <div>
-            <label for="zona_id" class="label">Zona (opcional)</label>
+            <label for="zona_id" class="label-base-content">Zona (opcional)</label>
             <select
               id="zona_id"
               formControlName="zona_id"
@@ -97,7 +97,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
           <!-- Descripción -->
           <div class="sm:col-span-2">
-            <label for="descripcion" class="label">
+            <label for="descripcion" class="label-base-content">
               Descripción (opcional)
             </label>
             <textarea
@@ -111,7 +111,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
           <!-- Estado -->
           <div class="flex items-center gap-3">
-            <label for="estado" class="label">Estado</label>
+            <label for="estado" class="label-base-content">Estado</label>
             <input
               id="estado"
               type="checkbox"
@@ -126,7 +126,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
           <!-- Parámetros -->
           <div class="sm:col-span-2">
-            <label class="label">¿Qué mide el sensor?</label>
+            <label class="label-base-content">¿Qué mide el sensor?</label>
             <div class="flex flex-wrap gap-2">
               <ng-container *ngFor="let param of posiblesParametros">
                 <label class="inline-flex items-center cursor-pointer mt-2">
@@ -140,7 +140,7 @@ import { TipoParametroService } from '../tipos_parametro.service';
                   <span
                     class="badge badge-outline
                           peer-checked:badge-success
-                          peer-checked:text-success
+                          peer-checked:text-base-content
                           transition-colors duration-150 ease-in-out"
                   >
                     {{ param.nombre }}
@@ -160,8 +160,17 @@ import { TipoParametroService } from '../tipos_parametro.service';
             </div>
           </div>
 
-          <!-- Botón Crear -->
-          <div class="sm:col-span-2 flex justify-end">
+           <!-- Botones -->
+           <div class="sm:col-span-2 flex justify-end gap-2 mt-4">
+            <!-- Cancelar -->
+            <button
+              type="button"
+              class="btn btn-ghost"
+              (click)="close.emit()"
+            >
+              Cancelar
+            </button>
+            <!-- Crear -->
             <button
               type="submit"
               class="btn btn-primary"
@@ -176,58 +185,95 @@ import { TipoParametroService } from '../tipos_parametro.service';
 
     <!-- Paso 2: instrucciones y token -->
     <ng-template #instructions>
-      <div class="p-8 space-y-5 bg-base-100 rounded-lg shadow-lg w-full max-w-2xl">
-        <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
-          ✅ Sensor Creado con Éxito
+      <div class="p-4 sm:p-8 bg-base-100 rounded-lg shadow-lg w-full max-w-[90vw] sm:max-w-2xl">
+        <!-- ✅ Título -->
+        <h2 class="text-2xl font-bold text-success flex items-center gap-2">
+          Sensor creado con éxito
         </h2>
 
-        <!-- Token -->
-        <div class="form-control">
-          <label class="label">Token de Conexión</label>
-          <div class="flex gap-2">
-            <input
-              type="text"
-              [value]="created.token"
-              readonly
-              class="input input-bordered w-full"
-            />
-            <button
-              class="btn btn-outline"
-              (click)="copyToken()"
-              title="Copiar token"
-            >
-              📋
-            </button>
+        <!-- 🔑 Token de conexión -->
+        <section>
+          <h3 class="font-semibold mb-2">1. Token de Conexión</h3>
+          <div class="form-control">
+            <div class="flex gap-2 items-center">
+              <input
+                type="text"
+                [value]="created.token"
+                readonly
+                class="input input-bordered w-full"
+              />
+              <button
+                type="button"
+                class="btn btn-outline relative w-10 h-10 p-0 flex items-center justify-center group"
+                (click)="animateCopyIcon()"
+                aria-label="Copiar token"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="w-6 h-6 text-base-content transition-opacity duration-300 group-[.copied]:opacity-0"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+
+                <!-- ✔ Check animado -->
+                <svg
+                  viewBox="0 0 24 24"
+                  class="w-6 h-6 text-success absolute opacity-0 transition-opacity duration-300 group-[.copied]:opacity-100"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6L9 17l-5-5"></path>
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Instrucciones de API -->
-        <div class="prose">
-          <p>Envía una solicitud <code>POST</code> a:</p>
-          <pre><code>POST {{ apiUrl }}/sensores/datos</code></pre>
+        <!-- 📬 Endpoint -->
+        <section class="space-y-1">
+          <h3 class="font-semibold text-base sm:text-lg">2. Enviar datos a la API</h3>
+          <p class="text-sm text-base-content">Realiza una solicitud <code>POST</code> al siguiente endpoint:</p>
+          <pre class="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap break-all overflow-auto">
+    POST {{ apiUrl }}/sensores/datos
+          </pre>
+        </section>
 
-          <p class="mt-4">Con el siguiente JSON en el <code>body</code>:</p>
-          <pre class="whitespace-pre-wrap"><code>
-{{ '{' }}
-  "token": "{{ created.token }}",
-  "parametros": {{ '{' }}
-    "Temperatura": 25.4,
-    "Humedad": 80.2
-  {{ '}' }}
-{{ '}' }}
-          </code></pre>
+        <!-- 📦 JSON de ejemplo -->
+        <section>
+          <h3 class="font-semibold mt-6 mb-2">3. Ejemplo de JSON en el <code>body</code></h3>
+          <pre class="bg-base-200 p-3 rounded overflow-auto text-sm whitespace-pre-wrap">
+            <code>{{ jsonEjemplo }}</code>
+            </pre>
+        </section>
 
-          <p>Parámetros válidos (deben escribirse exactamente):</p>
-          <ul>
+        <!-- ✅ Parámetros válidos -->
+        <section>
+          <h3 class="font-semibold mt-6 mb-2">4. Parámetros válidos</h3>
+          <ul class="list-disc list-inside">
             <li>Temperatura</li>
             <li>Humedad</li>
             <li>Potasio</li>
             <li>Fósforo</li>
             <li>Nitrógeno</li>
           </ul>
-        </div>
+          <p class="text-sm text-base-content/70 mt-1">
+            * Deben escribirse exactamente como se muestra, respetando mayúsculas.
+          </p>
+        </section>
 
-        <div class="flex justify-end">
+        <!-- 🔚 Cierre -->
+        <div class="flex justify-end pt-4">
           <button class="btn btn-primary" (click)="onClose()">Cerrar</button>
         </div>
       </div>
@@ -245,10 +291,19 @@ export class SensorCreateModalComponent implements OnInit {
   parametrosSeleccionados: number[] = [];
   parametrosTouched = false;
   tiposSensores: TipoSensor[] = [];
+  copiado = false;
 
   created!: CrearSensorResponse;
   apiUrl = 'http://localhost:5000/api';
-
+  jsonEjemplo = `
+  {
+    "token": "${this.created?.token || ''}",
+    "mediciones": [
+      { "parametro": "Temperatura", "valor": 25.4 },
+      { "parametro": "Humedad", "valor": 80.2 }
+    ]
+  }`;
+  
   constructor(
     private fb: FormBuilder,
     private invSvc: InvernaderoService,
@@ -330,9 +385,15 @@ export class SensorCreateModalComponent implements OnInit {
     });
   }
 
-  copyToken() {
-    navigator.clipboard.writeText(this.created.token);
-    alert('✔️ Token copiado al portapapeles');
+  animateCopyIcon() {
+    navigator.clipboard.writeText(this.created.token).then(() => {
+      const btn = document.activeElement as HTMLElement;
+      btn?.classList.add('copied');
+  
+      setTimeout(() => {
+        btn?.classList.remove('copied');
+      }, 1200); // duración de animación
+    });
   }
 
   onClose() {

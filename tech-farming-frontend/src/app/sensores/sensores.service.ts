@@ -96,7 +96,7 @@ export class SensoresService {
     );
   }
 
-  /** Eliminación de sensor */
+  /** DELETE /api/sensores/{id} */
   eliminarSensor(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

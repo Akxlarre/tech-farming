@@ -18,8 +18,10 @@ import { SensorFiltersComponent }     from './components/sensor-filters.componen
 import { SensorTableComponent }       from './components/sensor-table.component';
 import { SensorModalWrapperComponent }from './components/sensor-modal-wrapper.component';
 import { SensorCreateModalComponent }from './components/sensor-create-modal.component';
-//import { SensorViewModalComponent }  from './components/sensor-view-modal.component';
+import { SensorViewModalComponent }  from './components/sensor-view-modal.component';
 import { SensorEditModalComponent }  from './components/sensor-edit-modal.component';
+import { SensorDeleteModalComponent } from './components/sensor-delete-modal.component';
+import { SensorCardComponent } from './components/sensor-card.component';
 
 import { TipoSensorService }         from './tipos_sensor.service';
 import { InvernaderoService }        from '../invernaderos/invernaderos.service';
@@ -35,10 +37,12 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
     SensorHeaderComponent,
     SensorFiltersComponent,
     SensorTableComponent,
+    SensorCardComponent,
     SensorModalWrapperComponent,
     SensorCreateModalComponent,
-    //SensorViewModalComponent,
-    SensorEditModalComponent
+    SensorViewModalComponent,
+    SensorEditModalComponent,
+    SensorDeleteModalComponent
   ],
   template: `
     <!-- HEADER -->
@@ -55,58 +59,116 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
 
     <!-- TABLA + PAGINACIÓN -->
     <section class="space-y-6">
-      <app-sensor-table
-        [sensores]="sensoresConLectura"
-        (accion)="onAccion($event)"
-        [trackByFn]="trackBySensorId">
-      </app-sensor-table>
+      <div class="hidden md:block">
+        <app-sensor-table
+          [sensores]="sensoresConLectura"
+          (accion)="onAccion($event)"
+          [trackByFn]="trackBySensorId">
+        </app-sensor-table>
+      </div>
 
-      <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-        <div class="text-sm text-gray-600">
+      <!-- MOBILE: cards -->
+      <div class="block md:hidden space-y-4 p-6">
+        <app-sensor-card
+          *ngFor="let s of sensoresConLectura; trackBy: trackBySensorId"
+          [sensor]="s"
+          (accion)="onAccion($event)">
+        </app-sensor-card>
+      </div>
+
+      <div class="flex items-center justify-between p-6 bg-base-200 rounded-lg">
+        <div class="text-sm text-base-content/70">
           Página {{currentPage}} de {{totalPages}} · {{totalSensors}} sensores
         </div>
-        <div class="flex items-center space-x-1">
-          <button class="btn btn-md btn-outline rounded-full"
-                  (click)="goToPage(1)" [disabled]="currentPage===1">«</button>
-          <button class="btn btn-md btn-outline"
-                  (click)="goToPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+
+        <div class="flex items-center gap-2">
+          <!-- Primera página -->
+          <button class="btn btn-sm btn-outline rounded-full"
+                  (click)="goToPage(1)" [disabled]="currentPage === 1">
+            «
+          </button>
+
+          <!-- Página anterior -->
+          <button class="btn btn-sm btn-outline rounded-full"
+                  (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+            ‹
+          </button>
+
+          <!-- Números -->
           <ng-container *ngFor="let item of paginationItems">
-            <ng-container *ngIf="item!=='…'; else dot">
-              <button class="btn btn-md"
-                      [ngClass]="{'btn-primary': item===currentPage, 'btn-outline': item!==currentPage}"
-                      (click)="goToPage(+item)" [disabled]="item===currentPage">
+            <ng-container *ngIf="item !== '…'; else dots">
+              <button
+                class="btn btn-sm rounded-full"
+                [ngClass]="{
+                  'btn-success text-base-content border-success cursor-default': item === currentPage,
+                  'btn-outline': item !== currentPage
+                }"
+                (click)="goToPage(+item)" [disabled]="item === currentPage"
+              >
                 {{ item }}
               </button>
             </ng-container>
-            <ng-template #dot><span class="px-2">…</span></ng-template>
+            <ng-template #dots>
+              <span class="px-2 text-base-content/60 select-none">…</span>
+            </ng-template>
           </ng-container>
-          <button class="btn btn-md btn-outline"
-                  (click)="goToPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
-          <button class="btn btn-md btn-outline"
-                  (click)="goToPage(totalPages)" [disabled]="currentPage===totalPages">»</button>
+
+          <!-- Página siguiente -->
+          <button class="btn btn-sm btn-outline rounded-full"
+                  (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+            ›
+          </button>
+
+          <!-- Última página -->
+          <button class="btn btn-sm btn-outline rounded-full"
+                  (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">
+            »
+          </button>
         </div>
       </div>
     </section>
 
     <!-- MODALES -->
-    <<app-sensor-modal-wrapper *ngIf="modal.modalType$ | async as type">
+    <app-sensor-modal-wrapper *ngIf="modal.modalType$ | async as type">
       <ng-container [ngSwitch]="type">
-       <!-- EDITAR SENSOR -->
-        <ng-container *ngSwitchCase="'edit'">
-         <ng-container *ngIf="modal.selectedSensor$ | async as sel">
-           <app-sensor-edit-modal
-             [sensor]="sel"
-             (saved)="onEdited($event)"
-             (close)="onCloseModal()">
-           </app-sensor-edit-modal>
-         </ng-container>
-       </ng-container>
         <!-- CREAR SENSOR -->
         <ng-container *ngSwitchCase="'create'">
           <app-sensor-create-modal
             (saved)="onCreated($event)"
             (close)="onCloseModal()">
           </app-sensor-create-modal>
+        </ng-container>
+
+        <!-- VER SENSOR -->
+        <ng-container *ngSwitchCase="'view'">
+          <ng-container *ngIf="modal.selectedSensor$ | async as sel">
+            <app-sensor-view-modal
+              [sensor]="sel"
+              (close)="onCloseModal()">
+            </app-sensor-view-modal>
+          </ng-container>
+        </ng-container>
+
+        <!-- EDITAR SENSOR -->
+        <ng-container *ngSwitchCase="'edit'">
+          <ng-container *ngIf="modal.selectedSensor$ | async as sel">
+            <app-sensor-edit-modal
+              [sensor]="sel"
+              (saved)="onEdited($event)"
+              (close)="onCloseModal()">
+            </app-sensor-edit-modal>
+          </ng-container>
+        </ng-container>
+
+         <!-- ELIMINAR SENSOR -->
+        <ng-container *ngSwitchCase="'delete'">
+          <ng-container *ngIf="modal.selectedSensor$ | async as sel">
+            <app-sensor-delete-modal
+              [sensor]="sel"
+              (deleted)="onDeleted($event)"
+              (close)="onCloseModal()"
+            ></app-sensor-delete-modal>
+          </ng-container>
         </ng-container>
       </ng-container>
     </app-sensor-modal-wrapper>
@@ -117,7 +179,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
   refreshSub?: Subscription;
 
   // paginación
-  pageSize     = 6;
+  pageSize     = 5;
   currentPage  = 1;
   totalSensors = 0;
 
@@ -240,6 +302,12 @@ export class SensoresComponent implements OnInit, OnDestroy {
     this.loadPage(this.currentPage);
   }
   
+  onDeleted(id: number) {
+    this.modal.closeWithAnimation();
+    // recarga la página actual para quitar el eliminado
+    this.loadPage(this.currentPage);
+  }
+
   onCloseModal() {
     this.modal.closeWithAnimation();
     this.loadPage(this.currentPage);

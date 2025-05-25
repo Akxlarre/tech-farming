@@ -26,7 +26,7 @@ export default {
           'neutral-content': 'oklch(92% 0.004 286.32)',
           info: 'oklch(74% 0.16 232.661)',
           'info-content': 'oklch(29% 0.066 243.157)',
-          success: 'oklch(76% 0.177 163.223)',
+          success: 'oklch(55% 0.18 145)',
           'success-content': 'oklch(37% 0.077 168.94)',
           warning: 'oklch(82% 0.189 84.429)',
           'warning-content': 'oklch(41% 0.112 45.904)',
@@ -40,6 +40,7 @@ export default {
           '--border': '1px',
           '--depth': '1',
           '--noise': '0',
+          basetext:'oklch(100% 0 0)'
         }
       },
       {
@@ -74,6 +75,7 @@ export default {
           '--border': '1px',
           '--depth': '1',
           '--noise': '0',
+          basetext:'oklch(0% 0 0)'
         }
       }
     ],
