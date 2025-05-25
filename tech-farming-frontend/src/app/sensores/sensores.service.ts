@@ -32,7 +32,6 @@ export interface CrearSensorResponse {
   token: string;
 }
 
-// ** NUEVO **
 export interface EditarSensorPayload {
   id: number;
   nombre: string;
@@ -50,6 +49,7 @@ export class SensoresService {
 
   constructor(private http: HttpClient) { }
 
+  /** Listado paginado de sensores */
   getSensoresPage(
     page: number,
     pageSize: number,
@@ -60,44 +60,56 @@ export class SensoresService {
       .set('pageSize', pageSize.toString());
 
     Object.entries(filters).forEach(([k, v]) => {
-      if (v != null && v !== '') params = params.set(k, v.toString());
+      if (v != null && v !== '') {
+        params = params.set(k, v.toString());
+      }
     });
 
     return this.http.get<PagedResponse>(this.base, { params });
-      
-  /** Ahora sí devuelve un Observable */
-  getSensoresPorFiltro(invernaderoId: number, tipoParametroId: number): Observable<Sensor[]> {
-    return this.http.get<Sensor[]>(`${this.base}/sensores/filtro`,
-      {
-        params: {
-          invernadero_id: invernaderoId,
-          tipo_parametro_id: tipoParametroId
-        }
-      }
+  }
+
+  /** Filtrado de sensores por invernadero y tipo de parámetro */
+  getSensoresPorFiltro(
+    invernaderoId: number,
+    tipoParametroId: number
+  ): Observable<Sensor[]> {
+    const params = new HttpParams()
+      .set('invernadero_id', invernaderoId.toString())
+      .set('tipo_parametro_id', tipoParametroId.toString());
+
+    return this.http.get<Sensor[]>(
+      `${this.base}/sensores/filtro`,
+      { params }
     );
   }
 
+  /** Creación de sensor */
   crearSensor(payload: CrearSensorPayload): Observable<CrearSensorResponse> {
     return this.http.post<CrearSensorResponse>(this.base, payload);
   }
 
+  /** Edición de sensor */
   editarSensor(payload: EditarSensorPayload): Observable<Sensor> {
-    // Hacemos PUT /api/sensores/:id
     return this.http.put<Sensor>(
       `${this.base}/${payload.id}`,
       payload
     );
   }
 
+  /** Eliminación de sensor */
   eliminarSensor(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 
-  /** PARA ALERTAS: filtrar por invernadero y tipo parámetro */
-  getSensoresPorFiltro(invId: number, tipoParamId: number): Observable<Sensor[]> {
-    let params = new HttpParams()
-      .set('invernaderoId', invId.toString())
-      .set('tipoParametroId', tipoParamId.toString());
+  /** Para alertas: filtro alternativo por invernadero y tipo de parámetro */
+  getSensoresParaAlertas(
+    invernaderoId: number,
+    tipoParametroId: number
+  ): Observable<Sensor[]> {
+    const params = new HttpParams()
+      .set('invernaderoId', invernaderoId.toString())
+      .set('tipoParametroId', tipoParametroId.toString());
+
     return this.http.get<Sensor[]>(this.base, { params });
   }
 }
