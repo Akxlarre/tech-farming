@@ -13,6 +13,7 @@ from app.models.sensor_parametro import SensorParametro as SensorParametroModel
 from app.models.tipo_parametro import TipoParametro as TipoParametroModel
 from app.models.tipo_sensor import TipoSensor as TipoSensorModel
 from app.queries.sensor_queries import obtener_sensores_por_invernadero_y_parametro
+from app.queries.alerta_queries import evaluar_y_generar_alerta
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
 
@@ -440,6 +441,23 @@ def recibir_datos():
                 .time(datetime.utcnow())
             )
             write_api.write(bucket="temporalSeries_v3", record=point)
+
+            # Evaluar umbral y generar alerta si corresponde
+            tipo_parametro = TipoParametroModel.query.filter_by(nombre=parametro).first()
+            if not tipo_parametro:
+                continue  # Si no se encuentra el parámetro, no se puede continuar
+
+            sensor_param = SensorParametroModel.query.filter_by(
+                sensor_id=sensor.id,
+                tipo_parametro_id=tipo_parametro.id
+            ).first()
+
+            if sensor_param:
+                evaluar_y_generar_alerta(
+                    sensor_parametro_id=sensor_param.id,
+                    valor=float(valor),
+                    timestamp=datetime.utcnow()
+                )
 
         return jsonify({
             "sensor_id":  sensor.id,

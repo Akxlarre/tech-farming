@@ -41,7 +41,7 @@ export class AlertService {
     return this.http.get<{ data: Alerta[]; pagination: any }>(this.baseUrl, { params });
   }
 
-  resolverAlerta(id: number, resuelta_por: number): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/${id}/resolver`, { resuelta_por });
+  resolverAlerta(id: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/${id}/resolver`, {});
   }
 }

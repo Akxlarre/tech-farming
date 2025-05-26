@@ -145,7 +145,7 @@ export class AlertasComponent implements OnInit {
   }
 
   resolverAlerta(alerta: Alerta) {
-    this.alertService.resolverAlerta(alerta.id, 1).subscribe(() => this.cargarAlertas());
+    this.alertService.resolverAlerta(alerta.id).subscribe(() => this.cargarAlertas());
   }
 
   abrirConfiguracionUmbrales() {

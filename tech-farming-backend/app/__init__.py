@@ -101,6 +101,9 @@ def create_app():
     # Cargar modelos
     from app import models
 
+    from app.queries.alerta_queries import iniciar_scheduler
+    iniciar_scheduler()
+
     return app
 
 if __name__ == "__main__":
