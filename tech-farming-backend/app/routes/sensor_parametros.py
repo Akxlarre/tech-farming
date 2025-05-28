@@ -31,7 +31,10 @@ def parametros_de_sensor(sensor_id):
         for sp in filas:
             tp = TipoParametro.query.get(sp.tipo_parametro_id)
             if tp:
-                resultado.append({"id": tp.id, "nombre": tp.nombre})
+                resultado.append({"id": tp.id,
+                                  "nombre": tp.nombre,
+                                  "unidad": tp.unidad,
+                                  "sensor_parametro_id": sp.id})
         return jsonify(resultado), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

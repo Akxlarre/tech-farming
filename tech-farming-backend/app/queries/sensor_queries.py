@@ -1,7 +1,7 @@
 from app import db
 from app.models.sensor import Sensor
 from datetime import date
-from app.models.sensor import Sensor as SensorModel
+from app.models.sensor import Sensor
 from app.models.sensor_parametro import SensorParametro
 import secrets
 
@@ -51,7 +51,20 @@ def obtener_sensores_por_zona(zona_id: int) -> list[dict]:
             "token":            s.token
         })
     return salida    
-    
+
+def obtener_sensores_por_invernadero(invernadero_id: int) -> list[dict]:
+    """
+    Retorna todos los sensores instalados en un invernadero (por cualquier zona).
+    """
+    sensores = (
+        Sensor.query
+        .filter(Sensor.zona.has(invernadero_id=invernadero_id))
+        .filter(Sensor.estado == 'Activo')
+        .order_by(Sensor.nombre)
+        .all()
+    )
+
+    return [{"id": s.id, "nombre": s.nombre} for s in sensores]   
 
 def obtener_sensores_por_invernadero_y_parametro(invernadero_id: int, tipo_parametro_id: int) -> list[dict]:
     """
@@ -59,13 +72,13 @@ def obtener_sensores_por_invernadero_y_parametro(invernadero_id: int, tipo_param
     que tienen asociado un tipo de parámetro específico.
     """
     sensores = (
-        SensorModel.query
-        .join(SensorParametro, SensorParametro.sensor_id == SensorModel.id)
+        Sensor.query
+        .join(SensorParametro, SensorParametro.sensor_id == Sensor.id)
         .filter(
-            SensorModel.zona.has(invernadero_id=invernadero_id),
+            Sensor.zona.has(invernadero_id=invernadero_id),
             SensorParametro.tipo_parametro_id == tipo_parametro_id
         )
-        .order_by(SensorModel.nombre)
+        .order_by(Sensor.nombre)
         .all()
     )
 

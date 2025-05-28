@@ -5,12 +5,14 @@ import { Observable } from 'rxjs';
 export interface Alerta {
   id: number;
   sensor_parametro_id: number;
+  sensor_nombre: string;
   tipo: string;
-  nivel: 'advertencia' | 'critico';
+  nivel: 'Advertencia' | 'Crítico';
   valor_detectado: number;
   fecha_hora: string;
   mensaje: string;
-  estado: 'activo' | 'historico';
+  estado: 'Activa' | 'Resuelta';
+  resuelta_por?: string;
 }
 
 @Injectable({
@@ -22,8 +24,8 @@ export class AlertService {
   constructor(private http: HttpClient) {}
 
   getAlertas(
-    estado?: 'activo' | 'historico',
-    nivel?: 'advertencia' | 'critico',
+    estado?: 'Activa' | 'Resuelta',
+    nivel?: 'Advertencia' | 'Crítico',
     invernadero_id?: number,
     zona_id?: number,
     busqueda?: string,

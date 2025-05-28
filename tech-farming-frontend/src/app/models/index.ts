@@ -12,14 +12,31 @@ export interface Zona {
 export interface Sensor {
   id: number;
   nombre: string;
-  zonaId: number;
-  tipo: 'temperatura' | 'humedad' | 'p' | 'n' | 'k';
+  descripcion?: string;
+  estado: 'Activo' | 'Inactivo' | 'Mantenimiento';
+  fecha_instalacion?: string;
+  tipo_sensor: TipoSensor;
+  zona?: Zona;
+  invernadero?: Invernadero;
+  parametros: Array<{
+    id: number;
+    nombre: string;
+    unidad?: string;
+  }>;
+  ultimaLectura?: LecturaSensor | null;
 }
+
+export interface TipoSensor {
+    id: number;
+    nombre: string;
+    descripcion: string;
+  }
 
 export interface TipoParametro {
   id: number;
   nombre: string;
   unidad: string;
+  sensor_parametro_id?: number;
 }
 
 // Parámetros y datos para Historial
@@ -41,6 +58,12 @@ export interface HistorialData {
     desviacion: number;
   };
 }
+
+export interface LecturaSensor {
+    time: string;            // ISO timestamp
+    parametros: string[];    // p.ej. ['humedad']
+    valores: number[];       // p.ej. [60.5]
+  }
 
 // Modelos para Predicciones
 /** Un punto de datos en una serie */
@@ -81,14 +104,15 @@ export interface PredicResult {
 export interface Alerta {
   id: number;
   sensor_parametro_id: number;
+  sensor_nombre: string;
   tipo: string;
-  nivel: 'advertencia' | 'critico';
+  nivel: 'Advertencia' | 'Crítico';
   valor_detectado: number;
   fecha_hora: string;
   mensaje: string;
-  estado: 'activo' | 'historico';
-  resuelta_en?: string;
-  resuelta_por?: number;
+  estado: 'Activa' | 'Resuelta';
+  fecha_resolucion?: string;
+  resuelta_por?: string;
 }
 
 // Modelos para Umbrales

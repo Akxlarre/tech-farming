@@ -5,6 +5,7 @@ from functools import wraps
 
 SUPABASE_PROJECT_URL = os.getenv("SUPABASE_URL")
 SUPABASE_AUTH_URL = f"{SUPABASE_PROJECT_URL}/auth/v1/user"
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 def supabase_auth_required(f):
     @wraps(f)
@@ -14,13 +15,21 @@ def supabase_auth_required(f):
             return jsonify({"error": "Token no proporcionado o inválido"}), 401
 
         token = auth_header.split(" ")[1]
+        print(f"[DEBUG] Token recibido: {token}")
+        print(f"[DEBUG] URL de verificación: {SUPABASE_AUTH_URL}")
 
         # Llamar a Supabase para validar el token
         try:
             response = requests.get(
                 SUPABASE_AUTH_URL,
-                headers={"Authorization": f"Bearer {token}"}
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "apikey": SUPABASE_ANON_KEY
+                }
             )
+
+            print(f"[DEBUG] Código de respuesta Supabase: {response.status_code}")
+            print(f"[DEBUG] Respuesta Supabase: {response.text}")
 
             if response.status_code != 200:
                 return jsonify({"error": "Token inválido o expirado"}), 401

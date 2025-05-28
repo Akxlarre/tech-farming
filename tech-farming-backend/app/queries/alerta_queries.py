@@ -1,3 +1,4 @@
+from sqlalchemy import and_, not_, or_
 from app import db, influx_client as client
 from app.models.alerta import Alerta
 from app.models.sensor_parametro import SensorParametro
@@ -6,6 +7,7 @@ from app.models.zona import Zona
 from app.models.tipo_parametro import TipoParametro
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
+from flask import current_app
 from typing import Optional
 from sqlalchemy.orm import joinedload
 
@@ -65,9 +67,9 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     nivel_alerta = None
 
     if umbral.critico_min is not None and valor < umbral.critico_min or umbral.critico_max is not None and valor > umbral.critico_max:
-        nivel_alerta = "critico"
+        nivel_alerta = "Crítico"
     elif valor < umbral.advertencia_min or valor > umbral.advertencia_max:
-        nivel_alerta = "advertencia"
+        nivel_alerta = "Advertencia"
 
     if not nivel_alerta:
         return
@@ -75,9 +77,9 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     # Verificar si ya hay una alerta activa del mismo tipo y nivel
     ya_alertada = Alerta.query.filter_by(
         sensor_parametro_id=sensor_parametro_id,
-        tipo="umbral",
+        tipo="Umbral",
         nivel=nivel_alerta,
-        estado="activo"
+        estado="Activa"
     ).first()
 
     if ya_alertada:
@@ -88,13 +90,14 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     mensaje = f"El valor {valor} de {parametro.nombre} ({parametro.unidad}) excede el umbral {nivel_alerta.upper()}."
 
     alerta = Alerta(
+        sensor_id=sensor.id,
         sensor_parametro_id=sensor_parametro_id,
-        tipo="umbral",
+        tipo="Umbral",
         mensaje=mensaje,
         valor_detectado=valor,
         fecha_hora=timestamp,
         nivel=nivel_alerta,
-        estado="activo"
+        estado="Activa"
     )
 
     db.session.add(alerta)
@@ -110,7 +113,10 @@ def listar_alertas(filtros: dict):
             .joinedload(SensorParametro.sensor)
             .joinedload(Sensor.zona),
         joinedload(Alerta.sensor_parametro)
-            .joinedload(SensorParametro.tipo_parametro)
+            .joinedload(SensorParametro.tipo_parametro),
+        joinedload(Alerta.sensor)
+            .joinedload(Sensor.zona),
+        joinedload(Alerta.usuario_resolutor)
     )
 
     if filtros.get("estado"):
@@ -118,13 +124,33 @@ def listar_alertas(filtros: dict):
     if filtros.get("nivel"):
         query = query.filter(Alerta.nivel == filtros["nivel"])
     if filtros.get("invernadero_id"):
-        query = query.join(Alerta.sensor_parametro).join(SensorParametro.sensor).join(Sensor.zona).filter(Zona.invernadero_id == filtros["invernadero_id"])
-    if filtros.get("zona_id"):
-        query = query.join(Alerta.sensor_parametro).join(SensorParametro.sensor).filter(Sensor.zona_id == filtros["zona_id"])
-    if filtros.get("busqueda"):
-        query = query.join(Alerta.sensor_parametro).join(SensorParametro.tipo_parametro).filter(
-            TipoParametro.nombre.ilike(f"%{filtros['busqueda']}%")
+        query = query.filter(or_(
+            Alerta.sensor_parametro.has(
+                SensorParametro.sensor.has(
+                    Sensor.zona.has(Zona.invernadero_id == filtros["invernadero_id"])
+                )
+            ),
+            Alerta.sensor.has(
+                Sensor.zona.has(Zona.invernadero_id == filtros["invernadero_id"])
+            )
+        ))
+        query = query.filter(
+            not_(
+                and_(
+                    Alerta.tipo == 'umbral',
+                    Alerta.sensor_parametro_id.is_(None)
+                )
+            )
         )
+    if filtros.get("zona_id"):
+        query = query.filter(or_(
+            Alerta.sensor_parametro.has(
+                SensorParametro.sensor.has(Sensor.zona_id == filtros["zona_id"])
+            ),
+            Alerta.sensor.has(Sensor.zona_id == filtros["zona_id"])
+        ))
+    if filtros.get("sensor_id"):
+        query = query.filter(Alerta.sensor_id == filtros["sensor_id"])
 
     paginated = query.order_by(Alerta.fecha_hora.desc()).paginate(page=page, per_page=per_page)
 
@@ -133,12 +159,21 @@ def listar_alertas(filtros: dict):
             {
                 "id": a.id,
                 "sensor_parametro_id": a.sensor_parametro_id,
+                "tipo_parametro": (
+                    a.sensor_parametro.tipo_parametro.nombre if a.sensor_parametro and a.sensor_parametro.tipo_parametro else None
+                ),
+                "sensor_nombre": (
+                    a.sensor.nombre if a.sensor else (
+                        a.sensor_parametro.sensor.nombre if a.sensor_parametro and a.sensor_parametro.sensor else None
+                    )
+                ),
                 "nivel": a.nivel,
                 "tipo": a.tipo,
                 "mensaje": a.mensaje,
-                "valor_detectado": float(a.valor_detectado),
+                "valor_detectado": float(a.valor_detectado) if a.valor_detectado is not None else None,
                 "fecha_hora": a.fecha_hora.isoformat(),
-                "estado": a.estado
+                "estado": a.estado,
+                "resuelta_por": a.usuario_resolutor.nombre if a.usuario_resolutor else None
             } for a in paginated.items
         ],
         "pagination": {
@@ -149,68 +184,69 @@ def listar_alertas(filtros: dict):
         }
     }
 
-def verificar_sensores_desconectados(minutos: int = 5):
+def verificar_sensores_desconectados(app, minutos: int = 10):
     """
     Recorre todos los sensores y verifica si alguno no ha enviado datos
-    a InfluxDB en los últimos `minutos`. Si es así, se genera una alerta de tipo 'error'.
+    a InfluxDB en los últimos `minutos`. Si es así, se genera una alerta de tipo 'Error'.
     """
-    ahora = datetime.utcnow()
-    sensores = Sensor.query.all()
-    sensores_inactivos = []
+    with app.app_context():
 
-    for sensor in sensores:
-        flux = f'''
-        from(bucket: "temporalSeries_v3")
-          |> range(start: -{minutos}m)
-          |> filter(fn: (r) =>
-              r._measurement == "lecturas_sensores" and
-              r.sensor_id    == "{sensor.id}"
-          )
-          |> keep(columns: ["_time"])
-          |> sort(columns: ["_time"], desc: true)
-          |> limit(n:1)
-        '''
-        tables = client.query_api().query(flux)
-        ultima_lectura = None
+        ahora = datetime.utcnow()
+        sensores = Sensor.query.filter_by(estado="Activo").all()
+        sensores_inactivos = []
 
-        for table in tables:
-            for record in table.records:
-                ultima_lectura = record.get_time()
-                break
-
-        if not ultima_lectura:
-            sensores_inactivos.append(sensor)
-
-    # Crear alertas para sensores desconectados
-    for sensor in sensores_inactivos:
-        ya_alertado = (
-            Alerta.query
-            .filter_by(sensor_parametro_id=None, tipo="error", estado="activo")
-            .filter(Alerta.mensaje.like(f"%{sensor.nombre}%"))
-            .first()
-        )
-
-        if not ya_alertado:
-            alerta = Alerta(
-                sensor_parametro_id=None,
-                tipo="error",
-                nivel="critico",
-                mensaje=f"El sensor '{sensor.nombre}' no ha enviado datos en los últimos {minutos} minutos.",
-                valor_detectado=0,
-                fecha_hora=ahora,
-                estado="activo"
+        for sensor in sensores:
+            flux = f'''
+            from(bucket: "temporalSeries_v3")
+            |> range(start: -{minutos}m)
+            |> filter(fn: (r) =>
+                r._measurement == "lecturas_sensores" and
+                r.sensor_id    == "{sensor.id}"
             )
-            db.session.add(alerta)
+            |> keep(columns: ["_time"])
+            |> sort(columns: ["_time"], desc: true)
+            |> limit(n:1)
+            '''
+            tables = client.query_api().query(flux)
+            ultima_lectura = None
 
-    db.session.commit()
-    print(f"[INFO] Sensores inactivos detectados: {len(sensores_inactivos)}")
+            for table in tables:
+                for record in table.records:
+                    ultima_lectura = record.get_time()
+                    break
 
-def iniciar_scheduler():
+            if not ultima_lectura:
+                sensores_inactivos.append(sensor)
+
+        # Crear alertas para sensores desconectados
+        for sensor in sensores_inactivos:
+            ya_alertado = (
+                Alerta.query
+                .filter_by(sensor_id=sensor.id, tipo="Error", estado="Activa")
+                .first()
+            )
+
+            if not ya_alertado:
+                alerta = Alerta(
+                    sensor_id=sensor.id,
+                    sensor_parametro_id=None,
+                    tipo="Error",
+                    nivel="Crítico",
+                    mensaje=f"El sensor '{sensor.nombre}' no ha enviado datos en los últimos {minutos} minutos.",
+                    valor_detectado=None,
+                    fecha_hora=ahora,
+                    estado="Activa"
+                )
+                db.session.add(alerta)
+
+        db.session.commit()
+
+def iniciar_scheduler(app):
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=verificar_sensores_desconectados,
+        func=lambda: verificar_sensores_desconectados(app),
         trigger='interval',
-        minutes=5,
+        minutes=10,
         id='verificacion_sensores',
         replace_existing=True
     )

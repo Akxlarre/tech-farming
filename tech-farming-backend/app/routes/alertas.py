@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify, g
-from flask_jwt_extended import get_jwt_identity
 from app import db
 from app.queries.alerta_queries import listar_alertas
 from app.models.alerta import Alerta
@@ -35,7 +34,7 @@ def resolver_alerta(alerta_id):
         if not alerta:
             return jsonify({"error": "Alerta no encontrada"}), 404
 
-        if alerta.estado == "historico":
+        if alerta.estado == "Resuelta":
             return jsonify({"error": "La alerta ya fue resuelta"}), 400
 
         # Recuperar el Supabase UID desde JWT validado
@@ -45,15 +44,15 @@ def resolver_alerta(alerta_id):
         if not usuario:
             return jsonify({"error": "Usuario no registrado en la base de datos"}), 403
 
-        alerta.estado = "historico"
-        alerta.resuelta_en = datetime.utcnow()
+        alerta.estado = "Resuelta"
+        alerta.fecha_resolucion = datetime.utcnow()
         alerta.resuelta_por = usuario.id
         db.session.commit()
 
         return jsonify({
             "mensaje": "Alerta resuelta correctamente",
             "resuelta_por": usuario.nombre,
-            "resuelta_en": alerta.resuelta_en.isoformat()
+            "fecha_resolucion": alerta.fecha_resolucion.isoformat()
         }), 200
 
     except Exception as e:

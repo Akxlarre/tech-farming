@@ -20,6 +20,7 @@ def insertar_sensor_parametros(sensor_id, nombres_parametros):
     except Exception as e:
         db.session.rollback()
         print(f"Error al insertar parámetros del sensor: {e}")
+        
 def obtener_sensores_con_tipos_por_zona(zona_id: int) -> list[dict]:
     """
     Para una zona dada, devuelve un objeto por sensor:

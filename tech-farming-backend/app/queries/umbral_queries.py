@@ -77,7 +77,7 @@ def crear_umbral(data):
     try:
         if not data.get("tipo_parametro_id"):
             return {"error": "El campo tipo_parametro_id es obligatorio"}
-
+        
         nuevo_umbral = ConfiguracionUmbral(
             tipo_parametro_id = data.get("tipo_parametro_id"),
             invernadero_id = data.get("invernadero_id"),

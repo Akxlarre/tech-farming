@@ -12,7 +12,9 @@ from app.models.invernadero import Invernadero as InvernaderoModel
 from app.models.sensor_parametro import SensorParametro as SensorParametroModel
 from app.models.tipo_parametro import TipoParametro as TipoParametroModel
 from app.models.tipo_sensor import TipoSensor as TipoSensorModel
-from app.queries.sensor_queries import obtener_sensores_por_invernadero_y_parametro
+from app.queries.sensor_queries import (
+    obtener_sensores_por_invernadero_y_parametro,
+    obtener_sensores_por_invernadero)
 from app.queries.alerta_queries import evaluar_y_generar_alerta
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
@@ -398,6 +400,14 @@ def ultima_lectura_sensor(sensor_id):
         "valores":    valores,
         "time":       ultima_time
     }), 200
+
+@router.route('/por-invernadero/<int:invernadero_id>', methods=['GET'])
+def listar_sensores_por_invernadero(invernadero_id):
+    try:
+        sensores = obtener_sensores_por_invernadero(invernadero_id)
+        return jsonify(sensores), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @router.route('/filtro', methods=['GET'])
 def listar_sensores_filtrados():

@@ -39,22 +39,25 @@ import { FormsModule } from '@angular/forms';
     <!-- Vista Principal -->
     <div class="p-4">
       <!-- Toolbar -->
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xl font-semibold">Umbrales</h3>
-        <button class="btn btn-primary" (click)="nuevoUmbral()">+ Nuevo Umbral</button>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold">Umbrales</h2>
+        <button class="btn btn-ghost" (click)="modal.closeModal()">✕</button>
       </div>
       <div class="flex gap-4 mb-4">
         <input type="text" placeholder="Buscar..." [(ngModel)]="filter" class="input input-bordered flex-1" />
       </div>
 
       <!-- Tabs for scope -->
-      <div class="tabs mb-4">
-        <a *ngFor="let t of scopes; let i = index"
-           class="tab tab-lg"
-           [class.tab-active]="scopeIndex === i"
-           (click)="switchScope(i)">
-          {{ t | titlecase }}
-        </a>
+      <div class="flex justify-between items-center mb-4">
+        <div class="tabs">
+          <a *ngFor="let t of scopes; let i = index"
+            class="tab tab-lg"
+            [class.tab-active]="scopeIndex === i"
+            (click)="switchScope(i)">
+           {{ t | titlecase }}
+          </a>
+        </div>
+        <button class="btn btn-primary btn-md" (click)="nuevoUmbral()">+ Nuevo Umbral</button>
       </div>
 
       <!-- Table -->

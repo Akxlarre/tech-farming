@@ -3,7 +3,7 @@ import pandas as pd
 import time
 
 API_URL = "http://localhost:5000/api/sensores/datos"
-SENSOR_TOKEN = "943bee6fb6b844e1b56a996b1f53eeae"
+SENSOR_TOKEN = "726202b2c1564703bc0002a81890b590"
 
 # 1) Carga el CSV y muestra sus columnas
 df = pd.read_csv("D:\\DatosSimulados\\IoTProcessed_Data.csv")
@@ -22,7 +22,7 @@ if 'K' in df.columns:
     df.rename(columns={'K': 'Potasio'}, inplace=True)
 
 # 3) Parámetros que vas a enviar
-parametros_usados = ['Nitrógeno', 'Fósforo', 'Potasio']
+parametros_usados = ['Temperatura', 'Humedad']
 
 # 4) Itera fila por fila
 for index, row in df.iterrows():
@@ -50,5 +50,5 @@ for index, row in df.iterrows():
     except Exception as e:
         print(f"❌ Error inesperado: {e}")
 
-    # 5) Espera 2 segundos antes de la siguiente iteración
+    # 5) Espera 5 segundos antes de la siguiente iteración
     time.sleep(5)

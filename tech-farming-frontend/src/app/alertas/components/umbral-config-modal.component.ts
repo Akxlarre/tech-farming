@@ -47,33 +47,43 @@ import { Sensor } from '../../sensores/models/sensor.model';
         <!-- Invernadero -->
         <div *ngIf="form.value.ambito !== 'global'">
           <label class="label"><span class="label-text">Invernadero</span></label>
-          <select formControlName="invernadero_id" class="select select-bordered w-full"
-                  [disabled]="form.value.ambito === 'global'">
+          <select formControlName="invernadero_id" class="select select-bordered w-full">
             <option value="">-- Selecciona Invernadero --</option>
             <option *ngFor="let inv of invernaderos" [value]="inv.id">{{ inv.nombre }}</option>
-          </select>
-        </div>
-
-        <!-- Parámetro -->
-        <div *ngIf="true">
-          <label class="label"><span class="label-text">Parámetro</span></label>
-          <select formControlName="tipo_parametro_id" class="select select-bordered w-full">
-            <option value="">-- Selecciona Parámetro --</option>
-            <option *ngFor="let tp of tiposParametro" [value]="tp.id">{{ tp.nombre }} ({{ tp.unidad }})</option>
           </select>
         </div>
 
         <!-- Sensor -->
         <div *ngIf="form.value.ambito === 'sensor'">
           <label class="label"><span class="label-text">Sensor</span></label>
-          <select formControlName="sensor_parametro_id" class="select select-bordered w-full"
-                  [disabled]="!sensorEnabled">
+          <select formControlName="sensor_id" class="select select-bordered w-full">
             <option value="">-- Selecciona Sensor --</option>
             <option *ngFor="let s of sensores" [value]="s.id">{{ s.nombre }}</option>
           </select>
-          <div *ngIf="form.value.ambito==='sensor' && sensores.length === 0" class="text-sm text-warning">
-            No hay sensores disponibles para ese invernadero y parámetro.
-          </div>
+          <div *ngIf="sensores.length === 0" class="text-sm text-warning">No hay sensores disponibles.</div>
+        </div>
+
+        <!-- Parámetro -->
+        <div *ngIf="form.value.ambito === 'sensor'">
+          <label class="label"><span class="label-text">Parámetro</span></label>
+          <select formControlName="tipo_parametro_id" class="select select-bordered w-full">
+            <option value="">-- Selecciona Parámetro --</option>
+            <option *ngFor="let tp of sensorParametros" [value]="tp.id">
+              {{ tp.nombre }} ({{ tp.unidad }})
+            </option>
+          </select>
+          <div *ngIf="sensorParametros.length === 0" class="text-sm text-warning">Este sensor no mide ningún parámetro.</div>
+        </div>
+
+        <!-- Parámetro para ámbito global o invernadero -->
+        <div *ngIf="form.value.ambito !== 'sensor'">
+          <label class="label"><span class="label-text">Parámetro</span></label>
+          <select formControlName="tipo_parametro_id" class="select select-bordered w-full">
+            <option value="">-- Selecciona Parámetro --</option>
+            <option *ngFor="let tp of tiposParametro" [value]="tp.id">
+              {{ tp.nombre }} ({{ tp.unidad }})
+            </option>
+          </select>
         </div>
 
         <!-- Rangos de Advertencia -->
@@ -123,9 +133,10 @@ export class UmbralConfigModalComponent implements OnInit {
   loading = false;
 
   invernaderos: Invernadero[] = [];
-  tiposParametro: TipoParametro[] = [];
   sensores: Sensor[] = [];
-  sensorEnabled = false;
+  tiposParametro: TipoParametro[] = [];
+  sensorParametros: TipoParametro[] = [];
+  sensorParametrosCompletos: TipoParametro[] = [];
 
   confirmacionVisible = false;
   mensajeConfirmacion = '';
@@ -137,7 +148,7 @@ export class UmbralConfigModalComponent implements OnInit {
     private tpSvc: TipoParametroService,
     private sensorSvc: SensoresService,
     private modal: UmbralModalService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Inicializar form
@@ -148,6 +159,7 @@ export class UmbralConfigModalComponent implements OnInit {
       ambito: [sel ? this.getAmbito(sel) : 'global', Validators.required],
       invernadero_id: [sel?.invernadero_id || null],
       tipo_parametro_id: [sel?.tipo_parametro_id || null, Validators.required],
+      sensor_id: [null],
       sensor_parametro_id: [sel?.sensor_parametro_id || null],
       advertencia_min: [sel?.advertencia_min || '', Validators.required],
       advertencia_max: [sel?.advertencia_max || '', Validators.required],
@@ -162,48 +174,84 @@ export class UmbralConfigModalComponent implements OnInit {
 
     // Reactividad entre campos
     this.form.get('ambito')!.valueChanges.subscribe(() => this.resetScopeFields());
-    this.form.get('invernadero_id')!.valueChanges.subscribe(() => this.onScopeChange());
-    this.form.get('tipo_parametro_id')!.valueChanges.subscribe(() => this.onScopeChange());
+
+    this.form.get('invernadero_id')!.valueChanges.subscribe((invId) => {
+      const ambito = this.form.get('ambito')!.value;
+      if (ambito === 'sensor' && invId) {
+        this.loadSensores(invId);
+      } else {
+        this.sensores = [];
+        this.sensorParametros = [];
+        this.form.patchValue({ sensor_id: null, tipo_parametro_id: null });
+      }
+    });
+
+    this.form.get('sensor_id')!.valueChanges.subscribe(id => this.loadSensorParametros(id));
+
+    this.form.get('tipo_parametro_id')!.valueChanges.subscribe((tipo_parametro_id) => {
+      const sensorParam = this.sensorParametrosCompletos.find(p => p.id == tipo_parametro_id);
+
+      if (sensorParam?.sensor_parametro_id) {
+        this.form.patchValue({
+          sensor_parametro_id: sensorParam.sensor_parametro_id
+        });
+      } else {
+        this.form.patchValue({
+          sensor_parametro_id: null
+        });
+      }
+    });
 
     // Si editamos sensor, cargar sensores iniciales
     if (this.isEdit && this.form.value.ambito === 'sensor') {
-      this.loadSensores();
+      const invId = this.form.get('invernadero_id')!.value;
+      if (invId) {
+        this.loadSensores(invId);
+      }
     }
   }
 
   private getAmbito(u: Umbral): string {
     if (u.sensor_parametro_id) return 'sensor';
-    if (u.invernadero_id)    return 'invernadero';
+    if (u.invernadero_id) return 'invernadero';
     return 'global';
   }
 
   private resetScopeFields() {
-    this.form.patchValue({ invernadero_id: null, tipo_parametro_id: null, sensor_parametro_id: null });
+    this.form.patchValue({ invernadero_id: null, sensor_id: null, tipo_parametro_id: null });
     this.sensores = [];
-    this.sensorEnabled = false;
+    this.sensorParametros = [];
   }
 
-  private onScopeChange() {
-    const amb = this.form.value.ambito;
-    const invId = this.form.value.invernadero_id;
-    const tpId = this.form.value.tipo_parametro_id;
-
-    // Habilitar sensor select solo si ámbito= sensor y ambos IDs disponibles
-    this.sensorEnabled = (amb === 'sensor' && invId != null && tpId != null);
-    if (this.sensorEnabled) {
-      this.loadSensores();
-    } else {
-      this.form.patchValue({ sensor_parametro_id: null });
-      this.sensores = [];
-    }
+  private loadSensores(invernaderoId: number) {
+    this.sensorSvc.getSensoresPorInvernadero(invernaderoId).subscribe(sensores => {
+      this.sensores = sensores
+      this.form.patchValue({
+        sensor_id: null,
+        tipo_parametro_id: null
+      });
+      this.sensorParametros = [];
+    });
   }
 
-  private loadSensores() {
-    const invId = this.form.value.invernadero_id;
-    const tpId = this.form.value.tipo_parametro_id;
-    if (invId != null && tpId != null) {
-      this.sensorSvc.getSensoresPorFiltro(invId, tpId).subscribe(list => this.sensores = list);
-    }
+  private loadSensorParametros(sensorId: number) {
+    if (!sensorId) return;
+    this.sensorSvc.getParametrosPorSensor(sensorId).subscribe(list => {
+      this.sensorParametrosCompletos = list;
+      this.sensorParametros = list.map(p => ({
+        id: p.id,
+        nombre: p.nombre,
+        unidad: p.unidad
+      }));
+
+      const tipo_parametro_id = this.form.get('tipo_parametro_id')?.value;
+      if (tipo_parametro_id) {
+        const encontrado = list.find(p => p.id == tipo_parametro_id);
+        if (encontrado?.sensor_parametro_id) {
+          this.form.patchValue({ sensor_parametro_id: encontrado.sensor_parametro_id });
+        }
+      }
+    });
   }
 
   cancel() {
@@ -230,7 +278,7 @@ export class UmbralConfigModalComponent implements OnInit {
         setTimeout(() => {
           this.confirmacionVisible = false;
           this.modal.closeWithAnimation();
-        }, 1500);
+        }, 3000);
       },
       error: () => {
         this.loading = false;
