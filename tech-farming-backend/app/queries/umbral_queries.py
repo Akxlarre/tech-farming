@@ -1,5 +1,7 @@
 from app import db
 from app.models.configuracion_umbral import ConfiguracionUmbral
+from app.models.zona import Zona
+from sqlalchemy.orm import joinedload
 
 def listar_umbrales(filtros):
     from app.models.tipo_parametro import TipoParametro
@@ -7,7 +9,18 @@ def listar_umbrales(filtros):
     from app.models.invernadero import Invernadero
     from app.models.sensor_parametro import SensorParametro
 
-    query = ConfiguracionUmbral.query
+    page     = filtros.get("page", 1)
+    per_page = filtros.get("perPage", 10)
+
+    query = ConfiguracionUmbral.query.options(
+        joinedload(ConfiguracionUmbral.tipo_parametro),
+        joinedload(ConfiguracionUmbral.invernadero),
+        joinedload(ConfiguracionUmbral.sensor_parametro)
+            .joinedload(SensorParametro.sensor)
+            .joinedload(Sensor.zona)
+            .joinedload(Zona.invernadero)
+    )
+    query = query.filter(ConfiguracionUmbral.activo.is_(True))
 
     ambito = filtros.get("ambito")
     tipo_parametro_id = filtros.get("tipo_parametro_id")
@@ -35,43 +48,41 @@ def listar_umbrales(filtros):
     elif ambito == "sensor":
         query = query.filter(ConfiguracionUmbral.sensor_parametro_id.isnot(None))
 
-    query = query.filter(ConfiguracionUmbral.activo == True)
-    resultados = query.all()
-    data = []
+    query = query.join(TipoParametro, ConfiguracionUmbral.tipo_parametro_id == TipoParametro.id)
+    paginated = query.order_by(TipoParametro.nombre.asc()).paginate(page=page, per_page=per_page, error_out=False)
     
-    for u in resultados:
-        tipo_parametro = TipoParametro.query.get(u.tipo_parametro_id) if u.tipo_parametro_id else None
-        invernadero = Invernadero.query.get(u.invernadero_id) if u.invernadero_id else None
-
-        sensor_nombre = None
-        sensor_invernadero_nombre = None
-        if u.sensor_parametro_id:
-            sensor_param = SensorParametro.query.get(u.sensor_parametro_id)
-            if sensor_param:
-                sensor = Sensor.query.get(sensor_param.sensor_id)
-                sensor_nombre = sensor.nombre if sensor else None
-                if sensor and sensor.zona:
-                    sensor_invernadero_nombre = sensor.zona.invernadero.nombre
-
-        
-        print(f"[DEBUG] ID umbral: {u.id} | tipo_parametro_id: {u.tipo_parametro_id} → {tipo_parametro.nombre if tipo_parametro else 'NULO'}")
-        data.append({
-            "id": u.id,
-            "tipo_parametro_id": u.tipo_parametro_id,
-            "tipo_parametro_nombre": tipo_parametro.nombre if tipo_parametro else None,
-            "tipo_parametro_unidad": tipo_parametro.unidad if tipo_parametro else None,
-            "invernadero_id": u.invernadero_id,
-            "invernadero_nombre": invernadero.nombre if invernadero else None,
-            "sensor_parametro_id": u.sensor_parametro_id,
-            "sensor_nombre": sensor_nombre,
-            "sensor_invernadero_nombre": sensor_invernadero_nombre,
-            "advertencia_min": float(u.advertencia_min) if u.advertencia_min else None,
-            "advertencia_max": float(u.advertencia_max) if u.advertencia_max else None,
-            "critico_min": float(u.critico_min) if u.critico_min else None,
-            "critico_max": float(u.critico_max) if u.critico_max else None,
-            "activo": u.activo
-        })
-    return data
+    return {
+        "data": [
+            {
+                "id": u.id,
+                "tipo_parametro_id": u.tipo_parametro_id,
+                "tipo_parametro_nombre": u.tipo_parametro.nombre if u.tipo_parametro else None,
+                "tipo_parametro_unidad": u.tipo_parametro.unidad if u.tipo_parametro else None,
+                "invernadero_id": u.invernadero_id,
+                "invernadero_nombre": u.invernadero.nombre if u.invernadero else None,
+                "sensor_parametro_id": u.sensor_parametro_id,
+                "sensor_nombre": (
+                    u.sensor_parametro.sensor.nombre if u.sensor_parametro and u.sensor_parametro.sensor else None
+                ),
+                "sensor_invernadero_nombre": (
+                    u.sensor_parametro.sensor.zona.invernadero.nombre
+                    if u.sensor_parametro and u.sensor_parametro.sensor and u.sensor_parametro.sensor.zona and u.sensor_parametro.sensor.zona.invernadero
+                    else None
+                ),
+                "advertencia_min": float(u.advertencia_min) if u.advertencia_min is not None else None,
+                "advertencia_max": float(u.advertencia_max) if u.advertencia_max is not None else None,
+                "critico_min": float(u.critico_min) if u.critico_min is not None else None,
+                "critico_max": float(u.critico_max) if u.critico_max is not None else None,
+                "activo": u.activo
+            } for u in paginated.items
+        ],
+        "pagination": {
+            "page": paginated.page,
+            "pages": paginated.pages,
+            "per_page": paginated.per_page,
+            "total": paginated.total
+        }
+    }
 
 def crear_umbral(data):
     try:

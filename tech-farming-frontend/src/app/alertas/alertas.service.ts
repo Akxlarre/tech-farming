@@ -31,10 +31,12 @@ export class AlertService {
     busqueda?: string,
     page: number = 1,
     perPage: number = 20
+
   ): Observable<{ data: Alerta[]; pagination: any }> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('perPage', perPage.toString());
+      
     if (estado) params = params.set('estado', estado);
     if (nivel) params = params.set('nivel', nivel);
     if (invernadero_id) params = params.set('invernadero_id', invernadero_id.toString());

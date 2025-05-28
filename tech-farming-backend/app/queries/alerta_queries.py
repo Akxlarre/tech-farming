@@ -4,7 +4,6 @@ from app.models.alerta import Alerta
 from app.models.sensor_parametro import SensorParametro
 from app.models.sensor import Sensor
 from app.models.zona import Zona
-from app.models.tipo_parametro import TipoParametro
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from flask import current_app

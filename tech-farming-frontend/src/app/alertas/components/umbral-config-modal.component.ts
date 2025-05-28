@@ -119,7 +119,8 @@ import { Sensor } from '../../sensores/models/sensor.model';
           <button type="button" class="btn btn-outline btn-neutral" (click)="cancel()">
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+          <button type="submit" 
+          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content" [disabled]="form.invalid || loading">
             {{ isEdit ? 'Guardar' : 'Crear' }}
           </button>
         </div>
@@ -278,7 +279,7 @@ export class UmbralConfigModalComponent implements OnInit {
         setTimeout(() => {
           this.confirmacionVisible = false;
           this.modal.closeWithAnimation();
-        }, 3000);
+        }, 2500);
       },
       error: () => {
         this.loading = false;

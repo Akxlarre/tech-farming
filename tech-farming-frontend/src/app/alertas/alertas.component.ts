@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AlertService, Alerta } from './alertas.service';
 import { UmbralModalService } from './umbral-modal.service';
+import { AlertsHeaderComponent } from './components/alertas-header.component';
 import { ActiveAlertsComponent } from './components/alertas-activas.component';
 import { AlertsHistoryComponent } from './components/alertas-historial.component';
 import { UmbralModalWrapperComponent } from './components/umbral-modal-wrapper.component';
@@ -20,6 +21,7 @@ import { UmbralListComponent } from './components/umbral-list.component';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AlertsHeaderComponent,
     ActiveAlertsComponent,
     AlertsHistoryComponent,
     UmbralConfigModalComponent,
@@ -27,9 +29,31 @@ import { UmbralListComponent } from './components/umbral-list.component';
     UmbralModalWrapperComponent
   ],
   template: `
-    <div class="p-6 bg-base-200">
-      <h1 class="text-3xl font-bold mb-6">Gestión de Alertas</h1>
+    <!-- Header -->
+    <app-alertas-header
+      (configurar)="abrirConfiguracionUmbrales()">
+    </app-alertas-header>
 
+    <!-- Contenido principal -->
+    <div class="flex items-center gap-2 mb-4 px-6 text-basetext">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           class="w-5 h-5 text-basetext"
+           fill="none"
+           viewBox="0 0 24 24"
+           stroke="currentColor"
+      >
+        <path stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 
+                 13.414V19a1 1 0 01-1.447.894l-4-2A1 1 0 018 
+                 17v-3.586L3.293 6.707A1 1 0 013 6V4z"
+        />
+      </svg>
+      <h3 class="text-lg font-medium">Filtros</h3>
+    </div>
+
+    <div class="bg-base-200 px-6 rounded-xl mb-6">
       <!-- Filtros -->
       <form [formGroup]="filterForm" (ngSubmit)="aplicarFiltros()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-end">
         <!-- Nivel -->
@@ -121,8 +145,6 @@ import { UmbralListComponent } from './components/umbral-list.component';
           <a class="tab tab-lg" [class.tab-active]="tabIndex === 0" (click)="cambiarTab(0)">Activas</a>
           <a class="tab tab-lg" [class.tab-active]="tabIndex === 1" (click)="cambiarTab(1)">Resueltas</a>
         </div>
-
-        <button class="btn btn-outline btn-md" (click)="abrirConfiguracionUmbrales()">Configurar Umbrales</button>
       </div>
 
       <!-- Contenido de cada tab -->
@@ -149,6 +171,40 @@ import { UmbralListComponent } from './components/umbral-list.component';
       <p>La alerta fue marcada como resuelta exitosamente.</p>
     </div>
   </div>
+
+  <!-- Paginación -->
+  <div class="flex items-center justify-between p-6 bg-base-200 rounded-lg">
+    <div class="text-sm text-base-content/70">
+      Página {{currentPage}} de {{totalPages}} · {{totalAlertas}} alertas
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(1)" [disabled]="currentPage === 1">«</button>
+      <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+
+      <ng-container *ngFor="let item of paginationItems">
+        <ng-container *ngIf="item !== '…'; else dots">
+          <button
+            class="btn btn-sm rounded-full"
+            [ngClass]="{
+              'btn-success text-base-content border-success cursor-default': item === currentPage,
+              'btn-outline': item !== currentPage
+            }"
+            (click)="goToPage(+item)" [disabled]="item === currentPage"
+          >
+            {{ item }}
+          </button>
+        </ng-container>
+        <ng-template #dots>
+          <span class="px-2 text-base-content/60 select-none">…</span>
+        </ng-template>
+      </ng-container>
+
+      <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+      <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">»</button>
+    </div>
+  </div>
+  
   `
 })
 export class AlertasComponent implements OnInit {
@@ -168,6 +224,10 @@ export class AlertasComponent implements OnInit {
   alertasActivas: Alerta[] = [];
   alertasResueltas: Alerta[] = [];
   tabIndex = 0;
+  pageSize = 5;
+  currentPage = 1;
+  totalPages = 1;
+  totalAlertas = 0;
 
   constructor(
     private alertService: AlertService,
@@ -315,13 +375,18 @@ export class AlertasComponent implements OnInit {
       f.nivel || undefined,
       f.invernadero || undefined,
       f.zona || undefined,
-      f.sensor || undefined
+      f.sensor || undefined,
+      this.currentPage,
+      this.pageSize
     ).subscribe(resp => {
       if (estado === 'Activa') {
         this.alertasActivas = resp.data;
       } else {
         this.alertasResueltas = resp.data;
       }
+
+      this.totalPages = resp.pagination.pages;
+      this.totalAlertas = resp.pagination.total;
     });
   }
 
@@ -333,6 +398,28 @@ export class AlertasComponent implements OnInit {
 
     this.alertService.getAlertas('Resuelta', f.nivel, f.invernadero, f.zona, f.sensor)
       .subscribe(resp => this.alertasResueltas = resp.data);
+  }
+
+  get paginationItems(): Array<number | string> {
+    const total = this.totalPages;
+    const cur = this.currentPage;
+    const delta = 1;
+    const pages: Array<number | string> = [];
+    let last = 0;
+    for (let i = 1; i <= total; i++) {
+      if (i === 1 || i === total || (i >= cur - delta && i <= cur + delta)) {
+        if (last && i - last > 1) pages.push('…');
+        pages.push(i);
+        last = i;
+      }
+    }
+    return pages;
+  }
+
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages) return;
+    this.currentPage = p;
+    this.cargarAlertas();
   }
 
   cambiarTab(index: number) {
@@ -348,7 +435,7 @@ export class AlertasComponent implements OnInit {
       this.resolviendoId = null;
       this.mostrarModalExito = true;
 
-      setTimeout(() => (this.mostrarModalExito = false), 3000);
+      setTimeout(() => (this.mostrarModalExito = false), 2500);
     }, () => {
       this.resolviendoId = null;
     });

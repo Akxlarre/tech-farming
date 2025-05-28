@@ -108,7 +108,7 @@ export class ProfileMenuComponent {
     const toast = document.getElementById('toast-logout');
     if (toast) {
       toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3000);
+      setTimeout(() => toast.classList.add('hidden'), 2500);
     }
   }
 
