@@ -1,6 +1,6 @@
+// src/app/invernaderos/models/invernadero.model.ts
 import { Sensor } from "../../models";
 
-// src/app/invernaderos/models/invernadero.model.ts
 export interface Zona {
   id: number;
   nombre: string;

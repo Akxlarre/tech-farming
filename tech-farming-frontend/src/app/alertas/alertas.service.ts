@@ -5,12 +5,14 @@ import { Observable } from 'rxjs';
 export interface Alerta {
   id: number;
   sensor_parametro_id: number;
+  sensor_nombre: string;
   tipo: string;
-  nivel: 'advertencia' | 'critico';
+  nivel: 'Advertencia' | 'Crítico';
   valor_detectado: number;
   fecha_hora: string;
   mensaje: string;
-  estado: 'activo' | 'historico';
+  estado: 'Activa' | 'Resuelta';
+  resuelta_por?: string;
 }
 
 @Injectable({
@@ -22,17 +24,19 @@ export class AlertService {
   constructor(private http: HttpClient) {}
 
   getAlertas(
-    estado?: 'activo' | 'historico',
-    nivel?: 'advertencia' | 'critico',
+    estado?: 'Activa' | 'Resuelta',
+    nivel?: 'Advertencia' | 'Crítico',
     invernadero_id?: number,
     zona_id?: number,
     busqueda?: string,
     page: number = 1,
     perPage: number = 20
+
   ): Observable<{ data: Alerta[]; pagination: any }> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('perPage', perPage.toString());
+      
     if (estado) params = params.set('estado', estado);
     if (nivel) params = params.set('nivel', nivel);
     if (invernadero_id) params = params.set('invernadero_id', invernadero_id.toString());
@@ -41,7 +45,7 @@ export class AlertService {
     return this.http.get<{ data: Alerta[]; pagination: any }>(this.baseUrl, { params });
   }
 
-  resolverAlerta(id: number, resuelta_por: number): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/${id}/resolver`, { resuelta_por });
+  resolverAlerta(id: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/${id}/resolver`, {});
   }
 }

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Sensor } from './models/sensor.model';
+import { TipoParametro } from '../models';
 
 export interface SensorFilters {
   invernadero?: number;
@@ -78,9 +79,17 @@ export class SensoresService {
       .set('tipo_parametro_id', tipoParametroId.toString());
 
     return this.http.get<Sensor[]>(
-      `${this.base}/sensores/filtro`,
+      `${this.base}/filtro`,
       { params }
     );
+  }
+
+  getSensoresPorInvernadero(invernaderoId: number): Observable<Sensor[]> {
+    return this.http.get<Sensor[]>(`${this.base}/por-invernadero/${invernaderoId}`);
+  }
+
+  getParametrosPorSensor(sensorId: number): Observable<TipoParametro[]> {
+    return this.http.get<TipoParametro[]>(`${this.base}/${sensorId}/parametros`);
   }
 
   /** Creación de sensor */

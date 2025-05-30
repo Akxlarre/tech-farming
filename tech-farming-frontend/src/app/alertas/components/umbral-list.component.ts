@@ -9,14 +9,11 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <!-- Modal Confirmación Eliminar -->
-    <div *ngIf="confirmDeleteVisible"
-         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+    <!-- Confirmación Eliminar -->
+    <div *ngIf="confirmDeleteVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-3">
         <h3 class="text-lg font-semibold text-error">¿Eliminar Umbral?</h3>
-        <p class="text-sm text-base-content/80">
-          Esta acción desactivará el umbral de forma permanente.
-        </p>
+        <p class="text-sm text-base-content/80">Esta acción desactivará el umbral de forma permanente.</p>
         <div class="flex justify-center gap-4 pt-2">
           <button class="btn btn-outline btn-neutral" (click)="cancelarEliminar()">Cancelar</button>
           <button class="btn btn-error" (click)="confirmarEliminar()">Eliminar</button>
@@ -24,40 +21,32 @@ import { FormsModule } from '@angular/forms';
       </div>
     </div>
 
-    <!-- Modal Confirmación Eliminación Exitosa -->
-    <div *ngIf="deleteExitosoVisible"
-        class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+    <!-- Confirmación Éxito -->
+    <div *ngIf="deleteExitosoVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
-        <h3 class="text-xl font-semibold text-green-600">
-          ✅ ¡Éxito!
-        </h3>
+        <h3 class="text-xl font-semibold text-green-600">✅ ¡Éxito!</h3>
         <p>{{ mensajeDeleteExitoso }}</p>
       </div>
     </div>
 
-
     <!-- Vista Principal -->
     <div class="p-4">
-      <!-- Toolbar -->
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xl font-semibold">Umbrales</h3>
-        <button class="btn btn-primary" (click)="nuevoUmbral()">+ Nuevo Umbral</button>
-      </div>
-      <div class="flex gap-4 mb-4">
-        <input type="text" placeholder="Buscar..." [(ngModel)]="filter" class="input input-bordered flex-1" />
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold">Umbrales</h2>
+        <button class="btn btn-ghost" (click)="modal.closeModal()">✕</button>
       </div>
 
-      <!-- Tabs for scope -->
-      <div class="tabs mb-4">
-        <a *ngFor="let t of scopes; let i = index"
-           class="tab tab-lg"
-           [class.tab-active]="scopeIndex === i"
-           (click)="switchScope(i)">
-          {{ t | titlecase }}
-        </a>
+      <!-- Tabs -->
+      <div class="flex justify-between items-center mb-4">
+        <div class="tabs">
+          <a *ngFor="let t of scopes; let i = index" class="tab tab-lg" [class.tab-active]="scopeIndex === i" (click)="switchScope(i)">
+            {{ t | titlecase }}
+          </a>
+        </div>
+        <button class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content" (click)="nuevoUmbral()">+ Nuevo Umbral</button>
       </div>
 
-      <!-- Table -->
+      <!-- Tabla -->
       <table class="table w-full">
         <thead>
           <tr>
@@ -71,7 +60,7 @@ import { FormsModule } from '@angular/forms';
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let u of filteredUmbrales()">
+          <tr *ngFor="let u of umbrales">
             <td>{{ u.tipo_parametro_nombre }} ({{ u.tipo_parametro_unidad }})</td>
             <td *ngIf="scopes[scopeIndex] === 'invernadero'">{{ u.invernadero_nombre }}</td>
             <td *ngIf="scopes[scopeIndex] === 'sensor'">{{ u.sensor_invernadero_nombre }}</td>
@@ -85,6 +74,38 @@ import { FormsModule } from '@angular/forms';
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="flex items-center justify-between p-6 bg-base-200 rounded-lg mt-6" *ngIf="totalPages >= 0">
+        <div class="text-sm text-base-content/70">
+          Página {{ totalPages === 0 ? 0 : currentPage }} de {{ totalPages }} · {{ totalUmbrales }} umbral{{ totalUmbrales !== 1 ? 'es' : '' }}
+        </div>
+
+        <div class="flex items-center gap-2" *ngIf="totalPages > 1">
+          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(1)" [disabled]="currentPage === 1">«</button>
+          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+
+          <ng-container *ngFor="let item of paginationItems()">
+            <ng-container *ngIf="item !== '…'; else dots">
+              <button
+                class="btn btn-sm rounded-full"
+                [ngClass]="{
+                  'btn-success text-base-content border-success cursor-default': item === currentPage,
+                  'btn-outline': item !== currentPage
+                }"
+                (click)="goToPage(+item)" [disabled]="item === currentPage">
+                {{ item }}
+              </button>
+            </ng-container>
+            <ng-template #dots>
+              <span class="px-2 text-base-content/60 select-none">…</span>
+            </ng-template>
+          </ng-container>
+
+          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">»</button>
+        </div>
+      </div>
     </div>
   `
 })
@@ -92,7 +113,11 @@ export class UmbralListComponent implements OnInit {
   scopes: Array<'global' | 'invernadero' | 'sensor'> = ['global', 'invernadero', 'sensor'];
   scopeIndex = 0;
   umbrales: Umbral[] = [];
-  filter = '';
+
+  pageSize = 5;
+  currentPage = 1;
+  totalPages = 1;
+  totalUmbrales = 0;
 
   confirmDeleteVisible = false;
   umbralAEliminar: Umbral | null = null;
@@ -110,22 +135,40 @@ export class UmbralListComponent implements OnInit {
 
   switchScope(index: number) {
     this.scopeIndex = index;
+    this.currentPage = 1;
     this.loadUmbrales();
   }
 
   loadUmbrales() {
     const ambito = this.scopes[this.scopeIndex];
-    this.umbralService.getUmbrales(ambito).subscribe(list => this.umbrales = list);
+    this.umbralService.getUmbrales(ambito, undefined, undefined, undefined, this.currentPage, this.pageSize)
+      .subscribe(response => {
+        this.umbrales = response.data;
+        this.totalPages = response.pagination.pages;
+        this.totalUmbrales = response.pagination.total === 0 ? 0 : response.pagination.total;
+      });
   }
 
-  filteredUmbrales(): Umbral[] {
-    if (!this.filter) return this.umbrales;
-    const term = this.filter.toLowerCase();
-    return this.umbrales.filter(u =>
-      (u.tipo_parametro_id && u.tipo_parametro_id.toString().includes(term)) ||
-      (u.invernadero_id && u.invernadero_id.toString().includes(term)) ||
-      (u.sensor_parametro_id && u.sensor_parametro_id.toString().includes(term))
-    );
+  paginationItems(): Array<number | string> {
+    const total = this.totalPages;
+    const cur = this.currentPage;
+    const delta = 1;
+    const pages: Array<number | string> = [];
+    let last = 0;
+    for (let i = 1; i <= total; i++) {
+      if (i === 1 || i === total || (i >= cur - delta && i <= cur + delta)) {
+        if (last && i - last > 1) pages.push('…');
+        pages.push(i);
+        last = i;
+      }
+    }
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.loadUmbrales();
   }
 
   nuevoUmbral() {
@@ -153,7 +196,7 @@ export class UmbralListComponent implements OnInit {
 
       setTimeout(() => {
         this.deleteExitosoVisible = false;
-      }, 1500);
+      }, 2500);
     });
   }
 
