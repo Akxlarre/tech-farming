@@ -15,18 +15,18 @@ import { InvernaderoModalService } from '../invernadero-modal.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <!-- Overlay DaisyUI -->
+    <!-- overlay -->
     <div
       class="fixed inset-0 bg-black/50 z-50"
       (click)="onOverlayClick($event)"
       [ngClass]="{ 'animate-overlayIn': !closing, 'animate-overlayOut': closing }"
     ></div>
 
-    <!-- Contenedor modal DaisyUI -->
+    <!-- modal container, sin forzar tamaño -->
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         #modalContent
-        class="bg-base-100 rounded-box shadow-2xl w-full max-w-5xl transition-all overflow-hidden"
+        class="bg-base-100 rounded-lg shadow-2xl overflow-hidden transition-all"
         [ngClass]="{ 'animate-fadeInZoom': !closing, 'animate-fadeOutZoom': closing }"
       >
         <ng-content></ng-content>

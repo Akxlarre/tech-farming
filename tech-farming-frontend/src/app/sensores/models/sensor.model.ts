@@ -20,4 +20,6 @@ export interface Sensor {
     unidad?: string;
   }>;
   ultimaLectura?: LecturaSensor | null;
+  alertaActiva?: boolean;
+  
 }

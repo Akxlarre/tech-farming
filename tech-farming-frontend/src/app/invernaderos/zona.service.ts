@@ -1,7 +1,7 @@
 // src/app/invernaderos/zona.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Zona } from './models/invernadero.model';
 
 @Injectable({
@@ -19,6 +19,8 @@ export class ZonaService {
   getZonasByInvernadero(invernaderoId: number): Observable<Zona[]> {
     return this.http.get<Zona[]>(
       `${this.baseUrl}/${invernaderoId}/zonas`
+    ).pipe(
+      map(res => Array.isArray(res) ? res : [])  // fallback defensivo
     );
   }
 }

@@ -19,8 +19,8 @@ import {
   HistorialData
 } from '../models';
 
-import { FiltroSelectComponent    } from './components/FiltroSelect.component';
-import { FiltroDateRangeComponent } from './components/FiltroDateRange.component';
+import { FiltroSelectComponent    } from './components/filtro-select.component';
+import { FiltroDateRangeComponent } from './components/filtro-date-range.component';
 import { LineChartComponent       } from './components/line-chart.component';
 import { StatsCardComponent       } from './components/stats-card.component';
 
@@ -269,7 +269,7 @@ export class HistorialComponent implements OnInit {
         if (data.series.length === 0) {
           // no hay datos → mantengo el reset y muestro alerta
           this.noData = true;
-          setTimeout(() => this.noData = false, 3000);
+          setTimeout(() => this.noData = false, 2500);
         } else {
           // datos reales
           this.historial = data;
@@ -278,7 +278,7 @@ export class HistorialComponent implements OnInit {
       err => {
         console.error('Error al cargar historial:', err);
         this.noData = true;
-        setTimeout(() => this.noData = false, 3000);
+        setTimeout(() => this.noData = false, 2500);
       }
     );
 }

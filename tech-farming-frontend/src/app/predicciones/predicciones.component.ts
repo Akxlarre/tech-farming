@@ -18,7 +18,7 @@ import {
   PredicResult
 } from '../models';
 
-import { FiltroSelectComponent }    from '../historial/components/FiltroSelect.component';
+import { FiltroSelectComponent }    from '../historial/components/filtro-select.component';
 import { PredictionChartComponent } from './components/prediction-chart.component';
 import { SummaryCardComponent }     from './components/summary-card.component';
 import { Trend as UITrend, TrendCardComponent } from './components/trend-card.component';

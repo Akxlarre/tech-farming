@@ -1,4 +1,3 @@
-// src/app/sensores/components/sensor-card.component.ts
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Sensor } from '../models/sensor.model';
@@ -13,16 +12,23 @@ import { SensorModalType } from '../sensor-modal.service';
       <!-- Header -->
       <div class="flex justify-between items-center mb-2">
         <h3 class="text-lg font-semibold">{{ sensor.nombre }}</h3>
-        <span
-          class="badge badge-sm"
-          [ngClass]="{
-            'badge-success': sensor.estado === 'Activo',
-            'badge-warning': sensor.estado === 'Inactivo',
-            'badge-error':   sensor.estado === 'Mantenimiento'
-          }"
-        >
-          {{ sensor.estado }}
-        </span>
+
+        <ng-container *ngIf="sensor.alertaActiva !== undefined; else loadingEstado">
+          <span
+            class="badge badge-sm"
+            [ngClass]="{
+              'badge-error': sensor.alertaActiva,
+              'badge-success': !sensor.alertaActiva && sensor.estado === 'Activo',
+              'badge-warning': !sensor.alertaActiva && sensor.estado === 'Inactivo',
+              'badge-neutral': !sensor.alertaActiva && sensor.estado === 'Mantenimiento'
+            }"
+          >
+            {{ sensor.alertaActiva ? 'Alerta' : sensor.estado }}
+          </span>
+        </ng-container>
+        <ng-template #loadingEstado>
+          <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+        </ng-template>
       </div>
 
       <!-- Detalles -->
@@ -31,21 +37,34 @@ import { SensorModalType } from '../sensor-modal.service';
         <li><strong>Zona:</strong> {{ sensor.zona?.nombre ?? '—' }}</li>
         <li><strong>Inv.:</strong> {{ sensor.invernadero?.nombre ?? '—' }}</li>
         <li>
-          <ng-container *ngIf="sensor.ultimaLectura?.time as t; else noTime">
-            <strong>Última:</strong> {{ t | date:'short' }}
+          <ng-container *ngIf="sensor.ultimaLectura !== undefined; else loadingLectura">
+            <ng-container *ngIf="sensor.ultimaLectura?.time as t; else noData">
+              <strong>Última:</strong> {{ t | date:'short' }}
+            </ng-container>
+            <ng-template #noData><strong>Última:</strong> — sin datos —</ng-template>
           </ng-container>
-          <ng-template #noTime><strong>Última:</strong> — sin datos —</ng-template>
+          <ng-template #loadingLectura>
+            <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+          </ng-template>
         </li>
       </ul>
 
       <!-- Valores de última lectura -->
-      <div class="text-sm mb-4" *ngIf="sensor.ultimaLectura?.parametros?.length; else noVals">
-        <div *ngFor="let p of sensor.ultimaLectura?.parametros || []; let i = index">
-          {{ p }}: {{ sensor.ultimaLectura?.valores?.[i] ?? '—' }} {{ getUnidad(p) }}
+      <div *ngIf="sensor.ultimaLectura !== undefined; else loadingValores">
+        <div class="text-sm mb-4" *ngIf="sensor.ultimaLectura?.parametros?.length; else noVals">
+          <div *ngFor="let p of sensor.ultimaLectura?.parametros || []; let i = index">
+            {{ p }}: {{ sensor.ultimaLectura?.valores?.[i] ?? '—' }} {{ getUnidad(p) }}
+          </div>
         </div>
+        <ng-template #noVals>
+          <div class="text-sm text-gray-500">Sin lecturas</div>
+        </ng-template>
       </div>
-      <ng-template #noVals>
-        <div class="text-sm italic text-gray-500">Sin lecturas</div>
+
+      <ng-template #loadingValores>
+        <div class="space-y-1 mb-4">
+          <div class="skeleton h-4 w-32 rounded bg-base-300 animate-pulse opacity-60"></div>
+        </div>
       </ng-template>
 
       <!-- Acciones -->
