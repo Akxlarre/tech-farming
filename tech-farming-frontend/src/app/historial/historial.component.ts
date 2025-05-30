@@ -19,8 +19,8 @@ import {
   HistorialData
 } from '../models';
 
-import { FiltroSelectComponent    } from './components/FiltroSelect.component';
-import { FiltroDateRangeComponent } from './components/FiltroDateRange.component';
+import { FiltroSelectComponent    } from './components/filtro-select.component';
+import { FiltroDateRangeComponent } from './components/filtro-date-range.component';
 import { LineChartComponent       } from './components/line-chart.component';
 import { StatsCardComponent       } from './components/stats-card.component';
 

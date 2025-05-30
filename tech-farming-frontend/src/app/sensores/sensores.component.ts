@@ -1,7 +1,7 @@
 // src/app/sensores/sensores.component.ts
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule }           from '@angular/common';
-import { timer, Subscription, of }                   from 'rxjs';
+import { timer, Subscription, of, combineLatest }                   from 'rxjs';
 import { catchError, exhaustMap, tap }               from 'rxjs/operators';
 
 import {
@@ -177,7 +177,7 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
 export class SensoresComponent implements OnInit, OnDestroy {
   sensoresConLectura: Sensor[] = [];
   refreshSub?: Subscription;
-
+  isDataFullyLoaded = false; 
   // paginación
   pageSize     = 5;
   currentPage  = 1;
@@ -205,12 +205,15 @@ export class SensoresComponent implements OnInit, OnDestroy {
     // precarga selects
     this.tiposSvc.obtenerTiposSensor()
       .subscribe(list => this.tiposSensores = list);
+    // esta funcion puede ser mejorada en el futuro para evitar llamadas innecesarias o porque carga hasta la
+    //pagina 100, lo que puede ser excesivo o no suficiente en función de la cantidad de invernaderos
+    // y zonas que haya en el sistema.
 
-    this.invSvc.getInvernaderos()
-      .subscribe(list => {
-        this.invernaderosDisponibles = list;
-        this.zonasDisponibles = list.flatMap(inv => inv.zonas || []);
+      this.invSvc.getInvernaderosPage(1, 100).subscribe(resp => { 
+        this.invernaderosDisponibles = resp.data;
+        this.zonasDisponibles = resp.data.flatMap(inv => inv.zonas || []);
       });
+      
 
     this.loadPage(1);
   }
@@ -227,8 +230,8 @@ export class SensoresComponent implements OnInit, OnDestroy {
   private loadPage(page: number) {
     this.currentPage = page;
     this.refreshSub?.unsubscribe();
-
-    this.svc
+    this.isDataFullyLoaded = false;
+    this.refreshSub = this.svc
       .getSensoresPage(page, this.pageSize, this.appliedFilters)
       .pipe(
         tap(resp => {
@@ -246,22 +249,32 @@ export class SensoresComponent implements OnInit, OnDestroy {
 
   private updateLecturas() {
     const ids = this.sensoresConLectura.map(s => s.id);
-    return this.tsSvc.getBatchLecturas(ids).pipe(
-      tap(batch => {
-        this.sensoresConLectura.forEach(s => s.ultimaLectura = null);
-        batch.forEach((item: BatchLectura) => {
-          const sensor = this.sensoresConLectura.find(x => x.id === +item.sensor_id);
-          if (sensor) {
+  
+    return combineLatest([
+      this.tsSvc.getBatchLecturas(ids).pipe(catchError(() => of([]))),
+      this.svc.getAlertasActivas(ids).pipe(catchError(() => of([])))
+    ]).pipe(
+      tap(([lecturas, alertas]) => {
+        const alertaMap = new Map(alertas.map(a => [a.id, a.alerta]));
+        this.sensoresConLectura.forEach(sensor => {
+          sensor.alertaActiva = alertaMap.get(sensor.id) ?? false;
+      
+          sensor.ultimaLectura = null;
+          const item = lecturas.find(l => +l.sensor_id === sensor.id);
+          if (item) {
             sensor.ultimaLectura = {
               parametros: item.parametros,
-              valores:     item.valores,
-              time:        item.time ?? ''
+              valores:    item.valores,
+              time:       item.time ?? ''
             };
           }
         });
+      
+        this.isDataFullyLoaded = true;
       })
     );
   }
+  
 
   get paginationItems(): Array<number|string> {
     const total = this.totalPages;

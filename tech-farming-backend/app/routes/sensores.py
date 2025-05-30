@@ -477,3 +477,44 @@ def recibir_datos():
     except Exception:
         current_app.logger.error("Error recibir_datos:\n" + traceback.format_exc())
         return jsonify({ "error": "No se pudo procesar los datos" }), 500
+    
+@router.route('/alertas', methods=['GET'])
+def obtener_alertas_activas():
+    ids_param = request.args.get('ids')
+    if not ids_param:
+        return jsonify([]), 200
+
+    try:
+        sensor_ids = [int(i) for i in ids_param.split(',') if i.strip().isdigit()]
+        from app.models.alerta import Alerta
+        from app.models.sensor_parametro import SensorParametro
+
+        # buscar parámetros de esos sensores
+        param_ids = (
+            db.session.query(SensorParametro.sensor_id, SensorParametro.id)
+            .filter(SensorParametro.sensor_id.in_(sensor_ids))
+            .all()
+        )
+
+        sp_map = {}
+        for sid, pid in param_ids:
+            sp_map.setdefault(sid, []).append(pid)
+
+        # buscar alertas activas
+        alerta_ids = (
+            db.session.query(Alerta.sensor_parametro_id)
+            .filter(Alerta.estado == 'activo')
+            .all()
+        )
+        alerta_pid_set = {pid for (pid,) in alerta_ids}
+
+        salida = []
+        for sid in sensor_ids:
+            pids = sp_map.get(sid, [])
+            tiene_alerta = any(pid in alerta_pid_set for pid in pids)
+            salida.append({ "id": sid, "alerta": tiene_alerta })
+
+        return jsonify(salida), 200
+    except Exception as e:
+        current_app.logger.error(f"[alertas] error: {e}")
+        return jsonify({ "error": "Error al obtener alertas activas" }), 500

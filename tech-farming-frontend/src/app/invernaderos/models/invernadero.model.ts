@@ -1,17 +1,23 @@
+// src/app/invernaderos/models/invernadero.model.ts
+import { Sensor } from "../../models";
+
 export interface Zona {
-  id?: number;
+  id: number;
   nombre: string;
   descripcion?: string;
-  creado_en?: string;   // ISO timestamp string
-  activo?: boolean;
+  activo: boolean;
+  creado_en: string;
+  sensores?: Sensor[];  // Lista de sensores en esta zona
 }
 
 export interface Invernadero {
-  id?: number;
+  id: number;
   nombre: string;
   descripcion?: string;
-  creado_en?: string;           // ISO timestamp string
-  sensoresActivos?: number;     // calculado en backend
-  estado: 'Activo' | 'Inactivo' | 'Mantenimiento' | string;
-  zonas?: Zona[];               // lista de zonas asociadas
+  creado_en: string;
+  zonas?: Zona[];
+  zonasActivas?: number;
+  sensoresActivos?: number;
+  sensoresTotales?: number;
+  estado?: string;  // ej: "2 alertas activas" o "Sin alertas"
 }

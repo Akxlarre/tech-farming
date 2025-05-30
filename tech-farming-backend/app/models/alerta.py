@@ -4,6 +4,7 @@ from app import db
 class Alerta(db.Model):
     __tablename__ = 'alertas'
     id = db.Column(db.Integer, primary_key=True)
+
     sensor_id = db.Column(db.Integer, db.ForeignKey('sensores.id'), nullable=True)
     sensor_parametro_id = db.Column(db.Integer, db.ForeignKey('sensor_parametros.id'), nullable=True)
     tipo = db.Column(db.String(50), nullable=False) 

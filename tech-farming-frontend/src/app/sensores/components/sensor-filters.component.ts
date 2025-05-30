@@ -34,118 +34,115 @@ import { ZonaService }       from '../../invernaderos/zona.service';
     <div class="bg-base-200 px-6 rounded-xl mb-6">
       <!-- Formulario de filtros: 7 columnas en md -->
       <form [formGroup]="filterForm"
-            (ngSubmit)="apply()"
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-4 items-end pb-3"
-      >
-        <!-- 1. Invernadero -->
-        <div>
-          <label class="label-basetext font-bold">Invernadero</label>
-          <select formControlName="invernadero"
-                  class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
-          >
-            <option disabled value="">Todos los invernaderos</option>
-            <option *ngFor="let inv of invernaderos" [value]="inv.id">
-              {{ inv.nombre }}
-            </option>
-          </select>
-        </div>
-
-        <!-- 2. Zona -->
-        <div>
-        <label class="label-basetext font-bold">Zona</label>
-        <select
-          formControlName="zona"
-          class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500
-          disabled:bg-base-200 disabled:text-base-content/50 disabled:border-base-300 disabled:cursor-not-allowed"
-
-          [disabled]="!filterForm.get('invernadero')?.value"
-          [attr.title]="!filterForm.get('invernadero')?.value ? 'Selecciona un invernadero primero' : null"
+              (ngSubmit)="apply()"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 items-end pb-4"
         >
-          <option value="">
-            {{ filterForm.get('invernadero')?.value ? 'Todas las zonas' : 'Selecciona un invernadero primero' }}
-          </option>
-          <option *ngFor="let z of zonasDisponibles" [value]="z.id">
-            {{ z.nombre }}
-          </option>
-        </select>
-      </div>
-
-        <!-- 3. Tipo de sensor -->
-        <div>
-          <label class="label-basetext font-bold">Tipo</label>
-          <select formControlName="tipoSensor"
-                  class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
-          >
-            <option disabled value="">Todos los tipos</option>
-            <option *ngFor="let t of tiposSensor" [value]="t.id">
-              {{ t.nombre }}
-            </option>
-          </select>
-        </div>
-
-        <!-- 4. Estado -->
-        <div>
-          <label class="label-basetext font-bold">Estado</label>
-          <select formControlName="estado"
-                  class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
-          >
-            <option disabled value="">Todos</option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-            <option value="Mantenimiento">Mantenimiento</option>
-          </select>
-        </div>
-
-        <!-- 5. Ordenar por -->
-        <div>
-          <label class="label-basetext font-bold flex items-center gap-1">
-            <span>⇅ Ordenar por</span>
-          </label>
-          <select formControlName="sortBy"
-                  class="select select-bordered rounded-lg w-full focus:ring focus:ring-green-500"
-          >
-            <option disabled value="">Sin ordenar</option>
-            <option value="nombre">Nombre A→Z</option>
-            <option value="-nombre">Nombre Z→A</option>
-            <option value="fecha_instalacion">Fecha ↑</option>
-            <option value="-fecha_instalacion">Fecha ↓</option>
-          </select>
-        </div>
-
-        <!-- 6. Buscar -->
-        <div>
-          <label class="label-basetext font-bold">Buscar</label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-              🔍
-            </span>
-            <input
-              type="text"
-              formControlName="search"
-              placeholder="Nombre del sensor..."
-              maxlength="15"
-              class="input input-bordered pl-10 rounded-lg w-full focus:ring focus:ring-green-500"
-            />
+          <!-- 1. Invernadero -->
+          <div>
+            <label class="label-basetext font-bold">Invernadero</label>
+            <select formControlName="invernadero"
+                    class="select select-bordered w-full text-sm min-w-0 truncate"
+            >
+              <option disabled value="">Todos los invernaderos</option>
+              <option *ngFor="let inv of invernaderos" [value]="inv.id">
+                {{ inv.nombre }}
+              </option>
+            </select>
           </div>
-          <p
-            *ngIf="searchControl.invalid && searchControl.hasError('maxlength')"
-            class="text-xs text-error mt-1"
-          >
-            Máximo 15 caracteres.
-          </p>
-        </div>
 
+          <!-- 2. Zona -->
+          <div>
+            <label class="label-basetext font-bold">Zona</label>
+            <select
+              formControlName="zona"
+              class="select select-bordered w-full text-sm min-w-0 truncate
+                    disabled:bg-base-200 disabled:text-base-content/50
+                    disabled:border-base-300 disabled:cursor-not-allowed"
+              [disabled]="!filterForm.get('invernadero')?.value"
+              [attr.title]="!filterForm.get('invernadero')?.value ? 'Selecciona un invernadero primero' : null"
+            >
+              <option value="">
+                {{ filterForm.get('invernadero')?.value ? 'Todas las zonas' : 'Selecciona un invernadero primero' }}
+              </option>
+              <option *ngFor="let z of zonasDisponibles" [value]="z.id">
+                {{ z.nombre }}
+              </option>
+            </select>
+          </div>
 
-        <!-- 7. Botón Aplicar -->
-        <div class="flex justify-end md:justify-start">
-          <button
-            type="submit"
-            class="btn btn-outline btn-sm h-12 w-full md:w-auto border-success text-base-content hover:bg-success hover:text-base-content transition-colors duration-200"
-          >
-            Aplicar
-          </button>
-        </div>
-      </form>
+          <!-- 3. Tipo de sensor -->
+          <div>
+            <label class="label-basetext font-bold">Tipo</label>
+            <select formControlName="tipoSensor"
+                    class="select select-bordered w-full text-sm min-w-0 truncate"
+            >
+              <option disabled value="">Todos los tipos</option>
+              <option *ngFor="let t of tiposSensor" [value]="t.id">
+                {{ t.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- 4. Estado -->
+          <div>
+            <label class="label-basetext font-bold">Estado</label>
+            <select formControlName="estado"
+                    class="select select-bordered w-full text-sm min-w-0 truncate"
+            >
+              <option disabled value="">Todos</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+            </select>
+          </div>
+
+          <!-- 5. Ordenar -->
+          <div>
+            <label class="label-basetext font-bold">⇅ Ordenar por</label>
+            <select formControlName="sortBy"
+                    class="select select-bordered w-full text-sm min-w-0 truncate"
+            >
+              <option disabled value="">Sin ordenar</option>
+              <option value="nombre">Nombre A→Z</option>
+              <option value="-nombre">Nombre Z→A</option>
+              <option value="fecha_instalacion">Fecha ↑</option>
+              <option value="-fecha_instalacion">Fecha ↓</option>
+            </select>
+          </div>
+
+          <!-- 6. Buscar -->
+          <div>
+            <label class="label-basetext font-bold">Buscar</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                🔍
+              </span>
+              <input
+                type="text"
+                formControlName="search"
+                placeholder="Nombre del sensor..."
+                maxlength="15"
+                class="input input-bordered pl-10 w-full text-sm min-w-0"
+              />
+            </div>
+            <p
+              *ngIf="searchControl.invalid && searchControl.hasError('maxlength')"
+              class="text-xs text-error mt-1"
+            >
+              Máximo 15 caracteres.
+            </p>
+          </div>
+
+          <!-- 7. Botón Aplicar -->
+          <div class="flex justify-end sm:justify-start">
+            <button
+              type="submit"
+              class="btn btn-outline btn-sm h-10 w-full sm:w-auto border-success text-base-content hover:bg-success hover:text-base-content transition-colors duration-200"
+            >
+              Aplicar
+            </button>
+          </div>
+        </form>
 
       <!-- Zona de chips: altura y padding responsive -->
       <div class="py-4 sm:py-0 mb-4 sm:mb-4 px-4 sm:px-0">

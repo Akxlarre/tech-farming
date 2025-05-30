@@ -30,33 +30,57 @@ import { SensorModalType } from '../sensor-modal.service';
             <td>{{ getZonaName(s) }}</td>
             <td>{{ getInvernaderoName(s) }}</td>
             <td>
-              <span
-                class="badge badge-md"
-                [ngClass]="{
-                  'badge-success': s.estado === 'Activo',
-                  'badge-warning': s.estado === 'Inactivo',
-                  'badge-error':   s.estado === 'Mantenimiento'
-                }"
-              >
-                {{ s.estado }}
-              </span>
+              <ng-container *ngIf="s.alertaActiva !== undefined; else loadingEstado">
+                <span
+                  class="badge badge-md"
+                  [ngClass]="{
+                    'badge-error': s.alertaActiva,
+                    'badge-success': !s.alertaActiva && s.estado === 'Activo',
+                    'badge-warning': !s.alertaActiva && s.estado === 'Inactivo',
+                    'badge-neutral': !s.alertaActiva && s.estado === 'Mantenimiento'
+                  }">
+                  {{
+                    s.alertaActiva
+                      ? 'Alerta'
+                      : s.estado
+                  }}
+                </span>
+              </ng-container>
+              <ng-template #loadingEstado>
+                <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+              </ng-template>
             </td>
             <td>
-              <ng-container *ngIf="s.ultimaLectura?.time as t; else noTime">
+            <ng-container *ngIf="s.ultimaLectura !== undefined; else loadingLectura">
+              <ng-container *ngIf="s.ultimaLectura?.time as t; else noData">
                 {{ t | date: 'short' }}
               </ng-container>
-              <ng-template #noTime>— sin datos —</ng-template>
-            </td>
+              <ng-template #noData>— sin datos —</ng-template>
+            </ng-container>
+            <ng-template #loadingLectura>
+            <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+            </ng-template>
+          </td>
             <td>
               <ul class="space-y-1">
                 <li *ngFor="let param of s.parametros">{{ param.nombre }}</li>
               </ul>
             </td>
             <td>
-              <ng-container *ngIf="s.ultimaLectura?.parametros?.length; else noData">
-                <div *ngFor="let line of getValorLines(s)">{{ line }}</div>
+              <ng-container *ngIf="s.ultimaLectura !== undefined; else loadingValores">
+                <ng-container *ngIf="s.ultimaLectura?.parametros?.length; else noData">
+                  <div *ngFor="let line of getValorLines(s)">
+                    {{ line }}
+                  </div>
+                </ng-container>
+                <ng-template #noData>—</ng-template>
               </ng-container>
-              <ng-template #noData>—</ng-template>
+
+              <ng-template #loadingValores>
+                <div class="space-y-1">
+                  <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+                </div>
+              </ng-template>
             </td>
             <td class="flex justify-center space-x-1">
               <!-- Ver sensor -->
@@ -65,7 +89,7 @@ import { SensorModalType } from '../sensor-modal.service';
                 (click)="accion.emit({ tipo: 'view', sensor: s })"
                 aria-label="Ver sensor"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-base-content group-hover:stroke-success" fill="none"
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stsroke-base-content group-hover:stroke-success" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -91,7 +115,7 @@ import { SensorModalType } from '../sensor-modal.service';
 
               <!-- Eliminar -->
               <button
-                class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-success hover:bg-success/10 transition-colors duration-200"
+                class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-error hover:bg-error/10 transition-colors duration-200"
                 (click)="accion.emit({ tipo: 'delete', sensor: s })"
                 aria-label="Eliminar sensor"
               >

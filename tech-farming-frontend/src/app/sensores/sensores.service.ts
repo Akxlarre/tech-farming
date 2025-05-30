@@ -121,4 +121,9 @@ export class SensoresService {
 
     return this.http.get<Sensor[]>(this.base, { params });
   }
+
+  getAlertasActivas(ids: number[]): Observable<{ id: number; alerta: boolean }[]> {
+    const params = new HttpParams().set('ids', ids.join(','));
+    return this.http.get<{ id: number; alerta: boolean }[]>(`${this.base}/alertas`, { params });
+  }
 }
