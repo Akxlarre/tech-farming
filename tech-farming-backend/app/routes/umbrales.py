@@ -15,10 +15,12 @@ def obtener_umbrales():
             "ambito": request.args.get("ambito"),
             "tipo_parametro_id": request.args.get("tipo_parametro_id", type=int),
             "invernadero_id": request.args.get("invernadero_id", type=int),
-            "sensor_parametro_id": request.args.get("sensor_parametro_id", type=int)
+            "sensor_parametro_id": request.args.get("sensor_parametro_id", type=int),
+            "page": request.args.get("page", default=1, type=int),
+            "perPage": request.args.get("perPage", default=10, type=int)
         }
-        umbrales = listar_umbrales(filtros)
-        return jsonify(umbrales), 200
+        resultado = listar_umbrales(filtros)
+        return jsonify(resultado), 200
     except Exception as e:
         print(f"[ERROR] al obtener umbrales: {e}")
         return jsonify({"error": "Error al obtener umbrales"}), 500

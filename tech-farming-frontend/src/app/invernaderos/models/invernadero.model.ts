@@ -1,4 +1,3 @@
-// src/app/invernaderos/models/invernadero.model.ts
 export interface Zona {
   id?: number;
   nombre: string;

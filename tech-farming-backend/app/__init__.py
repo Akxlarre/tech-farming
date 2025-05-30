@@ -37,37 +37,6 @@ except Exception as e:
     influx_write_api = None
     print(f"❌ Error conectando a InfluxDB: {e}")
 
-def escribir_dato(sensor_id: str, parametro: str, valor: float):
-    """Inserta un punto en InfluxDB."""
-    if not sensor_id or not parametro or valor is None:
-        print("⚠️ sensor_id, parametro y valor son obligatorios")
-        return
-
-    point = (
-        Point("lecturas_sensores")
-        .tag("sensor_id", sensor_id)
-        .field("parametro", parametro)
-        .field("valor", valor)
-        .time(datetime.utcnow())
-    )
-
-    if influx_client and influx_write_api:
-        influx_write_api.write(
-            bucket=Config.INFLUXDB_BUCKET,
-            org=Config.INFLUXDB_ORG,
-            record=point
-        )
-        print(f"✅ Dato insertado: {sensor_id}, {parametro}={valor}")
-    else:
-        print("❌ No se pudo insertar el dato.")
-
-@click.command("insertar-lectura")
-@click.argument("sensor_id", type=int)
-@click.argument("parametro", type=str)
-@click.argument("valor", type=float)
-def cli_insertar_lectura(sensor_id, parametro, valor):
-    """flask insertar-lectura 3 Humedad 55.2"""
-    escribir_dato(str(sensor_id), parametro, valor)
 
 def create_app():
     app = Flask(__name__)
@@ -90,9 +59,6 @@ def create_app():
     from app.routes import register_routes
     register_routes(app)
 
-    # Añadir comando CLI
-    app.cli.add_command(cli_insertar_lectura)
-
     # Debug: rutas
     print("🔍 Rutas registradas:")
     for rule in app.url_map.iter_rules():
@@ -101,10 +67,7 @@ def create_app():
     # Cargar modelos
     from app import models
 
-    return app
+    from app.queries.alerta_queries import iniciar_scheduler
+    iniciar_scheduler(app)
 
-if __name__ == "__main__":
-    # Prueba de inserción rápida
-    escribir_dato("3", "N", 69.5)
-    escribir_dato("4", "Potasio", 9.8)
-    escribir_dato("2", "Humedad", 65.2)
+    return app
