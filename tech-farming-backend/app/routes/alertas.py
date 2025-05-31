@@ -51,7 +51,7 @@ def resolver_alerta(alerta_id):
 
         return jsonify({
             "mensaje": "Alerta resuelta correctamente",
-            "resuelta_por": usuario.nombre,
+            "resuelta_por": f"{usuario.nombre} {usuario.apellido}",
             "fecha_resolucion": alerta.fecha_resolucion.isoformat()
         }), 200
 

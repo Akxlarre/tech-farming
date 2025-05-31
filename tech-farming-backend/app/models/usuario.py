@@ -5,6 +5,8 @@ class Usuario(db.Model):
     __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
+    apellido = db.Column(db.String(100))
+    telefono = db.Column(db.String(14), unique=True, nullable=True)
     rol_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     usuario_admin_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     supabase_uid = db.Column(db.UUID(as_uuid=True), unique=True, nullable=False)

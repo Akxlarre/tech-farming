@@ -172,7 +172,7 @@ def listar_alertas(filtros: dict):
                 "valor_detectado": float(a.valor_detectado) if a.valor_detectado is not None else None,
                 "fecha_hora": a.fecha_hora.isoformat(),
                 "estado": a.estado,
-                "resuelta_por": a.usuario_resolutor.nombre if a.usuario_resolutor else None
+                "resuelta_por": f"{a.usuario_resolutor.nombre} {a.usuario_resolutor.apellido}" if a.usuario_resolutor else None
             } for a in paginated.items
         ],
         "pagination": {

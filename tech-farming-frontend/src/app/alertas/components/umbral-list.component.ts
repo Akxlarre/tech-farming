@@ -30,9 +30,9 @@ import { FormsModule } from '@angular/forms';
     </div>
 
     <!-- Vista Principal -->
-    <div class="p-4">
+    <div class="p-6">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold">Umbrales</h2>
+        <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">Umbrales</h2>
         <button class="btn btn-ghost" (click)="modal.closeModal()">✕</button>
       </div>
 
