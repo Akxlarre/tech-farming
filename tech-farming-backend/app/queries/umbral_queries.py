@@ -89,14 +89,35 @@ def crear_umbral(data):
         if not data.get("tipo_parametro_id"):
             return {"error": "El campo tipo_parametro_id es obligatorio"}
         
+        # Validaciones de rangos
+        adv_min = data.get("advertencia_min")
+        adv_max = data.get("advertencia_max")
+        crit_min = data.get("critico_min")
+        crit_max = data.get("critico_max")
+
+        if adv_min is None or adv_max is None:
+            return {"error": "Debe proporcionar advertencia_min y advertencia_max"}
+
+        if adv_min >= adv_max:
+            return {"error": "advertencia_min debe ser menor que advertencia_max"}
+
+        if crit_min is not None and crit_min >= adv_min:
+            return {"error": "critico_min debe ser menor que advertencia_min"}
+
+        if crit_max is not None and adv_max >= crit_max:
+            return {"error": "advertencia_max debe ser menor que critico_max"}
+
+        if crit_min is not None and crit_max is not None and crit_min >= crit_max:
+            return {"error": "critico_min debe ser menor que critico_max"}
+        
         nuevo_umbral = ConfiguracionUmbral(
             tipo_parametro_id = data.get("tipo_parametro_id"),
             invernadero_id = data.get("invernadero_id"),
             sensor_parametro_id = data.get("sensor_parametro_id"),
-            advertencia_min = data.get("advertencia_min"),
-            advertencia_max = data.get("advertencia_max"),
-            critico_min = data.get("critico_min"),
-            critico_max = data.get("critico_max"),
+            advertencia_min = adv_min,
+            advertencia_max = adv_max,
+            critico_min = crit_min,
+            critico_max = crit_max,
             activo = True
         )
         db.session.add(nuevo_umbral)
@@ -118,8 +139,28 @@ def actualizar_umbral(umbral_id, data):
             return {"error": "Umbral no encontrado"}
         if "tipo_parametro_id" in data and data["tipo_parametro_id"] is None:
             return {"error": "tipo_parametro_id no puede ser nulo"}
+        
+        adv_min = data.get("advertencia_min", umbral.advertencia_min)
+        adv_max = data.get("advertencia_max", umbral.advertencia_max)
+        crit_min = data.get("critico_min", umbral.critico_min)
+        crit_max = data.get("critico_max", umbral.critico_max)
 
-        # Actualizar campos si vienen en el JSON
+        if adv_min is None or adv_max is None:
+            return {"error": "Debe proporcionar advertencia_min y advertencia_max"}
+
+        if adv_min >= adv_max:
+            return {"error": "advertencia_min debe ser menor que advertencia_max"}
+
+        if crit_min is not None and crit_min >= adv_min:
+            return {"error": "critico_min debe ser menor que advertencia_min"}
+
+        if crit_max is not None and adv_max >= crit_max:
+            return {"error": "advertencia_max debe ser menor que critico_max"}
+
+        if crit_min is not None and crit_max is not None and crit_min >= crit_max:
+            return {"error": "critico_min debe ser menor que critico_max"}
+
+        # Actualizar campos
         umbral.tipo_parametro_id = data.get("tipo_parametro_id", umbral.tipo_parametro_id)
         umbral.invernadero_id = data.get("invernadero_id", umbral.invernadero_id)
         umbral.sensor_parametro_id = data.get("sensor_parametro_id", umbral.sensor_parametro_id)

@@ -125,6 +125,7 @@ export interface Umbral {
   invernadero_nombre: string | null;
   sensor_parametro_id: number | null;
   sensor_nombre: string | null;
+  sensor_id?: number | null;
   sensor_invernadero_nombre: string | null;
   advertencia_min: number;
   advertencia_max: number;
