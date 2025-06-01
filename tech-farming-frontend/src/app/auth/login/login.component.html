@@ -61,8 +61,19 @@
           <div class="flex justify-end gap-2 mt-4">
             <button class="btn btn-outline text-gray-700 hover:text-gray-900 border-gray-300"
               (click)="closeResetPasswordModal()">Cancelar</button>
-            <button class="btn bg-green-600 text-white hover:bg-green-700"
-              (click)="sendResetPasswordEmail()">Enviar</button>
+            <button
+              class="btn bg-green-600 text-white hover:bg-green-700 flex items-center justify-center gap-2"
+              [disabled]="cargandoResetPassword()"
+              (click)="sendResetPasswordEmail()">
+              <span *ngIf="!cargandoResetPassword(); else spinner">Enviar</span>
+              <ng-template #spinner>
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              </ng-template>
+            </button>
           </div>
         </div>
       </div>

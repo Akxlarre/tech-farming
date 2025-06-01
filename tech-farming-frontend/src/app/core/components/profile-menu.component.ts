@@ -85,7 +85,7 @@ export class ProfileMenuComponent {
 
   goProfile() {
     this.showMenu = false;
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/perfil']);
   }
 
   openLogoutModal() {
