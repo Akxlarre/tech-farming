@@ -35,7 +35,6 @@ export class ResetPasswordComponent {
       }
     });
 
-    // También se puede escuchar cambios en la sesión por si viene desde el email
     const supabase = this._authService.getClient();
     supabase.auth.onAuthStateChange((_, session) => {
       if (session) {
