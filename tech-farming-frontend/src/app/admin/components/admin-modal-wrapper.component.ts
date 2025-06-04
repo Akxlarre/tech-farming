@@ -4,25 +4,24 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { SensorModalService } from '../sensor-modal.service';
+import { AdminModalService } from '../admin-modal.service';
 
 @Component({
-  selector: 'app-sensor-modal-wrapper',
+  selector: 'app-admin-modal-wrapper',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <!-- overlay -->
-    <div
-      class="fixed inset-0 bg-black/50 z-50"
-      (click)="onOverlayClick($event)"
-      [ngClass]="{ 'animate-overlayIn': !closing, 'animate-overlayOut': closing }"
+    <!-- Overlay oscuro -->
+    <div class="fixed inset-0 bg-black/50 z-50"
+         (click)="onOverlayClick($event)"
+         [ngClass]="{ 'animate-overlayIn': !closing, 'animate-overlayOut': closing }"
     ></div>
 
-    <!-- modal container, sin forzar tamaño -->
+    <!-- Contenedor modal -->
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         #modalContent
-        class="bg-base-100 rounded-lg shadow-2xl overflow-hidden transition-all"
+        class="bg-base-100 rounded-lg shadow-2xl overflow-hidden transition-all w-full max-w-xl"
         [ngClass]="{ 'animate-fadeInZoom': !closing, 'animate-fadeOutZoom': closing }"
       >
         <ng-content></ng-content>
@@ -41,12 +40,12 @@ import { SensorModalService } from '../sensor-modal.service';
     .animate-fadeOutZoom { animation: fadeOutZoom 0.25s ease-in forwards; }
   `]
 })
-export class SensorModalWrapperComponent implements OnInit, OnDestroy {
+export class AdminModalWrapperComponent implements OnInit, OnDestroy {
   closing = false;
   private sub!: Subscription;
   @ViewChild('modalContent', { static: true }) modalContent!: ElementRef;
 
-  constructor(public modal: SensorModalService) {}
+  constructor(public modal: AdminModalService) {}
 
   ngOnInit() {
     this.sub = this.modal.closing$.subscribe(v => this.closing = v);

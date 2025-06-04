@@ -12,7 +12,7 @@ import { PerfilService } from '../../perfil/perfil.service';
     <div class="relative" #menuContainer>
       <button (click)="toggleMenu()"
               aria-label="Perfil"
-              class="flex items-center btn btn-ghost px-2 space-x-2 focus:ring-2 focus:ring-primary">
+              class="flex items-center btn btn-ghost px-2 space-x-2 focus:ring-2 focus:ring-success">
         <div class="w-10 h-10 rounded-full overflow-hidden ring ring-success ring-offset-base-100 ring-offset-2">
           <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" />
         </div>

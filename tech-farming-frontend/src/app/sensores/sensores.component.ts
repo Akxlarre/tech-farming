@@ -194,7 +194,6 @@ export class SensoresComponent implements OnInit, OnDestroy {
     private tsSvc: TimeSeriesService,
     private tiposSvc: TipoSensorService,
     private invSvc: InvernaderoService,
-    private zonaSvc: ZonaService,
     public  modal: SensorModalService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}

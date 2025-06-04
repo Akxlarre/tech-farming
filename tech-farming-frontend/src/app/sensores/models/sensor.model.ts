@@ -1,6 +1,4 @@
-// src/app/sensores/models/sensor.model.ts
 import { TipoSensor } from './tipo-sensor.model';
-import { TipoParametro } from './tipos_parametro.model';
 import { Zona } from './zona.model';
 import { Invernadero } from './invernadero.model';
 import { LecturaSensor } from './lectura-sensor.model';
