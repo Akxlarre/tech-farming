@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { privateGuard, publicGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -14,7 +15,7 @@ export const routes: Routes = [
       { path: 'invernaderos', loadComponent: () => import('./invernaderos/invernaderos.component').then(m => m.InvernaderosComponent) },
       { path: 'alertas', loadComponent: () => import('./alertas/alertas.component').then(m => m.AlertasComponent) },
       { path: 'historial', loadComponent: () => import('./historial/historial.component').then(m => m.HistorialComponent) },
-      { path: 'admin', loadComponent: () => import('./admin/admin.component').then(m => m.AdminComponent) },
+      { path: 'admin', loadComponent: () => import('./admin/admin.component').then(m => m.AdminComponent), canActivate: [adminGuard] },
       { path: 'predicciones', loadComponent: () => import('./predicciones/predicciones.component').then(m => m.PrediccionesComponent) },
       { path: 'perfil', loadComponent: () => import('./perfil/perfil.component').then(m => m.PerfilComponent)}
     ]
