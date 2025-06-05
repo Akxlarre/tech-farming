@@ -209,7 +209,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
     //pagina 100, lo que puede ser excesivo o no suficiente en función de la cantidad de invernaderos
     // y zonas que haya en el sistema.
 
-      this.invSvc.getInvernaderosPage(1, 100).subscribe(resp => { 
+      this.invSvc.getInvernaderosPage(1, 100, {}).subscribe(resp => { 
         this.invernaderosDisponibles = resp.data;
         this.zonasDisponibles = resp.data.flatMap(inv => inv.zonas || []);
       });
