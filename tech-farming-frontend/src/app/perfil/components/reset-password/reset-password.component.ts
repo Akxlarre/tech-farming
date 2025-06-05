@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -14,7 +14,6 @@ export class ResetPasswordComponent {
   private _formBuilder = inject(FormBuilder);
   private _authService = inject(AuthService);
   private _router = inject(Router);
-  private _route = inject(ActivatedRoute);
 
   resetForm = this._formBuilder.group({
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -23,15 +22,25 @@ export class ResetPasswordComponent {
 
   errorMessage = signal<string | null>(null);
   passwordsDoNotMatch = false;
-  token: string | null = null;
+  showSuccessModal = signal(false);
+  sessionActiva = signal(false);
 
   ngOnInit() {
-    this.token = this._route.snapshot.queryParamMap.get('token');
-    const type = this._route.snapshot.queryParamMap.get('type');
+    // Verificar si hay una sesión válida, ya sea normal o de recuperación
+    this._authService.session().then(({ data }) => {
+      if (data.session) {
+        this.sessionActiva.set(true);
+      } else {
+        this._router.navigateByUrl('/login');
+      }
+    });
 
-    if (!this.token || type !== 'recovery') {
-      this.errorMessage.set('El enlace de restablecimiento es inválido o ha expirado.');
-    }
+    const supabase = this._authService.getClient();
+    supabase.auth.onAuthStateChange((_, session) => {
+      if (session) {
+        this.sessionActiva.set(true);
+      }
+    });
   }
 
   async submit() {
@@ -47,28 +56,23 @@ export class ResetPasswordComponent {
       this.passwordsDoNotMatch = false;
     }
 
-    const email = this._route.snapshot.queryParamMap.get('email');
-    if (!email) {
-      this.errorMessage.set('El enlace de restablecimiento es inválido o ha expirado.');
-      return;
-    }
-
-    if (!this.token) {
-      this.errorMessage.set('El enlace de restablecimiento es inválido o ha expirado.');
-      return;
-    }
-
     try {
-      const { error } = await this._authService.updatePassword(email, password, this.token);
+      const { error } = await this._authService.updatePassword(password);
 
       if (error) {
         this.errorMessage.set('Hubo un problema al restablecer la contraseña.');
       } else {
-        alert('Contraseña restablecida correctamente.');
-        this._router.navigateByUrl('/login');
+        this.showSuccessModal.set(true);
       }
-    } catch (error) {
-      this.errorMessage.set('Hubo un problema al restablecer la contraseña.');
+    } catch (err) {
+      this.errorMessage.set('Hubo un problema inesperado al restablecer la contraseña.');
+      console.error(err);
     }
+  }
+
+  async cerrarModalYRedirigir() {
+    this.showSuccessModal.set(false);
+    await this._authService.logout();
+    this._router.navigateByUrl('/login');
   }
 }

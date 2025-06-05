@@ -9,7 +9,7 @@ import {
   CrearSensorResponse,
   SensorFilters
 } from './sensores.service';
-import { TimeSeriesService, BatchLectura }            from './time-series.service';
+import { TimeSeriesService }            from './time-series.service';
 import { Sensor }                                     from './models/sensor.model';
 import { SensorModalService, SensorModalType }                         from './sensor-modal.service';
 
@@ -25,7 +25,6 @@ import { SensorCardComponent } from './components/sensor-card.component';
 
 import { TipoSensorService }         from './tipos_sensor.service';
 import { InvernaderoService }        from '../invernaderos/invernaderos.service';
-import { ZonaService }               from '../invernaderos/zona.service';
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
 
@@ -194,7 +193,6 @@ export class SensoresComponent implements OnInit, OnDestroy {
     private tsSvc: TimeSeriesService,
     private tiposSvc: TipoSensorService,
     private invSvc: InvernaderoService,
-    private zonaSvc: ZonaService,
     public  modal: SensorModalService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}

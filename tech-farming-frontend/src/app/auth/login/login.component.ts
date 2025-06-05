@@ -36,6 +36,7 @@ export class LoginComponent {
   showResetPasswordModal = signal(false);
   showSuccessModal = signal(false);
   resetEmail = '';
+  cargandoResetPassword = signal(false);
 
   form = this._formBuilder.group<LoginForm>({
     email: this._formBuilder.control(null, [
@@ -85,35 +86,37 @@ export class LoginComponent {
   }
 
   async sendResetPasswordEmail() {
-  this.resetErrorMessage.set(null);
+    this.resetErrorMessage.set(null);
 
-  if (this.resetForm.invalid) {
-    this.resetErrorMessage.set('Ingresa un correo válido.');
-    return;
-  }
-
-  const email = this.resetForm.get('email')?.value ?? '';
-
-  try {
-    const { error } = await this._authService.resetPassword(email);
-
-    if (error) {
-      console.error("Error en Supabase:", error);
-      this.resetErrorMessage.set('Hubo un problema al enviar el correo. Verifica tu correo e inténtalo de nuevo.');
+    if (this.resetForm.invalid) {
+      this.resetErrorMessage.set('Ingresa un correo válido.');
       return;
     }
 
-    this.showResetPasswordModal.set(false);
-    this.showSuccessModal.set(true);
-    this.resetForm.reset();
+    const email = this.resetForm.get('email')?.value ?? '';
+    this.cargandoResetPassword.set(true);
 
-    setTimeout(() => {
-      this.showSuccessModal.set(false);
-    }, 5000);
-  } catch (error) {
-    this.resetErrorMessage.set('Error al enviar el correo de recuperación.');
-    console.error(error);
+    try {
+      const { error } = await this._authService.resetPassword(email);
+
+      if (error) {
+        console.error("Error en Supabase:", error);
+        this.resetErrorMessage.set('Hubo un problema al enviar el correo. Verifica tu correo e inténtalo de nuevo.');
+        return;
+      }
+
+      this.showResetPasswordModal.set(false);
+      this.showSuccessModal.set(true);
+      this.resetForm.reset();
+
+      setTimeout(() => {
+        this.showSuccessModal.set(false);
+      }, 5000);
+    } catch (error) {
+      this.resetErrorMessage.set('Error al enviar el correo de recuperación.');
+      console.error(error);
+    } finally {
+      this.cargandoResetPassword.set(false);
+    }
   }
-}
-
 }

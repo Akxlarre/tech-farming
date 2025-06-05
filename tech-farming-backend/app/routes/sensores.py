@@ -518,3 +518,21 @@ def obtener_alertas_activas():
     except Exception as e:
         current_app.logger.error(f"[alertas] error: {e}")
         return jsonify({ "error": "Error al obtener alertas activas" }), 500
+
+@router.route('/validar-token', methods=['POST'])
+def validar_token_sensor():
+    try:
+        data = request.get_json() or {}
+        token = data.get("token")
+        if not token:
+            abort(400, description="Token requerido")
+
+        sensor = SensorModel.query.filter_by(token=token).first()
+        if not sensor:
+            abort(401, description="Token no válido")
+
+        return jsonify({"valido": True}), 200
+
+    except Exception:
+        current_app.logger.error("Error validar_token_sensor:\n" + traceback.format_exc())
+        return jsonify({ "error": "No se pudo validar el token" }), 500
