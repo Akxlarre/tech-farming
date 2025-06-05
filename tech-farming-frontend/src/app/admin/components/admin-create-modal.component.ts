@@ -1,13 +1,25 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import e from 'express';
+import { AdminService } from '../admin.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-admin-create-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
+    <!-- Modal de Confirmación de Éxito -->
+    <div *ngIf="confirmacionVisible"
+        class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
+        <h3 class="text-xl font-semibold text-green-600">
+          ✅ ¡Éxito!
+        </h3>
+        <p>{{ mensajeConfirmacion }}</p>
+      </div>
+    </div>
+
     <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl">
       <h3 class="font-bold text-2xl mb-4">Agregar nuevo usuario trabajador</h3>
 
@@ -62,7 +74,13 @@ import e from 'express';
         <!-- BOTONES -->
         <div class="modal-action mt-6 flex justify-end gap-2">
           <button type="button" (click)="close.emit()" class="btn btn-outline">Cancelar</button>
-          <button type="submit" class="btn btn-success">Crear usuario</button>
+          <button type="submit" class="btn btn-success">
+            <span *ngIf="!loading">Crear usuario</span>
+            <span *ngIf="loading" class="flex items-center gap-2">
+              <span class="loading loading-spinner loading-sm"></span>
+              Creando...
+            </span>
+          </button>
         </div>
       </form>
     </div>
@@ -72,26 +90,52 @@ export class AdminCreateModalComponent {
   @Output() saved = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
 
+  adminService = inject(AdminService);
+  supabaseService = inject(SupabaseService);
+  loading = false;
+  error = '';
+  confirmacionVisible = false;
+  mensajeConfirmacion = '';
+
   nuevoUsuario = {
     nombre: '',
     apellido: '',
     email: '',
     telefono: '',
     permisos: {
-      ver: true,
       editar: false,
       crear: false,
       eliminar: false
     }
   };
 
-  crearUsuario() {
-    const usuario = {
-      id: Date.now(), // ID temporal
-      ...this.nuevoUsuario,
-      telefono: `+56${this.nuevoUsuario.telefono}`
-    };
-    this.saved.emit(usuario);
+  async crearUsuario() {
+    this.loading = true;
+    this.error = '';
+
+    try {
+      const response = await this.adminService.crearTrabajador({
+        nombre: this.nuevoUsuario.nombre,
+        apellido: this.nuevoUsuario.apellido,
+        email: this.nuevoUsuario.email,
+        telefono: '+56' + this.nuevoUsuario.telefono,
+        permisos: this.nuevoUsuario.permisos
+      });
+
+      if (response.success) {
+        this.mensajeConfirmacion = 'Usuario creado correctamente.';
+        this.confirmacionVisible = true;
+        setTimeout(() => {
+          this.confirmacionVisible = false;
+          this.saved.emit();
+        }, 2500);
+      } else {
+        this.error = response.error || 'Error al crear usuario.';
+      }
+    } catch (err: any) {
+      this.error = err.message || 'Error inesperado';
+    }
+
+    this.loading = false;
   }
 }
-

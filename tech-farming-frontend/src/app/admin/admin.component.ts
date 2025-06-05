@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AdminService } from './admin.service';
 import { AdminModalService } from './admin-modal.service';
 import { AdminHeaderComponent } from './components/admin-header.component';
 import { AdminFiltersComponent } from './components/admin-filters.component';
@@ -12,6 +13,8 @@ interface Usuario {
   id: number;
   nombre: string;
   apellido: string;
+  email: string;
+  telefono: string;
   puedeCrear: boolean;
   puedeEditar: boolean;
   puedeEliminar: boolean;
@@ -44,7 +47,7 @@ interface Usuario {
         <!-- CREAR USUARIO -->
         <ng-container *ngSwitchCase="'create'">
           <app-admin-create-modal
-            (saved)="onUsuarioCreado($event)"
+            (saved)="onUsuarioCreado()"
             (close)="modal.closeWithAnimation()"
           ></app-admin-create-modal>
         </ng-container>
@@ -73,24 +76,25 @@ export class AdminComponent implements OnInit {
   pageSize = 5;
   totalUsuarios = 0;
 
-  constructor(public modal: AdminModalService) { }
+  constructor(
+    public modal: AdminModalService,
+    private adminService: AdminService
+  ) { }
 
-  ngOnInit() {
-    this.usuarios = [
-      { id: 1, nombre: 'Camila', apellido: 'Salas', puedeEditar: true, puedeCrear: false, puedeEliminar: true },
-      { id: 2, nombre: 'Lucas', apellido: 'Rojas', puedeEditar: true, puedeCrear: true, puedeEliminar: false },
-      // agrega más mock data
-    ];
-    this.filtrar('');
+  ngOnInit(): void {
+    this.cargarUsuarios();
   }
 
-  onAgregarUsuario() {
-    this.modal.openModal('create');
+  cargarUsuarios(): void {
+    this.adminService.getTrabajadores().subscribe(trabajadores => {
+      this.usuarios = trabajadores;
+      this.filtrar('');
+    });
   }
 
-  onUsuarioCreado(nuevo: Usuario) {
-    this.usuarios.push(nuevo);
-    this.filtrar('');
+  onUsuarioCreado(): void {
+    this.modal.closeWithAnimation();
+    this.cargarUsuarios();
   }
 
   onUsuarioEditado(usuarioEditado: any) {

@@ -5,6 +5,8 @@ interface Usuario {
   id: number;
   nombre: string;
   apellido: string;
+  email: string;
+  telefono: string;
   puedeEditar: boolean;
   puedeCrear: boolean;
   puedeEliminar: boolean;
@@ -21,6 +23,8 @@ interface Usuario {
           <tr class="text-base-content font-bold">
             <th>Nombre</th>
             <th>Apellido</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
             <th>Editar</th>
             <th>Crear</th>
             <th>Eliminar</th>
@@ -31,6 +35,8 @@ interface Usuario {
           <tr *ngFor="let u of usuarios">
             <td>{{ u.nombre }}</td>
             <td>{{ u.apellido }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.telefono }}</td>
             <td>{{ u.puedeEditar ? '✔️' : '❌' }}</td>
             <td>{{ u.puedeCrear ? '✔️' : '❌' }}</td>
             <td>{{ u.puedeEliminar ? '✔️' : '❌' }}</td>
