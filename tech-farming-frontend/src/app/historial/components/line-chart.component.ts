@@ -41,11 +41,10 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   ngAfterViewInit() {
     if (!this.isBrowser) return;
-
     console.log('[LineChart] ngAfterViewInit → renderChart()');
     this.renderChart();
 
-    // Observamos cambios en data-theme de <html>
+    // Observamos cambios en data-theme de <html> para actualizar colores
     this.themeObserver = new MutationObserver(muts => {
       console.log('[LineChart] theme changed', muts);
       this.applyThemeColors();
@@ -102,15 +101,16 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private buildConfig(): ChartConfiguration<'line'> {
-    // Solo para logs de arranque
+    // Detectamos tema actual (light/dark)
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     console.log('[LineChart] buildConfig → isDark=', isDark);
 
-    // Extraemos colores de Tailwind (DaisyUI los cambia según data-theme)
+    // Extraemos colores de Tailwind (DaisyUI los cambia con data-theme)
     const colorSuccess = this.getCSSVar('--color-success', '#22c55e');
     const colorBase    = this.getCSSVar('--color-base-content', isDark ? '#f9fafb' : '#374151');
     console.log('[LineChart] Tailwind colors → success=', colorSuccess, ', base-content=', colorBase);
 
+    // Preparamos etiquetas y valores
     const labels = this.data.map(d =>
       new Date(d.timestamp).toLocaleDateString('es-ES', { month: 'short', day: '2-digit' })
     );
@@ -133,9 +133,21 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+
+        // ───── Reservamos 16px a izquierda y derecha dentro del gráfico ─────
+        layout: {
+          padding: {
+            left: 16,
+            right: 16,
+            top: 0,
+            bottom: 0
+          }
+        },
+
         interaction: { mode: 'nearest', axis: 'x', intersect: false },
         scales: {
           x: {
+            offset: true,   // asegura espacio extra entre primer/última etiqueta y el borde
             title: { display: true, text: 'Fecha', color: colorBase },
             ticks: { color: colorBase, maxTicksLimit: 6, autoSkip: true },
             grid:  { color: colorBase + '20' }
