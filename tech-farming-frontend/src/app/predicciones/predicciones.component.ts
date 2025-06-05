@@ -1,7 +1,10 @@
 // src/app/predicciones/predicciones.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { FormsModule }       from '@angular/forms';
+import { HttpClientModule }  from '@angular/common/http';     // <--- Importa HttpClientModule
+
 import { MatFormFieldModule }from '@angular/material/form-field';
 import { MatSelectModule }   from '@angular/material/select';
 import { MatButtonModule }   from '@angular/material/button';
@@ -27,9 +30,13 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
   selector: 'app-predicciones',
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    MatFormFieldModule, MatSelectModule,
-    MatButtonModule, MatCardModule,
+    CommonModule,
+    FormsModule,
+    HttpClientModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
 
     FiltroSelectComponent,
     PredictionChartComponent,
@@ -116,7 +123,6 @@ export class PrediccionesComponent implements OnInit {
     { id: 24, label: '24 horas' }
   ];
 
-  // Ahora aceptan undefined
   selectedInvernadero?: number;
   selectedZona?:         number;
   selectedProjection = 6;
@@ -127,6 +133,7 @@ export class PrediccionesComponent implements OnInit {
   constructor(private svc: PrediccionesService) {}
 
   ngOnInit() {
+    // Llama a getInvernaderos(), que ahora unwrappea response.data
     this.svc.getInvernaderos().subscribe(list => {
       this.invernaderos   = list;
       this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
@@ -137,10 +144,11 @@ export class PrediccionesComponent implements OnInit {
     return this.optProjection.find(p => p.id === this.selectedProjection)?.label ?? '';
   }
 
-  // Métodos ahora aceptan number | undefined
   onInvernaderoChange(id: number | undefined) {
     if (id == null) return;
     this.selectedInvernadero = id;
+
+    // Llama a getZonasByInvernadero(), que unwrappea response.data de zonas
     this.svc.getZonasByInvernadero(id).subscribe(list => {
       this.zonas   = list;
       this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
@@ -164,9 +172,12 @@ export class PrediccionesComponent implements OnInit {
       zonaId:        this.selectedZona,
       horas:         this.selectedProjection as 6|12|24
     };
-    this.svc.getPredicciones(params).subscribe(res => {
-      this.data    = res;
-      this.uiTrend = this.mapTrend(res.trend);
+    this.svc.getPredicciones(params).subscribe({
+      next: (res: PredicResult) => {
+        this.data    = res;
+        this.uiTrend = this.mapTrend(res.trend);
+      },
+      error: err => console.error('Error al obtener predicciones:', err)
     });
   }
 

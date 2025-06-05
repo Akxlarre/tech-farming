@@ -10,7 +10,7 @@ from app.routes.zonas_sensores import router as zonas_sensores_bp
 from app.routes.historial import router as historial_bp
 from app.routes.sensor_parametros import router as sensor_parametros_bp
 from app.routes.usuarios import router as usuarios_bp
-
+from app.routes.predict_routes import predict_bp
 
 def register_routes(app):
     app.register_blueprint(api_bp, url_prefix='/api')
@@ -25,3 +25,4 @@ def register_routes(app):
     app.register_blueprint(historial_bp, url_prefix='/api')
     app.register_blueprint(sensor_parametros_bp)
     app.register_blueprint(usuarios_bp, url_prefix='/api/usuarios')
+    app.register_blueprint(predict_bp)
