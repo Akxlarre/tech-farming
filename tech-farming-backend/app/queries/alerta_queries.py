@@ -250,4 +250,4 @@ def iniciar_scheduler(app):
         replace_existing=True
     )
     scheduler.start()
-    print("[SCHEDULER] Verificación de sensores desconectados cada 5 minutos iniciada.")
+    print("[SCHEDULER] Verificación de sensores desconectados cada 10 minutos iniciada.")

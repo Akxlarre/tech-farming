@@ -1,7 +1,7 @@
 from datetime import datetime
 import traceback
 from uuid import uuid4
-from flask import Blueprint, request, jsonify, abort, current_app
+from flask import Blueprint, g, request, jsonify, abort, current_app
 from sqlalchemy.orm import joinedload
 from influxdb_client import Point
 
@@ -16,6 +16,7 @@ from app.queries.sensor_queries import (
     obtener_sensores_por_invernadero_y_parametro,
     obtener_sensores_por_invernadero)
 from app.queries.alerta_queries import evaluar_y_generar_alerta
+from app.utils.auth_supabase import usuario_autenticado_requerido
 
 router = Blueprint('sensores', __name__, url_prefix='/api/sensores')
 
@@ -115,7 +116,11 @@ def listar_sensores():
 
 
 @router.route('/', methods=['POST'])
+@usuario_autenticado_requerido
 def crear_sensor():
+    if not getattr(g.permisos, "puede_crear", False):
+        return jsonify({"error": "No tienes permiso para crear sensores"}), 403
+    
     data = request.get_json() or {}
 
     nombre      = data.get('nombre')
@@ -184,7 +189,11 @@ def crear_sensor():
         abort(500, description="No se pudo crear el sensor")
 
 @router.route('/<int:sensor_id>', methods=['PUT'])
+@usuario_autenticado_requerido
 def editar_sensor(sensor_id):
+    if not getattr(g.permisos, "puede_editar", False):
+        return jsonify({"error": "No tienes permiso para editar sensores"}), 403
+
     data = request.get_json() or {}
 
     # Campos que aceptamos actualizar
@@ -281,7 +290,10 @@ def editar_sensor(sensor_id):
         abort(500, description="No se pudo actualizar el sensor")
 
 @router.route('/<int:sensor_id>', methods=['DELETE'])
+@usuario_autenticado_requerido
 def eliminar_sensor(sensor_id):
+    if not getattr(g.permisos, "puede_eliminar", False):
+        return jsonify({"error": "No tienes permiso para eliminar sensores"}), 403
     """
     DELETE /api/sensores/{sensor_id}
     Elimina completamente el sensor (y, gracias al cascade, sus parámetros asociados).
@@ -518,3 +530,21 @@ def obtener_alertas_activas():
     except Exception as e:
         current_app.logger.error(f"[alertas] error: {e}")
         return jsonify({ "error": "Error al obtener alertas activas" }), 500
+
+@router.route('/validar-token', methods=['POST'])
+def validar_token_sensor():
+    try:
+        data = request.get_json() or {}
+        token = data.get("token")
+        if not token:
+            abort(400, description="Token requerido")
+
+        sensor = SensorModel.query.filter_by(token=token).first()
+        if not sensor:
+            abort(401, description="Token no válido")
+
+        return jsonify({"valido": True}), 200
+
+    except Exception:
+        current_app.logger.error("Error validar_token_sensor:\n" + traceback.format_exc())
+        return jsonify({ "error": "No se pudo validar el token" }), 500

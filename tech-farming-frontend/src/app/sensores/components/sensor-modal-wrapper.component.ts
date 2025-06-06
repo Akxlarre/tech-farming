@@ -1,4 +1,3 @@
-// src/app/sensores/components/sensor-modal-wrapper.component.ts
 import {
   Component, OnInit, OnDestroy,
   HostListener, ViewChild, ElementRef

@@ -7,6 +7,8 @@ import { ThemeToggleComponent } from './theme-toggle.component';
 import { ProfileMenuComponent } from './profile-menu.component';
 import { DesktopNavComponent } from './desktop-nav.component';
 import { MobileNavComponent } from './mobile-nav.component';
+import { SupabaseService } from '../../services/supabase.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -32,4 +34,31 @@ export class HeaderComponent {
     { label: 'Predicciones',  path: '/predicciones' },
     { label: 'Usuarios',      path: '/admin'         },
   ];
+
+  isReady = false;
+
+  constructor(
+    private supabaseService: SupabaseService,
+    private authService: AuthService
+  ) {}
+
+  async ngOnInit() {
+    const session = await this.authService.session();
+    const user = session.data?.session?.user;
+
+    if (user) {
+      const { data: usuarioDB } = await this.supabaseService.supabase
+        .from('usuarios')
+        .select('rol_id')
+        .eq('supabase_uid', user.id)
+        .single();
+
+      const esAdmin = usuarioDB?.rol_id === 1;
+
+      if (!esAdmin) {
+        this.navItems = this.navItems.filter(item => item.path !== '/admin');
+      }
+    }
+    this.isReady = true;
+  }
 }

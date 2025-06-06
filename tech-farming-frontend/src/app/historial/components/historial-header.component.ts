@@ -20,13 +20,17 @@ import { CommonModule } from '@angular/common';
           (click)="exportCsv.emit()"
           aria-label="Exportar historial a CSV"
         >
-          <svg xmlns="http://www.w3.org/2000/svg"
-               class="w-5 h-5 stroke-base-content hover:stroke-success-content"
-               fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8M8 16l4 4 4-4M8 12h8" />
+          <svg
+              class="w-5 h-5 stroke-base-content hover:stroke-success-content "
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3v12m0 0l-3-3m3 3l3-3M20 21H4a2 2 0 01-2-2V5a2 2 0 012-2h8l8 8v10a2 2 0 01-2 2z"
+              />
           </svg>
           <span class="text-base-content group-hover:text-success-content">
             Exportar CSV

@@ -1,10 +1,11 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, g, request, jsonify
 from app.queries.umbral_queries import (
     listar_umbrales, 
     crear_umbral,
     actualizar_umbral,
     eliminar_umbral
     )
+from app.utils.auth_supabase import usuario_autenticado_requerido
 
 router = Blueprint('umbrales', __name__)
 
@@ -26,7 +27,11 @@ def obtener_umbrales():
         return jsonify({"error": "Error al obtener umbrales"}), 500
 
 @router.route('/', methods=['POST'])
+@usuario_autenticado_requerido
 def crear_nuevo_umbral():
+    if not getattr(g.permisos, "puede_crear", False):
+        return jsonify({"error": "No tienes permiso para crear umbrales"}), 403
+    
     try:
         data = request.get_json()
         resultado = crear_umbral(data)
@@ -38,7 +43,11 @@ def crear_nuevo_umbral():
         return jsonify({"error": "Error al crear umbral"}), 500
     
 @router.route('/<int:umbral_id>', methods=['PUT'])
+@usuario_autenticado_requerido
 def actualizar_umbral_route(umbral_id):
+    if not getattr(g.permisos, "puede_editar", False):
+        return jsonify({"error": "No tienes permiso para editar umbrales"}), 403
+    
     try:
         data = request.get_json()
         resultado = actualizar_umbral(umbral_id, data)
@@ -50,7 +59,11 @@ def actualizar_umbral_route(umbral_id):
         return jsonify({"error": "Error al actualizar umbral"}), 500
     
 @router.route('/<int:umbral_id>', methods=['DELETE'])
+@usuario_autenticado_requerido
 def eliminar_umbral_route(umbral_id):
+    if not getattr(g.permisos, "puede_eliminar", False):
+        return jsonify({"error": "No tienes permiso para eliminar umbrales"}), 403
+    
     try:
         resultado = eliminar_umbral(umbral_id)
         if "error" in resultado:

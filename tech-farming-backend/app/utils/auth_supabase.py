@@ -1,45 +1,47 @@
 import os
 import requests
-from flask import request, jsonify, g
+from flask import request, abort, jsonify, g
 from functools import wraps
+from supabase import create_client
+from app.models.usuario import Usuario
+from app.models.usuario_permiso import UsuarioPermiso
 
-SUPABASE_PROJECT_URL = os.getenv("SUPABASE_URL")
-SUPABASE_AUTH_URL = f"{SUPABASE_PROJECT_URL}/auth/v1/user"
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_AUTH_URL = f"{SUPABASE_URL}/auth/v1/user"
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-def supabase_auth_required(f):
+def obtener_usuario_y_permisos():
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if not token:
+        abort(401, description="Falta token de autenticación")
+
+    try:
+        user_info = supabase.auth.get_user(token)
+    except Exception:
+        abort(401, description="Token inválido o expirado")
+
+    uid = user_info.user.id
+    usuario = Usuario.query.filter_by(supabase_uid=uid).first()
+    if not usuario:
+        abort(403, description="Usuario no registrado")
+
+    permisos = UsuarioPermiso.query.filter_by(usuario_id=usuario.id).first()
+    if not permisos:
+        abort(403, description="Permisos no asignados")
+        
+    return usuario, permisos
+
+def usuario_autenticado_requerido(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        auth_header = request.headers.get("Authorization", "")
-        if not auth_header.startswith("Bearer "):
-            return jsonify({"error": "Token no proporcionado o inválido"}), 401
-
-        token = auth_header.split(" ")[1]
-        print(f"[DEBUG] Token recibido: {token}")
-        print(f"[DEBUG] URL de verificación: {SUPABASE_AUTH_URL}")
-
-        # Llamar a Supabase para validar el token
         try:
-            response = requests.get(
-                SUPABASE_AUTH_URL,
-                headers={
-                    "Authorization": f"Bearer {token}",
-                    "apikey": SUPABASE_ANON_KEY
-                }
-            )
-
-            print(f"[DEBUG] Código de respuesta Supabase: {response.status_code}")
-            print(f"[DEBUG] Respuesta Supabase: {response.text}")
-
-            if response.status_code != 200:
-                return jsonify({"error": "Token inválido o expirado"}), 401
-
-            user_data = response.json()
-            g.current_user = user_data  # Guardamos en el contexto global de Flask
-
+            usuario, permisos = obtener_usuario_y_permisos()
+            g.usuario = usuario
+            g.permisos = permisos
+            return f(*args, **kwargs)
         except Exception as e:
-            return jsonify({"error": f"Error al verificar token: {str(e)}"}), 500
-
-        return f(*args, **kwargs)
+            return jsonify({"error": str(e)}), 401
 
     return decorated_function

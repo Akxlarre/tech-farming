@@ -1,5 +1,5 @@
 // src/app/sensores/components/sensor-header.component.ts
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -40,6 +40,7 @@ import { CommonModule } from '@angular/common';
 
         <!-- Botón Añadir Sensor -->
         <button
+          *ngIf="puedeCrear"
           class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content"
           (click)="create.emit()"
           aria-label="Añadir nuevo sensor"
@@ -65,6 +66,7 @@ import { CommonModule } from '@angular/common';
   `,
 })
 export class SensorHeaderComponent {
+  @Input() puedeCrear = false;
   @Output() create    = new EventEmitter<void>();
   @Output() exportPdf = new EventEmitter<void>();
 }

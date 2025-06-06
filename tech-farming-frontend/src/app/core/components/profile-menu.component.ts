@@ -2,6 +2,7 @@ import { Component, HostListener, ElementRef, signal, inject } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { PerfilService } from '../../perfil/perfil.service';
 
 @Component({
   standalone: true,
@@ -11,11 +12,18 @@ import { AuthService } from '../../services/auth.service';
     <div class="relative" #menuContainer>
       <button (click)="toggleMenu()"
               aria-label="Perfil"
-              class="flex items-center btn btn-ghost px-2 space-x-2 focus:ring-2 focus:ring-primary">
+              class="flex items-center btn btn-ghost px-2 space-x-2 focus:ring-2 focus:ring-success">
         <div class="w-10 h-10 rounded-full overflow-hidden ring ring-success ring-offset-base-100 ring-offset-2">
           <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" />
         </div>
-        <span class="hidden lg:inline-block font-medium">Nicol</span>
+        <div class="hidden lg:flex items-center gap-1 font-medium">
+          <ng-container *ngIf="!cargandoNombre; else cargandoNombreTpl">
+            {{ nombre }}
+          </ng-container>
+          <ng-template #cargandoNombreTpl>
+            <div class="h-3 w-12 bg-gray-300 rounded animate-pulse"></div>
+          </ng-template>
+        </div>
         <i class="hidden lg:inline-block fas fa-caret-down"></i>
       </button>
 
@@ -78,6 +86,20 @@ export class ProfileMenuComponent {
   private router = inject(Router);
   private host = inject(ElementRef);
   private authService = inject(AuthService);
+  private perfilService = inject(PerfilService);
+  nombre = '';
+  cargandoNombre = true;
+
+  async ngOnInit() {
+    const { user, error: authError } = await this.perfilService.getUsuarioAutenticado();
+    if (authError || !user) return;
+
+    const { usuario, error: dbError } = await this.perfilService.getDatosPerfil(user.id);
+    if (!dbError && usuario?.nombre) {
+      this.nombre = usuario.nombre;
+    }
+    this.cargandoNombre = false;
+  }
 
   toggleMenu() {
     this.showMenu = !this.showMenu;
@@ -85,7 +107,7 @@ export class ProfileMenuComponent {
 
   goProfile() {
     this.showMenu = false;
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/perfil']);
   }
 
   openLogoutModal() {

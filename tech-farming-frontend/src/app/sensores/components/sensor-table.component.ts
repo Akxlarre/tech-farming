@@ -101,6 +101,7 @@ import { SensorModalType } from '../sensor-modal.service';
 
               <!-- Editar -->
               <button
+                *ngIf="puedeEditar"
                 class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-success hover:bg-success/10 transition-colors duration-200"
                 (click)="accion.emit({ tipo: 'edit', sensor: s })"
                 aria-label="Editar sensor"
@@ -115,6 +116,7 @@ import { SensorModalType } from '../sensor-modal.service';
 
               <!-- Eliminar -->
               <button
+                *ngIf="puedeEliminar"
                 class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-error hover:bg-error/10 transition-colors duration-200"
                 (click)="accion.emit({ tipo: 'delete', sensor: s })"
                 aria-label="Eliminar sensor"
@@ -139,6 +141,8 @@ import { SensorModalType } from '../sensor-modal.service';
   `]
 })
 export class SensorTableComponent {
+  @Input() puedeEditar = false;
+  @Input() puedeEliminar = false;
   @Input() sensores: Sensor[] = [];
   @Input() trackByFn!: (_: number, item: Sensor) => any;
   @Output() accion = new EventEmitter<{ tipo: SensorModalType; sensor: Sensor }>();

@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -39,6 +39,7 @@ import { CommonModule } from '@angular/common';
 
         <!-- Botón Añadir Invernadero -->
         <button
+          *ngIf="puedeCrear"
           class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content"
           (click)="create.emit()"
           aria-label="Añadir nuevo invernadero"
@@ -64,6 +65,7 @@ import { CommonModule } from '@angular/common';
   `,
 })
 export class InvernaderoHeaderComponent {
+  @Input() puedeCrear = false;
   @Output() create    = new EventEmitter<void>();
   @Output() exportPdf = new EventEmitter<void>();
 }

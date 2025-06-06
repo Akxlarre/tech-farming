@@ -1,296 +1,214 @@
 // src/app/historial/historial.component.ts
+
 import { Component, OnInit } from '@angular/core';
-import { CommonModule }      from '@angular/common';
-import { FormsModule }       from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule }    from '@angular/material/select';
-import { MatDatepickerModule }from '@angular/material/datepicker';
-import { MatNativeDateModule }from '@angular/material/core';
-import { MatCardModule }      from '@angular/material/card';
-import { MatButtonModule }    from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 
 import { HistorialService } from './historial.service';
 import {
-  Invernadero,
-  Zona,
-  Sensor,
-  TipoParametro,
   HistorialParams,
-  HistorialData
+  HistorialData,
+  TipoParametro
 } from '../models';
 
-import { FiltroSelectComponent    } from './components/filtro-select.component';
-import { FiltroDateRangeComponent } from './components/filtro-date-range.component';
-import { LineChartComponent       } from './components/line-chart.component';
-import { StatsCardComponent       } from './components/stats-card.component';
+import { FiltroComponent } from './components/filtro.component';
+import { LineChartComponent } from './components/line-chart.component';
+import { StatsCardComponent } from './components/stats-card.component';
+import { HistorialHeaderComponent } from './components/historial-header.component';
 
 @Component({
   selector: 'app-historial',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatCardModule,
     MatButtonModule,
-    FiltroSelectComponent,
-    FiltroDateRangeComponent,
+    FiltroComponent,
     LineChartComponent,
-    StatsCardComponent
+    StatsCardComponent,
+    HistorialHeaderComponent
   ],
   template: `
-    <div class="p-6 space-y-6 bg-base-200 rounded-lg shadow">
 
-      <!-- HEADER -->
-      <div class="flex items-center justify-between">
-        <h1 class="text-3xl font-bold text-base-content">Historial de Variables</h1>
-        <button (click)="exportCsv()" class="btn btn-outline btn-sm flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8M8 16l4 4 4-4M8 12h8" />
+      <app-historial-header
+        [title]="'Historial de Variables'"
+        (exportCsv)="exportCsv()"
+      ></app-historial-header>
+      <!-- COMPONENTE DE FILTROS -->
+      <app-filtro-global (filtrosSubmit)="onFiltrosAplicados($event)"></app-filtro-global>
+
+      <!-- CONTENEDOR siempre visible del gráfico -->
+      <div class="relative w-full h-96 bg-base-100 rounded-lg overflow-hidden">
+
+        <!-- Spinner semitransparente (cargando) -->
+        <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center bg-base-200/50 z-20">
+          <svg class="animate-spin h-10 w-10 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
           </svg>
-          Exportar CSV
-        </button>
-      </div>
+          <span class="ml-2 text-base-content/70">Cargando datos…</span>
+        </div>
 
-      <!-- FILTROS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <app-filtro-select
-          label="Invernadero"
-          [options]="optInvernadero"
-          [selectedId]="selectedInvernadero"
-          (selectionChange)="onInvernaderoChange($event)"
-          [allowUndefined]="false"
-        ></app-filtro-select>
+        <!-- Banner “No hay datos” mejorado -->
+        <div
+          *ngIf="!isLoading && noData"
+          class="
+            absolute inset-x-0 top-0
+            alert alert-warning
+            rounded-b-none
+            shadow-md
+            flex justify-between items-center
+            p-4
+            z-10
+            transition-opacity duration-300
+          "
+        >
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-exclamation-triangle text-xl text-warning-content"></i>
+            <span class="font-semibold text-warning-content">No hay datos para estos filtros</span>
+          </div>
+          <button (click)="noData = false" class="btn btn-ghost btn-sm btn-circle">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-        <app-filtro-select
-          label="Zona"
-          [options]="optZona"
-          [selectedId]="selectedZona"
-          (selectionChange)="onZonaChange($event)"
-        ></app-filtro-select>
+        <!-- Placeholder guía inicial (ilustración + texto) -->
+        <div
+          *ngIf="!isLoading && !historial && !noData"
+          class="
+            absolute inset-0 flex items-center justify-center
+            px-8
+            z-0
+          "
+        >
+          <div class="flex items-center space-x-6">
+            <!-- Icono representativo de gráfico vacío -->
+            <i class="fas fa-chart-line text-6xl text-base-content/30"></i>
 
-        <app-filtro-select
-          label="Sensor"
-          [options]="optSensor"
-          [selectedId]="selectedSensor"
-          (selectionChange)="onSensorChange($event)"
-        ></app-filtro-select>
+            <!-- Texto explicativo -->
+            <div class="flex flex-col">
+              <p class="text-xl font-semibold text-base-content/70">Tu historial aparecerá aquí</p>
+              <p class="text-sm text-base-content/60 mt-1">
+                Selecciona un Invernadero y un Parámetro, luego pulsa “Aplicar filtros” para cargar los datos.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <app-filtro-select
-          label="Parámetro"
-          [options]="optParametro"
-          [selectedId]="selectedTipoParametroId"
-          (selectionChange)="onParametroChange($event)"
-          [allowUndefined]="false"
-        ></app-filtro-select>
-
-        <app-filtro-date-range
-          label="Rango de fechas"
-          [from]="rango.from"
-          [to]="rango.to"
-          (rangeChange)="onRangoChange($event)"
-        ></app-filtro-date-range>
-      </div>
-
-      <!-- BOTÓN ACTUALIZAR -->
-      <div class="text-right">
-        <button mat-raised-button color="primary"
-                class="bg-primary text-primary-content hover:bg-primary-content hover:text-primary"
-                (click)="reloadHistorial()">
-          Actualizar
-        </button>
-      </div>
-
-      <!-- ALERTA “NO HAY DATOS” -->
-      <div *ngIf="noData" class="border-l-4 border-yellow-500 bg-yellow-100 text-yellow-800 p-4 rounded">
-        ⚠️ No hay datos disponibles para los filtros seleccionados.
-      </div>
-
-      <!-- GRÁFICO -->
-      <mat-card class="bg-base-100 p-4 animate-fade-in-down overflow-hidden">
-        <div class="chart-wrapper w-full">
+        <!-- El gráfico real -->
+        <div *ngIf="!isLoading && historial" class="w-full h-full z-0">
           <app-line-chart
-            [data]="historial?.series ?? []"
-            [label]="nombreParametroSeleccionado"
+            [data]="historial.series"
+            [label]="textoParametro"
             class="w-full h-full"
           ></app-line-chart>
         </div>
-      </mat-card>
-
-      <!-- ESTADÍSTICAS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <app-stats-card title="Promedio"
-                        [value]="historial?.stats?.promedio ?? 0">
-        </app-stats-card>
-
-        <app-stats-card title="Mínimo"
-                        [value]="historial?.stats?.minimo?.value ?? 0"
-                        [subtext]="historial?.stats?.minimo?.fecha ?? ''">
-        </app-stats-card>
-
-        <app-stats-card title="Máximo"
-                        [value]="historial?.stats?.maximo?.value ?? 0"
-                        [subtext]="historial?.stats?.maximo?.fecha">
-        </app-stats-card>
-
-        <app-stats-card title="Desvío estándar"
-                        [value]="historial?.stats?.desviacion ?? 0">
-        </app-stats-card>
       </div>
 
-    </div>
+      <!-- Tarjetas de estadísticas (sólo con datos) -->
+      <div *ngIf="!isLoading && historial" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <app-stats-card title="Promedio" [value]="historial!.stats.promedio"></app-stats-card>
+        <app-stats-card
+          title="Mínimo"
+          [value]="historial!.stats.minimo.value"
+          [subtext]="historial!.stats.minimo.fecha"
+        ></app-stats-card>
+        <app-stats-card
+          title="Máximo"
+          [value]="historial!.stats.maximo.value"
+          [subtext]="historial!.stats.maximo.fecha"
+        ></app-stats-card>
+        <app-stats-card title="Desvío estándar" [value]="historial!.stats.desviacion"></app-stats-card>
+      </div>
+
+      <!-- Placeholder de estadísticas -->
+      <div *ngIf="!isLoading && !historial" class="text-center text-base-content/50 italic mt-6">
+        Aplica un filtro para ver estadísticas
+      </div>
   `,
   styles: [`
     :host { display: block; }
-    .chart-wrapper { min-height: 300px; max-height: 48vh; height: 48vh; position: relative; }
-    mat-card { overflow: hidden; }
+
+    /* Contenedor siempre visible del gráfico */
+    .relative        { position: relative; }
+    .w-full          { width: 100%; }
+    .h-96            { height: 24rem; } /* equivalente a h-96 en Tailwind */
+    .bg-base-100     { background-color: var(--p-base-100); }
+    .rounded-lg      { border-radius: 0.5rem; }
+    .overflow-hidden { overflow: hidden; }
+
+    /* Placeholder guía inicial */
+    .text-base-content\\/30 { color: rgba(55,65,81,0.3); } /* ícono gris opaco 30% */
+    .text-base-content\\/70 { color: rgba(55,65,81,0.7); } /* texto principal 70% */
+    .text-base-content\\/60 { color: rgba(55,65,81,0.6); } /* subtítulo 60% */
+    .text-base-content\\/50 { color: rgba(55,65,81,0.5); } /* texto de estadísticas 50% */
+
+    /* Márgenes y espaciados */
+    .space-x-6 { margin-right: 1.5rem; }
+    .mt-1      { margin-top: 0.25rem; }
+    .mt-6      { margin-top: 1.5rem; }
+    .px-8      { padding-left: 2rem; padding-right: 2rem; }
   `]
 })
 export class HistorialComponent implements OnInit {
-  invernaderos: Invernadero[]   = [];
-  zonas:        Zona[]          = [];
-  sensores:     Sensor[]        = [];
   tiposParametro: TipoParametro[] = [];
-  historial?:   HistorialData;
+  historial?: HistorialData;
+
+  /** Indicadores de estado */
+  isLoading = false;
   noData = false;
 
-  optInvernadero: Array<{id:number; label:string}> = [];
-  optZona:        Array<{id:number; label:string}> = [];
-  optSensor:      Array<{id:number; label:string}> = [];
-  optParametro:   Array<{id:number; label:string}> = [];
+  /** Texto del eje Y (nombre del parámetro seleccionado) */
+  textoParametro = '';
 
-  selectedInvernadero?:    number;
-  selectedZona?:           number;
-  selectedSensor?:         number;
-  selectedTipoParametroId!: number;
-  rango = { from: new Date(), to: new Date() };
-
-  constructor(private historialService: HistorialService) {}
+  constructor(private historialService: HistorialService) { }
 
   ngOnInit() {
-    this.historialService.getInvernaderos()
-      .subscribe(list => {
-        this.invernaderos = list;
-        this.optInvernadero = list.map(i => ({ id: i.id, label: i.nombre }));
-        if (list.length) this.onInvernaderoChange(list[0].id);
-      });
-
-    this.historialService.getTiposParametro()
-      .subscribe(list => {
-        this.tiposParametro = list;
-        this.optParametro   = list.map(t => ({ id: t.id, label: t.nombre }));
-        if (list.length) this.selectedTipoParametroId = list[0].id;
-      });
+    // Pre-cargamos la lista de Tipos de Parámetro
+    this.historialService.getTiposParametro().subscribe(list => {
+      this.tiposParametro = list;
+    });
   }
 
-  get nombreParametroSeleccionado(): string {
-    const t = this.tiposParametro.find(t => t.id === this.selectedTipoParametroId);
-    return t ? t.nombre : '';
-  }
-
-  onInvernaderoChange(id: number|undefined) {
-    this.selectedInvernadero = id;
-    this.optZona = []; this.zonas = []; this.selectedZona = undefined;
-    this.optSensor = []; this.sensores = []; this.selectedSensor = undefined;
+  /**
+   * Se invoca al enviar los filtros completos desde FiltroComponent.
+   */
+  onFiltrosAplicados(params: HistorialParams) {
+    this.isLoading = true;
     this.noData = false;
-    if (id != null) {
-      this.historialService.getZonasByInvernadero(id)
-        .subscribe(list => {
-          this.zonas   = list;
-          this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
-          if (list.length) this.onZonaChange(list[0].id);
-        });
-    }
-  }
+    this.historial = undefined;
 
-  onZonaChange(id: number|undefined) {
-    this.selectedZona = id;
-    this.optSensor = []; this.sensores = []; this.selectedSensor = undefined;
-    this.noData = false;
-    if (id != null) {
-      this.historialService.getSensoresByZona(id)
-        .subscribe(list => {
-          this.sensores  = list;
-          this.optSensor = list.map(s => ({ id: s.id, label: s.nombre }));
-          if (list.length) this.onSensorChange(list[0].id);
-        });
-    }
-  }
-
-  onSensorChange(id: number|undefined) {
-    this.selectedSensor = id;
-  }
-
-  onParametroChange(id: number|undefined) {
-    this.selectedTipoParametroId = id!;
-  }
-
-  onRangoChange(r: { from: Date; to: Date }) {
-    this.rango = r;
-  }
-
-  reloadHistorial() {
-  // 1) Reset previo: todas las fechas en '' para respetar string
-  this.noData    = false;
-  this.historial = {
-    series: [],
-    stats: {
-      promedio: 0,
-      minimo:   { value: 0, fecha: '' },
-      maximo:   { value: 0, fecha: '' },
-      desviacion: 0
-    }
-  };
-
-  // 2) Validación básica
-  if (!this.selectedInvernadero || !this.selectedTipoParametroId) {
-    return;
-  }
-
-  // 3) Preparo params
-  const p: HistorialParams = {
-    invernaderoId:   this.selectedInvernadero,
-    zonaId:          this.selectedZona,
-    sensorId:        this.selectedSensor,
-    tipoParametroId: this.selectedTipoParametroId,
-    fechaDesde:      this.rango.from,
-    fechaHasta:      this.rango.to
-  };
-
-  // 4) Llamada y manejo de respuesta
-  this.historialService.getHistorial(p)
-    .subscribe(
+    this.historialService.getHistorial(params).subscribe(
       data => {
+        this.isLoading = false;
+
         if (data.series.length === 0) {
-          // no hay datos → mantengo el reset y muestro alerta
+          // Mostrar banner overlay
           this.noData = true;
-          setTimeout(() => this.noData = false, 2500);
         } else {
-          // datos reales
+          // Guardar datos y nombre del parámetro
           this.historial = data;
+          const tipoSel = this.tiposParametro.find(t => t.id === params.tipoParametroId);
+          this.textoParametro = tipoSel ? tipoSel.nombre : '';
         }
       },
       err => {
         console.error('Error al cargar historial:', err);
+        this.isLoading = false;
         this.noData = true;
-        setTimeout(() => this.noData = false, 2500);
       }
     );
-}
+  }
 
-
+  /**
+   * Exporta a CSV la serie actual (si existe historial).
+   */
   exportCsv() {
     if (!this.historial) return;
     const csv = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a   = document.createElement('a');
-    a.href    = url;
+    const a = document.createElement('a');
+    a.href = url;
     a.download = 'historial.csv';
     a.click();
     URL.revokeObjectURL(url);

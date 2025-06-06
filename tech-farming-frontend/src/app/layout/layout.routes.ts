@@ -6,15 +6,13 @@ export const layoutRoutes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
-        {
-            path: 'dashboard',
-            loadChildren: () =>
-              import('../dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
-        },
       {
-        path: 'sensores',
+        path: 'dashboard',
         loadChildren: () =>
-          import('../sensores/sensores.routes').then((m) => m.sensoresRoutes),
+          import('../dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
+      },
+      {
+        path: 'sensores'
       },
       {
         path: 'invernaderos',
@@ -41,6 +39,11 @@ export const layoutRoutes: Routes = [
         loadChildren: () =>
           import('../admin/admin.routes').then((m) => m.adminRoutes),
       },
+      {
+        path: 'perfil',
+        loadChildren: () =>
+          import('../perfil/perfil.routes').then((m) => m.perfilRoutes),
+      }
     ],
   },
 ];

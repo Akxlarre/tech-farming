@@ -9,7 +9,8 @@ import {
   CrearSensorResponse,
   SensorFilters
 } from './sensores.service';
-import { TimeSeriesService, BatchLectura }            from './time-series.service';
+import { SupabaseService } from '../services/supabase.service';
+import { TimeSeriesService }            from './time-series.service';
 import { Sensor }                                     from './models/sensor.model';
 import { SensorModalService, SensorModalType }                         from './sensor-modal.service';
 
@@ -25,7 +26,6 @@ import { SensorCardComponent } from './components/sensor-card.component';
 
 import { TipoSensorService }         from './tipos_sensor.service';
 import { InvernaderoService }        from '../invernaderos/invernaderos.service';
-import { ZonaService }               from '../invernaderos/zona.service';
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
 
@@ -47,7 +47,8 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
   template: `
     <!-- HEADER -->
     <app-sensor-header
-      (create)="modal.openModal('create')">
+      (create)="modal.openModal('create')"
+      [puedeCrear]="puedeCrear">
     </app-sensor-header>
 
     <!-- FILTROS -->
@@ -62,6 +63,8 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
       <div class="hidden md:block">
         <app-sensor-table
           [sensores]="sensoresConLectura"
+          [puedeEditar]="puedeEditar"
+          [puedeEliminar]="puedeEliminar"
           (accion)="onAccion($event)"
           [trackByFn]="trackBySensorId">
         </app-sensor-table>
@@ -182,39 +185,65 @@ export class SensoresComponent implements OnInit, OnDestroy {
   pageSize     = 5;
   currentPage  = 1;
   totalSensors = 0;
-
   // datos para filtros
   tiposSensores:           TipoSensor[]  = [];
   invernaderosDisponibles: Invernadero[] = [];
   zonasDisponibles:        Zona[]        = [];
   appliedFilters:          any           = {};
+  // permisos
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
 
   constructor(
     private svc: SensoresService,
+    private supaSvc: SupabaseService,
     private tsSvc: TimeSeriesService,
     private tiposSvc: TipoSensorService,
     private invSvc: InvernaderoService,
-    private zonaSvc: ZonaService,
     public  modal: SensorModalService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // precarga selects
+    // Obtener sesión activa
+    const session = await this.supaSvc.supabase.auth.getSession();
+    const user = session.data?.session?.user;
+
+    if (user) {
+      // Buscar ID del usuario en la tabla relacional
+      const { data: usuario } = await this.supaSvc.supabase
+        .from('usuarios')
+        .select('id')
+        .eq('supabase_uid', user.id)
+        .single();
+
+      if (usuario?.id) {
+        const { data: permisos } = await this.supaSvc.supabase
+          .from('usuarios_permisos')
+          .select('*')
+          .eq('usuario_id', usuario.id)
+          .single();
+
+        this.puedeCrear = permisos?.puede_crear ?? false;
+        this.puedeEditar = permisos?.puede_editar ?? false;
+        this.puedeEliminar = permisos?.puede_eliminar ?? false;
+      }
+    }
+
+    // Precarga de tipos de sensor
     this.tiposSvc.obtenerTiposSensor()
       .subscribe(list => this.tiposSensores = list);
-    // esta funcion puede ser mejorada en el futuro para evitar llamadas innecesarias o porque carga hasta la
-    //pagina 100, lo que puede ser excesivo o no suficiente en función de la cantidad de invernaderos
-    // y zonas que haya en el sistema.
 
-      this.invSvc.getInvernaderosPage(1, 100).subscribe(resp => { 
-        this.invernaderosDisponibles = resp.data;
-        this.zonasDisponibles = resp.data.flatMap(inv => inv.zonas || []);
-      });
-      
+    // Precarga de invernaderos y zonas
+    this.invSvc.getInvernaderosPage(1, 100, {}).subscribe(resp => { 
+      this.invernaderosDisponibles = resp.data;
+      this.zonasDisponibles = resp.data.flatMap(inv => inv.zonas || []);
+    });
 
+    // Carga de sensores (página 1 por defecto)
     this.loadPage(1);
   }
 
