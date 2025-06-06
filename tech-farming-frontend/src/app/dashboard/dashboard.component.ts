@@ -116,14 +116,15 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
               <!-- Select Sensor -->
               <div class="form-control w-40">
                 <label class="label label-text text-sm">Sensor</label>
-                <select
+              <select
                   id="sensorSelect"
                   class="select select-bordered select-sm w-full"
                   [(ngModel)]="sensorSeleccionado"
+                  (change)="onSensorChange()"
                   aria-label="Selecciona Sensor"
                 >
                   <option [ngValue]="null" disabled selected>— Sensor —</option>
-                  <option *ngFor="let s of sensoresDisponibles" [ngValue]="s">{{ s }}</option>
+                  <option *ngFor="let s of sensoresDisponibles" [ngValue]="s.id">{{ s.nombre }}</option>
                 </select>
               </div>
 
@@ -138,7 +139,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
                   aria-label="Selecciona Variable"
                 >
                   <option [ngValue]="null" disabled selected>— Variable —</option>
-                  <option *ngFor="let v of variablesDisponibles" [ngValue]="v">{{ v }}</option>
+                  <option *ngFor="let v of variablesDisponibles" [ngValue]="v">{{ v.nombre }}</option>
                 </select>
               </div>
 
@@ -205,7 +206,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
                   #lineChart
                   [labels]="graficaData.labels"
                   [data]="graficaData.valores"
-                  [variable]="variableSeleccionada"
+                  [variable]="variableSeleccionada?.nombre as any"
                   [intervalo]="intervaloSeleccionado"
                   class="w-full h-full"
                 ></app-line-chart>
@@ -404,14 +405,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }
 
   // ───────── GRÁFICA 24H ─────────
-  sensoresDisponibles: string[] = [];
-  variablesDisponibles: ('Temperatura' | 'Humedad' | 'Nitrógeno')[] = [
-    'Temperatura',
-    'Humedad',
-    'Nitrógeno',
-  ];
-  sensorSeleccionado: string | null = null;
-  variableSeleccionada: 'Temperatura' | 'Humedad' | 'Nitrógeno' = 'Temperatura';
+  sensoresDisponibles: Sensor[] = [];
+  variablesDisponibles: Array<{ id: number; nombre: 'Temperatura' | 'Humedad' | 'Nitrógeno'; unidad?: string }> = [];
+  sensorSeleccionado: number | null = null;
+  variableSeleccionada: { id: number; nombre: 'Temperatura' | 'Humedad' | 'Nitrógeno'; unidad?: string } | null = null;
   intervaloSeleccionado: 6 | 12 | 24 = 24;
 
   graficaData = {
@@ -480,6 +477,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     this.cambiarIntervalo(this.intervaloSeleccionado);
   }
 
+  onSensorChange(): void {
+    const sensor = this.sensoresDisponibles.find((s) => s.id === this.sensorSeleccionado);
+    this.variablesDisponibles = sensor ? sensor.parametros.map((p) => ({ id: p.id, nombre: p.nombre as 'Temperatura' | 'Humedad' | 'Nitrógeno', unidad: p.unidad })) : [];
+    this.variableSeleccionada = this.variablesDisponibles[0] ?? null;
+    if (this.variableSeleccionada) {
+      this.cambiarIntervalo(this.intervaloSeleccionado);
+    }
+  }
+
 
   // ───────── CAMBIAR VARIABLE ─────────
   onVariableChange(): void {
@@ -490,16 +496,17 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   cambiarIntervalo(horas: 6 | 12 | 24): void {
     this.intervaloSeleccionado = horas;
 
-    if (!this.filtros.invernaderoId) return;
+    if (!this.filtros.invernaderoId || !this.variableSeleccionada || !this.sensorSeleccionado) return;
 
     const hasta = new Date();
     const desde = new Date(hasta.getTime() - horas * 60 * 60 * 1000);
-    const tipoId = this.getParametroId(this.variableSeleccionada);
+    const tipoId = this.variableSeleccionada ? this.variableSeleccionada.id : 0;
 
     this.dashSvc
       .getHistorial({
         invernaderoId: this.filtros.invernaderoId,
         zonaId: this.filtros.zonaId ?? undefined,
+        sensorId: this.sensorSeleccionado ?? undefined,
         tipoParametroId: tipoId,
         desde: desde.toISOString(),
         hasta: hasta.toISOString(),
@@ -513,16 +520,16 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
             valores: resp.series.map((s) => s.value),
           };
 
-          if (this.lineChartComp) {
+          if (this.lineChartComp && this.variableSeleccionada) {
             this.lineChartComp.actualizarData(
               this.graficaData.labels,
               this.graficaData.valores,
-              this.variableSeleccionada
+              this.variableSeleccionada.nombre
             );
           }
 
           const ultimoVal = this.graficaData.valores[this.graficaData.valores.length - 1];
-          const unidad = this.getUnidad(this.variableSeleccionada);
+          const unidad = this.getUnidad(this.variableSeleccionada?.nombre ?? 'Temperatura');
           this.tooltipFijo = `${ultimoVal ?? '-'} ${unidad}`;
           this.ultimaActualizacion = new Date();
           this.updateFormattedLastUpdate();
@@ -543,14 +550,6 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private getParametroId(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): number {
-    const map: Record<'Temperatura' | 'Humedad' | 'Nitrógeno', number> = {
-      'Temperatura': 1,
-      'Humedad': 2,
-      'Nitrógeno': 3
-    };
-    return map[variable];
-  }
 
   private getIconForParam(nombre: string): string {
     const n = nombre.toLowerCase();
@@ -591,14 +590,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
     sensoresObs.subscribe({
       next: (sens) => {
-        this.sensoresDisponibles = sens.map((s) => s.nombre);
+        this.sensoresDisponibles = sens;
         this.totalSensores = sens.length;
         this.sensoresActivos = sens.filter((s) => s.estado === 'Activo').length;
 
-        this.sensorSeleccionado = this.sensoresDisponibles[0] ?? null;
-        if (this.sensorSeleccionado) {
-          this.cambiarIntervalo(this.intervaloSeleccionado);
-        }
+        this.sensorSeleccionado = this.sensoresDisponibles[0]?.id ?? null;
+        this.onSensorChange();
 
         const paramMap = new Map<string, string | undefined>();
         sens.forEach((s) =>
