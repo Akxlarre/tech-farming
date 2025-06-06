@@ -207,6 +207,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
                   [labels]="graficaData.labels"
                   [data]="graficaData.valores"
                   [variable]="variableSeleccionada!.nombre"
+
                   [intervalo]="intervaloSeleccionado"
                   class="w-full h-full"
                 ></app-line-chart>
