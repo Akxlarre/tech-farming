@@ -1,26 +1,20 @@
-<div class="fixed inset-0 bg-white z-[99999] flex items-center justify-center">
+<div class="fixed inset-0 bg-base-100 z-[99999] flex items-center justify-center">
     <!-- Flare animación de fondo -->
     <div class="absolute inset-0 z-[99998] pointer-events-none flare-animation"></div>
   
     <!-- Contenido del Splash -->
     <div class="flex flex-col items-center justify-center gap-6 sm:gap-8 px-4 sm:px-8 mt-6 sm:mt-10 animate-splashPulse max-w-full">
   
-      <!-- Branding con imagen -->
+      <!-- Branding con el logo principal -->
       <div class="flex items-center gap-4 flex-wrap justify-center text-center">
-        <img src="assets/img/hoja-logo.png" 
-             alt="Logo Tech Farming"
-             class="w-[4rem] sm:w-[5rem] md:w-[6rem] h-auto rounded-full drop-shadow-xl saturate-[1.2] animate-splashIcon">
-  
-        <h1 class="text-[2rem] sm:text-[2.75rem] md:text-[4rem] font-extrabold text-green-800 tracking-tight animate-splashText drop-shadow-md">
-          Tech Farming
-        </h1>
+        <app-logo class="animate-splashIcon drop-shadow-xl saturate-[1.2]"></app-logo>
       </div>
   
       <!-- Spinner y mensaje -->
       <div class="flex flex-col items-center gap-4 px-4 text-center">
-        <div class="w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 border-4 border-green-500 border-t-transparent rounded-full animate-softSpin"></div>
+        <div class="w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 border-4 border-success border-t-transparent rounded-full animate-softSpin"></div>
         
-        <p class="relative text-gray-600 text-sm sm:text-base md:text-lg font-medium tracking-tight animate-fadeInText leading-snug">
+        <p class="relative text-base-content text-sm sm:text-base md:text-lg font-medium tracking-tight animate-fadeInText leading-snug">
             Cargando plataforma inteligente
             <span class="dots-animation" aria-hidden="true"></span>
         </p>
