@@ -13,6 +13,9 @@ import { LineChartComponent } from './components/line-chart.component';
 import { AlertCardComponent } from './components/alert-card.component';
 import { TabsPanelComponent } from './components/tabs-panel.component';
 import { FooterComponent } from './components/footer.component';
+import { DashboardService } from './services/dashboard.service';
+import { NotificationService } from '../shared/services/notification.service';
+import { Invernadero, Zona, Sensor, Alerta } from '../models';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -363,36 +366,21 @@ import { FooterComponent } from './components/footer.component';
 })
 export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── FILTROS ─────────
-  invernaderos = [
-    { id: 1, nombre: 'Invernadero A' },
-    { id: 2, nombre: 'Invernadero B' },
-    { id: 3, nombre: 'Invernadero C' },
-  ];
-  zonasMap: Record<number, { id: number; nombre: string }[]> = {
-    1: [
-      { id: 11, nombre: 'Zona Norte' },
-      { id: 12, nombre: 'Zona Sur' },
-    ],
-    2: [{ id: 21, nombre: 'Zona Centro' }],
-    3: [
-      { id: 31, nombre: 'Zona Este' },
-      { id: 32, nombre: 'Zona Oeste' },
-    ],
-  };
+  invernaderos: Invernadero[] = [];
+  zonasMap: Record<number, Zona[]> = {};
   filtros = { invernaderoId: null as number | null, zonaId: null as number | null };
 
   // ───────── KPI PRINCIPALES ─────────
-  tempActual = 24.5;
-  humedadActual = 66;
-  nitrogenoActual = 8;
-  totalSensores = 12;
-  sensoresActivos = 12; // Simulado
+  tempActual = 0;
+  humedadActual = 0;
+  nitrogenoActual = 0;
+  totalSensores = 0;
+  sensoresActivos = 0;
   estadoSistema: 'sinRiesgo' | 'advertencia' | 'critica' = 'sinRiesgo';
-
-  sparkTemp = { labels: this.generarNDias(3), data: [23, 24.1, 24.5] };
-  sparkHum = { labels: this.generarNDias(3), data: [65, 66, 66] };
-  sparkNit = { labels: this.generarNDias(3), data: [7, 8, 8] };
-  sparkSens = { labels: this.generarNDias(3), data: [10, 11, 12] };
+  sparkTemp = { labels: [] as string[], data: [] as number[] };
+  sparkHum = { labels: [] as string[], data: [] as number[] };
+  sparkNit = { labels: [] as string[], data: [] as number[] };
+  sparkSens = { labels: [] as string[], data: [] as number[] };
 
   get estadoIcono(): string {
     switch (this.estadoSistema) {
@@ -426,57 +414,35 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }
 
   // ───────── GRÁFICA 24H ─────────
-  sensoresDisponibles = ['Sensor 1', 'Sensor 2', 'Sensor 3'];
+  sensoresDisponibles: string[] = [];
   variablesDisponibles: ('Temperatura' | 'Humedad' | 'Nitrógeno')[] = [
     'Temperatura',
     'Humedad',
     'Nitrógeno',
   ];
-  sensorSeleccionado: string | null = 'Sensor 1';
+  sensorSeleccionado: string | null = null;
   variableSeleccionada: 'Temperatura' | 'Humedad' | 'Nitrógeno' = 'Temperatura';
   intervaloSeleccionado: 6 | 12 | 24 = 24;
 
   graficaData = {
-    labels: this.generarLabelsHoras(24),
-    valores: this.generarRandomArray(24, 18, 30),
+    labels: [] as string[],
+    valores: [] as number[],
   };
   ultimaActualizacion = new Date();
-  tooltipFijo = `${this.graficaData.valores[this.graficaData.valores.length - 1]} °C`;
+  tooltipFijo = '';
   formattedLastUpdate: string = '';
 
   @ViewChild('lineChart', { static: false })
   lineChartComp!: LineChartComponent;
 
   // ───────── ALERTAS ACTIVAS ─────────
-  alertas: {
+  alertas: Array<{
     id: number;
     nivel: 'critica' | 'advertencia';
     mensaje: string;
     fecha: Date;
     zona: string;
-  }[] = [
-    {
-      id: 1,
-      nivel: 'critica',
-      mensaje: 'Alta temperatura detectada',
-      fecha: new Date('2025-06-05T11:45:00'),
-      zona: 'Zona Norte',
-    },
-    {
-      id: 2,
-      nivel: 'advertencia',
-      mensaje: 'Nivel de humedad bajo',
-      fecha: new Date('2025-06-05T10:15:00'),
-      zona: 'Zona Norte',
-    },
-    {
-      id: 3,
-      nivel: 'critica',
-      mensaje: 'Nivel de nitrógeno alto',
-      fecha: new Date('2025-06-05T09:30:00'),
-      zona: 'Zona Sur',
-    },
-  ];
+  }> = [];
 
   // ───────── PREDICCIONES SIMULADAS ─────────
   predicciones: {
@@ -490,10 +456,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── TAB ACTIVA ─────────
   tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
 
-  constructor() {}
+  constructor(
+    private dashSvc: DashboardService,
+    private notify: NotificationService
+  ) {}
 
   ngOnInit(): void {
-    this.simularPredicciones();
+    this.cargarInvernaderos();
     this.updateFormattedLastUpdate();
   }
 
@@ -505,9 +474,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── FILTROS ─────────
   onInvernaderoChange(): void {
     this.filtros.zonaId = null;
+    this.cargarZonasYsensores();
+    this.cargarAlertas();
   }
 
   aplicarFiltros(): void {
+    this.cargarZonasYsensores();
+    this.cargarAlertas();
     this.cambiarIntervalo(this.intervaloSeleccionado);
   }
 
@@ -520,47 +493,120 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   cambiarIntervalo(horas: 6 | 12 | 24): void {
     this.intervaloSeleccionado = horas;
 
-    // Generar nuevas etiquetas y datos aleatorios
-    this.graficaData = {
-      labels: this.generarLabelsHoras(horas),
-      valores: this.generarRandomArray(horas, 18, 30),
-    };
+    if (!this.filtros.invernaderoId) return;
 
-    // Actualizar el componente hijo (LineChartComponent)
-    if (this.lineChartComp) {
-      this.lineChartComp.actualizarData(
-        this.graficaData.labels,
-        this.graficaData.valores,
-        this.variableSeleccionada
-      );
-    }
+    const hasta = new Date();
+    const desde = new Date(hasta.getTime() - horas * 60 * 60 * 1000);
+    const tipoId = this.getParametroId(this.variableSeleccionada);
 
-    // Actualizar tooltip fijo y timestamp
-    const ultimoVal = this.graficaData.valores[this.graficaData.valores.length - 1];
-    const unidad = this.getUnidad(this.variableSeleccionada);
-    this.tooltipFijo = `${ultimoVal} ${unidad}`;
+    this.dashSvc
+      .getHistorial({
+        invernaderoId: this.filtros.invernaderoId,
+        zonaId: this.filtros.zonaId ?? undefined,
+        tipoParametroId: tipoId,
+        desde: desde.toISOString(),
+        hasta: hasta.toISOString(),
+      })
+      .subscribe({
+        next: (resp) => {
+          this.graficaData = {
+            labels: resp.series.map((s) =>
+              new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            ),
+            valores: resp.series.map((s) => s.value),
+          };
 
-    this.ultimaActualizacion = new Date();
-    this.updateFormattedLastUpdate();
+          if (this.lineChartComp) {
+            this.lineChartComp.actualizarData(
+              this.graficaData.labels,
+              this.graficaData.valores,
+              this.variableSeleccionada
+            );
+          }
+
+          const ultimoVal = this.graficaData.valores[this.graficaData.valores.length - 1];
+          const unidad = this.getUnidad(this.variableSeleccionada);
+          this.tooltipFijo = `${ultimoVal ?? '-'} ${unidad}`;
+          this.ultimaActualizacion = new Date();
+          this.updateFormattedLastUpdate();
+        },
+        error: () => this.notify.error('Error al cargar historial')
+      });
   }
 
-  // ───────── SIMULAR PREDICCIONES ─────────
-  private simularPredicciones(): void {
-    this.predicciones = [6, 12, 24].map((h) => {
-      const valor = parseFloat((Math.random() * (28 - 20) + 20).toFixed(1));
-      const confianza = Math.floor(Math.random() * (99 - 80) + 80);
-      const recomendacion = `Ventilar si > ${Math.floor(
-        Math.random() * (25 - 22) + 22
-      )} °C`;
-      return {
-        intervalo: h as 6 | 12 | 24,
-        valor,
-        confianza,
-        recomendacion,
-        variable: this.variableSeleccionada,
-      };
+  private getParametroId(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): number {
+    const map: Record<'Temperatura' | 'Humedad' | 'Nitrógeno', number> = {
+      'Temperatura': 1,
+      'Humedad': 2,
+      'Nitrógeno': 3
+    };
+    return map[variable];
+  }
+
+  private cargarInvernaderos() {
+    this.dashSvc.getInvernaderos().subscribe({
+      next: (list) => (this.invernaderos = list),
+      error: () => this.notify.error('Error al cargar invernaderos')
     });
   }
+
+  private cargarZonasYsensores() {
+    const id = this.filtros.invernaderoId;
+    if (!id) return;
+    this.dashSvc.getZonas(id).subscribe({
+      next: (z) => (this.zonasMap[id] = z),
+      error: () => this.notify.error('Error al cargar zonas')
+    });
+
+    this.dashSvc.getSensores(id).subscribe({
+      next: (sens) => {
+        this.sensoresDisponibles = sens.map((s) => s.nombre);
+        this.totalSensores = sens.length;
+        this.sensoresActivos = sens.length;
+        const ids = sens.map((s) => s.id);
+        if (ids.length) {
+          this.dashSvc.getLecturas(ids).subscribe({
+            next: (lects) => {
+              lects.forEach((l) => {
+                l.parametros.forEach((p, i) => {
+                  const val = l.valores[i];
+                  const name = p.toLowerCase();
+                  if (name.includes('temper')) this.tempActual = val;
+                  if (name.includes('hum')) this.humedadActual = val;
+                  if (name.includes('nitr')) this.nitrogenoActual = val;
+                });
+              });
+            },
+            error: () => this.notify.error('Error al obtener lecturas')
+          });
+        }
+      },
+      error: () => this.notify.error('Error al cargar sensores')
+    });
+  }
+
+  private cargarAlertas() {
+    this.dashSvc
+      .getAlertas({
+        estado: 'Activa',
+        invernadero_id: this.filtros.invernaderoId ?? undefined,
+        zona_id: this.filtros.zonaId ?? undefined,
+        perPage: 5,
+      })
+      .subscribe({
+        next: (resp) => {
+          this.alertas = resp.data.map((a) => ({
+            id: a.id,
+            nivel: a.nivel === 'Crítico' ? 'critica' : 'advertencia',
+            mensaje: a.mensaje,
+            fecha: new Date(a.fecha_hora),
+            zona: a.sensor_nombre || '',
+          }));
+        },
+        error: () => this.notify.error('Error al cargar alertas'),
+      });
+  }
+
 
   /** Obtiene unidad según variable seleccionada */
   getUnidad(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): string {
