@@ -553,7 +553,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       error: () => this.notify.error('Error al cargar zonas')
     });
 
-    this.dashSvc.getSensores(id).subscribe({
+    const sensoresObs = this.filtros.zonaId
+      ? this.dashSvc.getSensoresPorZona(this.filtros.zonaId)
+      : this.dashSvc.getSensores(id);
+
+    sensoresObs.subscribe({
       next: (sens) => {
         this.sensoresDisponibles = sens.map((s) => s.nombre);
         this.totalSensores = sens.length;

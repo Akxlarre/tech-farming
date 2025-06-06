@@ -27,6 +27,11 @@ export class DashboardService {
     return this.http.get<Zona[]>(`${this.apiUrl}/invernaderos/${invernaderoId}/zonas`);
   }
 
+  /** GET /api/zonas/{id}/sensores */
+  getSensoresPorZona(zonaId: number): Observable<Sensor[]> {
+    return this.http.get<Sensor[]>(`${this.apiUrl}/zonas/${zonaId}/sensores`);
+  }
+
   /** GET /api/sensores?invernadero={id}&pageSize=1000 */
   getSensores(invernaderoId: number): Observable<Sensor[]> {
     const url = `${this.apiUrl}/sensores?invernadero=${invernaderoId}&pageSize=1000`;
