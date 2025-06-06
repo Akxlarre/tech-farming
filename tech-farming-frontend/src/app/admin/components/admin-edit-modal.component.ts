@@ -1,12 +1,25 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AdminService } from '../admin.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-admin-edit-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
+    <!-- Modal de Confirmación de Éxito -->
+    <div *ngIf="confirmacionVisible"
+        class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
+        <h3 class="text-xl font-semibold text-green-600">
+          ✅ ¡Éxito!
+        </h3>
+        <p>{{ mensajeConfirmacion }}</p>
+      </div>
+    </div>
+
     <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl">
       <h3 class="font-bold text-2xl mb-4">Editar permisos del usuario</h3>
 
@@ -38,8 +51,14 @@ import { FormsModule } from '@angular/forms';
 
         <!-- BOTONES -->
         <div class="modal-action mt-6 flex justify-end gap-2">
-          <button type="button" class="btn btn-outline" (click)="close.emit()">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar cambios</button>
+          <button type="button" class="btn btn-outline" (click)="close.emit()" [disabled]="loading">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="loading">
+            <span *ngIf="!loading">Guardar cambios</span>
+            <span *ngIf="loading" class="flex items-center gap-2">
+              <span class="loading loading-spinner loading-sm"></span>
+              Guardando...
+            </span>
+          </button>
         </div>
       </form>
     </div>
@@ -57,10 +76,39 @@ export class AdminEditModalComponent {
     };
   };
 
+  adminService = inject(AdminService);
+  loading = false;
+  confirmacionVisible = false;
+  mensajeConfirmacion = 'Permisos actualizados correctamente.';
+  error = '';
+
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<any>();
 
-  guardarCambios() {
-    this.saved.emit(this.usuario);
+  async guardarCambios() {
+    this.loading = true;
+    this.error = '';
+    this.mensajeConfirmacion = '';
+
+    try {
+      await firstValueFrom(
+        this.adminService.actualizarPermisos(this.usuario.id, this.usuario.permisos)
+      );
+
+      this.mensajeConfirmacion = 'Permisos actualizados correctamente.';
+      this.confirmacionVisible = true;
+      this.saved.emit(this.usuario);
+
+      setTimeout(() => {
+        this.confirmacionVisible = false;
+        this.close.emit();
+      }, 2000);
+    } catch (err: any) {
+      console.error('Error al actualizar permisos:', err);
+      this.error = err?.message || 'Error inesperado';
+      alert(this.error);
+    }
+
+    this.loading = false;
   }
 }

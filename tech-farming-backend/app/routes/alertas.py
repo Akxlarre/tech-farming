@@ -2,8 +2,7 @@ from flask import Blueprint, request, jsonify, g
 from app import db
 from app.queries.alerta_queries import listar_alertas
 from app.models.alerta import Alerta
-from app.models.usuario import Usuario
-from app.utils.auth_supabase import supabase_auth_required
+from app.utils.auth_supabase import usuario_autenticado_requerido
 from datetime import datetime
 
 router = Blueprint('alertas', __name__)
@@ -27,7 +26,7 @@ def obtener_alertas():
         return jsonify({"error": "Error al obtener alertas"}), 500
     
 @router.route('/<int:alerta_id>/resolver', methods=['PATCH'])
-@supabase_auth_required
+@usuario_autenticado_requerido
 def resolver_alerta(alerta_id):
     try:
         alerta = Alerta.query.get(alerta_id)
@@ -38,12 +37,8 @@ def resolver_alerta(alerta_id):
             return jsonify({"error": "La alerta ya fue resuelta"}), 400
 
         # Recuperar el Supabase UID desde JWT validado
-        supabase_uid = g.current_user.get("id")
-        usuario = Usuario.query.filter_by(supabase_uid=supabase_uid).first()
-
-        if not usuario:
-            return jsonify({"error": "Usuario no registrado en la base de datos"}), 403
-
+        usuario = g.usuario
+        
         alerta.estado = "Resuelta"
         alerta.fecha_resolucion = datetime.utcnow()
         alerta.resuelta_por = usuario.id

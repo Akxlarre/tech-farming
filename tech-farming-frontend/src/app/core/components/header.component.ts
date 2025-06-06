@@ -35,6 +35,8 @@ export class HeaderComponent {
     { label: 'Usuarios',      path: '/admin'         },
   ];
 
+  isReady = false;
+
   constructor(
     private supabaseService: SupabaseService,
     private authService: AuthService
@@ -57,5 +59,6 @@ export class HeaderComponent {
         this.navItems = this.navItems.filter(item => item.path !== '/admin');
       }
     }
+    this.isReady = true;
   }
 }

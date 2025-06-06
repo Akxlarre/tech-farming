@@ -57,6 +57,7 @@ import { Invernadero } from '../models/invernadero.model';
 
               <!-- Editar -->
               <button
+                *ngIf="puedeEditar"
                 class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-success hover:bg-success/10 transition-colors duration-200"
                 (click)="editInvernadero.emit(inv)"
                 aria-label="Editar invernadero"
@@ -71,6 +72,7 @@ import { Invernadero } from '../models/invernadero.model';
 
               <!-- Eliminar -->
               <button
+                *ngIf="puedeEliminar"
                 class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-error hover:bg-error/10 transition-colors duration-200"
                 (click)="deleteInvernadero.emit(inv)"
                 aria-label="Eliminar invernadero"
@@ -91,6 +93,8 @@ import { Invernadero } from '../models/invernadero.model';
   `
 })
 export class InvernaderoTableComponent {
+  @Input() puedeEditar = false;
+  @Input() puedeEliminar = false;
   @Input() invernaderos: Invernadero[] = [];
   @Output() viewInvernadero   = new EventEmitter<Invernadero>();
   @Output() editInvernadero   = new EventEmitter<Invernadero>();

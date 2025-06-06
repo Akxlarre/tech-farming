@@ -1,9 +1,10 @@
 # app/routes/zonas.py
-from flask import Blueprint, request, jsonify, abort, current_app
+from flask import Blueprint, request, g, jsonify, abort, current_app
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
 from app.models.zona import Zona as ZonaModel
 from app.models.invernadero import Invernadero as InvernaderoModel
+from app.utils.auth_supabase import usuario_autenticado_requerido
 
 router = Blueprint('zonas', __name__, url_prefix='/api')
 
@@ -20,7 +21,11 @@ def listar_zonas_por_invernadero(inv_id):
     } for z in zonas]), 200
 
 @router.route('/zonas', methods=['POST'])
+@usuario_autenticado_requerido
 def crear_zona():
+    if not getattr(g.permisos, "puede_crear", False):
+        return jsonify({"error": "No tienes permiso para crear zonas"}), 403
+    
     data = request.get_json() or {}
     inv_id = data.get('invernadero_id')
     nombre = data.get('nombre')
@@ -52,7 +57,11 @@ def crear_zona():
         abort(500, description="Error al crear la zona")
 
 @router.route('/zonas/<int:zona_id>', methods=['PUT'])
+@usuario_autenticado_requerido
 def editar_zona(zona_id):
+    if not getattr(g.permisos, "puede_editar", False):
+        return jsonify({"error": "No tienes permiso para crear zonas"}), 403
+    
     data = request.get_json() or {}
     z = ZonaModel.query.get_or_404(zona_id, description="Zona no encontrada")
     if 'nombre' in data:
@@ -77,7 +86,11 @@ def editar_zona(zona_id):
         abort(500, description="Error al editar la zona")
 
 @router.route('/zonas/<int:zona_id>', methods=['DELETE'])
+@usuario_autenticado_requerido
 def eliminar_zona(zona_id):
+    if not getattr(g.permisos, "puede_eliminar", False):
+        return jsonify({"error": "No tienes permiso para eliminar zonas"}), 403
+    
     z = ZonaModel.query.get_or_404(zona_id, description="Zona no encontrada")
     try:
         db.session.delete(z)
