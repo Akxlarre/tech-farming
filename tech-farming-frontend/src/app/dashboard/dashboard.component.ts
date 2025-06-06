@@ -349,6 +349,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   sparkHum = { labels: [] as string[], data: [] as number[] };
   sparkNit = { labels: [] as string[], data: [] as number[] };
   sparkSens = { labels: [] as string[], data: [] as number[] };
+  private readonly LECTURA_MAX_AGE_MS = 60 * 60 * 1000; // 1h
 
   kpiCards: Array<{
     label: string;
@@ -388,6 +389,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       default:
         return 'border-success bg-success/10';
     }
+  }
+
+  private peorEstado(a: 'sinRiesgo' | 'advertencia' | 'critica', b: 'sinRiesgo' | 'advertencia' | 'critica'): 'sinRiesgo' | 'advertencia' | 'critica' {
+    const order: Record<'sinRiesgo' | 'advertencia' | 'critica', number> = {
+      sinRiesgo: 0,
+      advertencia: 1,
+      critica: 2
+    };
+    return order[a] >= order[b] ? a : b;
   }
 
   // ───────── GRÁFICA 24H ─────────
@@ -584,7 +594,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
         if (ids.length) {
           this.dashSvc.getLecturas(ids).subscribe({
             next: (lects) => {
+              let desactualizados = 0;
+              const ahora = Date.now();
               lects.forEach((l) => {
+                const lecturaTime = l.time ? new Date(l.time).getTime() : 0;
+                if (!lecturaTime || ahora - lecturaTime > this.LECTURA_MAX_AGE_MS) {
+                  desactualizados++;
+                }
                 l.parametros.forEach((p, i) => {
                   const val = l.valores[i];
                   const card = this.kpiCards.find(
@@ -597,6 +613,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
                   if (name.includes('nitr')) this.nitrogenoActual = val;
                 });
               });
+
+              if (desactualizados) {
+                const nuevo: 'critica' | 'advertencia' =
+                  desactualizados === lects.length ? 'critica' : 'advertencia';
+                this.estadoSistema = this.peorEstado(this.estadoSistema, nuevo);
+              }
             },
             error: () => this.notify.error('Error al obtener lecturas'),
           });
@@ -623,6 +645,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
             fecha: new Date(a.fecha_hora),
             zona: a.sensor_nombre || '',
           }));
+
+          const niveles = resp.data.map((a) => a.nivel);
+          let nuevoEstado: 'sinRiesgo' | 'advertencia' | 'critica' = 'sinRiesgo';
+          if (niveles.includes('Crítico')) {
+            nuevoEstado = 'critica';
+          } else if (niveles.length) {
+            nuevoEstado = 'advertencia';
+          }
+          this.estadoSistema = this.peorEstado(this.estadoSistema, nuevoEstado);
         },
         error: () => this.notify.error('Error al cargar alertas'),
       });
