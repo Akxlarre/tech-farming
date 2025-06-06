@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
         type="text"
         [(ngModel)]="busqueda"
         (input)="buscar.emit(busqueda)"
-        placeholder="Buscar por nombre..."
+        placeholder="Buscar por nombre o apellido..."
         class="input input-bordered w-full max-w-sm"
       />
     </div>

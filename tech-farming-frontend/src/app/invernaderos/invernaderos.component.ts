@@ -13,6 +13,7 @@ import {
 import { InvernaderoModalService } from './invernadero-modal.service';
 
 import { NotificationService } from '../shared/services/notification.service';
+import { SupabaseService } from '../services/supabase.service';
 
 /* Componentes “genéricos” ya existentes */
 import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper.component';
@@ -51,7 +52,10 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
     <section class="space-y-6">
 
       <!-- HEADER + BOTON “Crear” -->
-      <app-invernadero-header (create)="open('create')"></app-invernadero-header>
+      <app-invernadero-header 
+        (create)="open('create')"
+        [puedeCrear]="puedeCrear">
+      </app-invernadero-header>
 
       <!-- FILTROS -->
       <app-invernadero-filters (filtersChange)="onFiltersChange($event)"></app-invernadero-filters>
@@ -59,6 +63,8 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
       <!-- TABLA (desktop) / LISTA (mobile) -->
       <app-invernadero-table
         [invernaderos]="invernaderos"
+        [puedeEditar]="puedeEditar"
+        [puedeEliminar]="puedeEliminar"
         (viewInvernadero)="open('view',   $event)"
         (editInvernadero)="open('edit',   $event)"
         (deleteInvernadero)="open('delete',$event)"
@@ -173,6 +179,10 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
   selectedInv: Invernadero | null = null;
   appliedFilters: InvernaderoFilters = {};
   modalType: 'view' | 'create' | 'delete' | 'edit' | null = null;
+  // permisos
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
 
   /** Detectar si estamos en móvil para mostrar la lista en tarjetas */
   get isMobile(): boolean {
@@ -184,11 +194,37 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
 
   constructor(
     private svc: InvernaderoService,
+    private supaSvc: SupabaseService,
     public modal: InvernaderoModalService,
     private notify: NotificationService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Obtener sesión activa
+    const session = await this.supaSvc.supabase.auth.getSession();
+    const user = session.data?.session?.user;
+
+    if (user) {
+      // Buscar ID del usuario en la tabla relacional
+      const { data: usuario } = await this.supaSvc.supabase
+        .from('usuarios')
+        .select('id')
+        .eq('supabase_uid', user.id)
+        .single();
+
+      if (usuario?.id) {
+        const { data: permisos } = await this.supaSvc.supabase
+          .from('usuarios_permisos')
+          .select('*')
+          .eq('usuario_id', usuario.id)
+          .single();
+
+        this.puedeCrear = permisos?.puede_crear ?? false;
+        this.puedeEditar = permisos?.puede_editar ?? false;
+        this.puedeEliminar = permisos?.puede_eliminar ?? false;
+      }
+    }
+
     // 1) Suscribirnos al tipo de modal para saber cuál abrir/cerrar
     this.modal.modalType$.pipe(takeUntil(this.destroy$)).subscribe(t => this.modalType = t);
 

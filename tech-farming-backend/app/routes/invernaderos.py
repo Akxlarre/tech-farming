@@ -1,11 +1,11 @@
-from flask import request, jsonify, Blueprint, abort
+from flask import request, g, jsonify, Blueprint
 from sqlalchemy import func, or_
 from app import db
 from app.models.invernadero import Invernadero
 from app.models.zona import Zona
-from app.models.sensor import Sensor
 from app.models.alerta import Alerta
 from app.models.sensor_parametro import SensorParametro
+from app.utils.auth_supabase import usuario_autenticado_requerido
 
 router = Blueprint('invernaderos', __name__)
 
@@ -194,7 +194,11 @@ def obtener_invernadero(inv_id):
         return jsonify({"error": "No se pudo obtener el invernadero"}), 500
 
 @router.route('/', methods=['POST'])
+@usuario_autenticado_requerido
 def crear_invernadero():
+    if not getattr(g.permisos, "puede_crear", False):
+        return jsonify({"error": "No tienes permiso para crear invernaderos"}), 403
+    
     data = request.get_json() or {}
     nombre = data.get('nombre')
     descripcion = data.get('descripcion', '')
@@ -234,7 +238,10 @@ def crear_invernadero():
 # ─── NUEVO ENDPOINT: ACTUALIZAR INVERNADERO COMPLETO ───────────────────────────────
 #
 @router.route('/<int:inv_id>', methods=['PUT'])
+@usuario_autenticado_requerido
 def actualizar_invernadero_completo(inv_id):
+    if not getattr(g.permisos, "puede_editar", False):
+        return jsonify({"error": "No tienes permiso para editar invernaderos"}), 403
     """
     PUT /api/invernaderos/{inv_id}
     Payload esperado (JSON):
@@ -351,7 +358,10 @@ def resumen_borrado_invernadero(inv_id):
 # ─── ENDPOINT PARA BORRAR UN INVERNADERO COMPLETO ─────────────────────────────────
 #
 @router.route('/<int:inv_id>', methods=['DELETE'])
+@usuario_autenticado_requerido
 def eliminar_invernadero(inv_id):
+    if not getattr(g.permisos, "puede_eliminar", False):
+        return jsonify({"error": "No tienes permiso para editar invernaderos"}), 403
     """
     DELETE /api/invernaderos/{inv_id}
     Elimina el invernadero y, en cascada, sus zonas (y sensores y alertas).

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SupabaseService } from '../../services/supabase.service';
 import { UmbralService, Umbral } from '../umbral.service';
 import { UmbralModalService } from '../umbral-modal.service';
 import { FormsModule } from '@angular/forms';
@@ -43,7 +44,13 @@ import { FormsModule } from '@angular/forms';
             {{ t | titlecase }}
           </a>
         </div>
-        <button class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content" (click)="nuevoUmbral()">+ Nuevo Umbral</button>
+        <button
+          *ngIf="puedeCrear" 
+          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content" 
+          (click)="nuevoUmbral()"
+        >
+          + Nuevo Umbral
+        </button>
       </div>
 
       <!-- Tabla -->
@@ -68,8 +75,8 @@ import { FormsModule } from '@angular/forms';
             <td>{{ u.advertencia_min }} – {{ u.advertencia_max }}</td>
             <td>{{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</td>
             <td class="text-right">
-              <button class="btn btn-sm btn-outline mr-2" (click)="editar(u)">✏️</button>
-              <button class="btn btn-sm btn-error" (click)="eliminar(u)">🗑️</button>
+              <button *ngIf="puedeEditar" class="btn btn-sm btn-outline mr-2" (click)="editar(u)">✏️</button>
+              <button *ngIf="puedeEliminar" class="btn btn-sm btn-error" (click)="eliminar(u)">🗑️</button>
             </td>
           </tr>
         </tbody>
@@ -124,12 +131,43 @@ export class UmbralListComponent implements OnInit {
   deleteExitosoVisible = false;
   mensajeDeleteExitoso = '';
 
+  // permisos
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
+
   constructor(
+    private supaSvc: SupabaseService,
     private umbralService: UmbralService,
     public modal: UmbralModalService
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Obtener sesión activa
+    const session = await this.supaSvc.supabase.auth.getSession();
+    const user = session.data?.session?.user;
+
+    if (user) {
+      // Buscar ID del usuario en la tabla relacional
+      const { data: usuario } = await this.supaSvc.supabase
+        .from('usuarios')
+        .select('id')
+        .eq('supabase_uid', user.id)
+        .single();
+
+      if (usuario?.id) {
+        const { data: permisos } = await this.supaSvc.supabase
+          .from('usuarios_permisos')
+          .select('*')
+          .eq('usuario_id', usuario.id)
+          .single();
+
+        this.puedeCrear = permisos?.puede_crear ?? false;
+        this.puedeEditar = permisos?.puede_editar ?? false;
+        this.puedeEliminar = permisos?.puede_eliminar ?? false;
+      }
+    }
+
     this.loadUmbrales();
   }
 

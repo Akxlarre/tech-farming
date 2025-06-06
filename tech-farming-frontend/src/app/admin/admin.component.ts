@@ -57,7 +57,7 @@ interface Usuario {
           <ng-container *ngIf="selectedUsuario">
             <app-admin-edit-modal
             [usuario]="selectedUsuario"
-                (saved)="onUsuarioEditado($event)"
+                (saved)="onUsuarioEditado()"
                 (close)="modal.closeWithAnimation()">
             </app-admin-edit-modal>
           </ng-container>
@@ -97,17 +97,8 @@ export class AdminComponent implements OnInit {
     this.cargarUsuarios();
   }
 
-  onUsuarioEditado(usuarioEditado: any) {
-    const index = this.usuarios.findIndex(u => u.id === usuarioEditado.id);
-    if (index !== -1) {
-      this.usuarios[index] = {
-        ...this.usuarios[index],
-        puedeEditar: usuarioEditado.permisos.editar,
-        puedeCrear: usuarioEditado.permisos.crear,
-        puedeEliminar: usuarioEditado.permisos.eliminar
-      };
-    }
-    this.filtrar('');
+  onUsuarioEditado(): void {
+    this.cargarUsuarios();
   }
 
   filtrar(nombre: string) {
