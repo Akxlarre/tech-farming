@@ -30,7 +30,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
     FooterComponent,
   ],
   template: `
-    <div class="flex flex-col h-full bg-base-200">
+    <div *ngIf="!loading; else loadingTpl" class="flex flex-col h-full bg-base-200">
 
       <!-- ─────── 1) HEADER MEJORADO ─────── -->
       <header class="sticky top-0 z-20 bg-base-200">
@@ -247,6 +247,9 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
                     [mensaje]="a.mensaje"
                     [fecha]="a.fecha"
                     [zona]="a.zona"
+                    [showResolve]="true"
+                    [resolviendo]="resolviendoId === a.id"
+                    (resolver)="resolverAlerta(a.id)"
                   ></app-alert-card>
                 </div>
               </ng-container>
@@ -315,6 +318,11 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
         <app-footer [ultimaActualizacion]="ultimaActualizacion"></app-footer>
       </div>
     </div>
+    <ng-template #loadingTpl>
+      <div class="flex flex-col h-full items-center justify-center bg-base-200">
+        <span class="loading loading-spinner loading-xl"></span>
+      </div>
+    </ng-template>
   `,
   styles: [
     `
@@ -331,6 +339,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   invernaderos: Invernadero[] = [];
   zonasMap: Record<number, Zona[]> = {};
   filtros = { invernaderoId: null as number | null, zonaId: null as number | null };
+  loading = true;
 
   // ───────── KPI PRINCIPALES ─────────
   tempActual = 0;
@@ -424,6 +433,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     fecha: Date;
     zona: string;
   }> = [];
+  resolviendoId: number | null = null;
 
   // ───────── PREDICCIONES SIMULADAS ─────────
   predicciones: {
@@ -521,6 +531,18 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       });
   }
 
+  resolverAlerta(id: number) {
+    this.resolviendoId = id;
+    this.dashSvc.resolverAlerta(id).subscribe({
+      next: () => {
+        this.notify.success('Alerta resuelta');
+        this.cargarAlertas();
+      },
+      error: () => this.notify.error('Error al resolver alerta'),
+      complete: () => (this.resolviendoId = null)
+    });
+  }
+
   private getParametroId(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): number {
     const map: Record<'Temperatura' | 'Humedad' | 'Nitrógeno', number> = {
       'Temperatura': 1,
@@ -542,12 +564,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     this.dashSvc.getInvernaderos().subscribe({
       next: (list) => {
         this.invernaderos = list;
-        if (list.length) {
-          this.filtros.invernaderoId = list[0].id;
-          this.onInvernaderoChange();
-        }
+        this.loading = false;
       },
-      error: () => this.notify.error('Error al cargar invernaderos')
+      error: () => {
+        this.loading = false;
+        this.notify.error('Error al cargar invernaderos');
+      }
     });
   }
 
