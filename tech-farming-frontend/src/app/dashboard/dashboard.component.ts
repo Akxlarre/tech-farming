@@ -562,7 +562,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       next: (sens) => {
         this.sensoresDisponibles = sens.map((s) => s.nombre);
         this.totalSensores = sens.length;
-        this.sensoresActivos = sens.length;
+        this.sensoresActivos = sens.filter((s) => s.estado === 'Activo').length;
         const ids = sens.map((s) => s.id);
         if (ids.length) {
           this.dashSvc.getLecturas(ids).subscribe({
