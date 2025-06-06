@@ -93,7 +93,8 @@ def predict_from_csv():
     - Lee el CSV completo (sin parsear fechas inicialmente).
     - Convierte 'date' a datetime64, elimina filas con NaT, ordena por fecha.
     - Convierte las columnas numéricas (temp, hum, N, P, K) a float.
-    - Extrae las últimas 6 filas (cronológicamente).
+    - Hace resample cada 1H y toma la última lectura de cada hora.
+    - Extrae las últimas 6 filas (6 horas más recientes).
     - Construye 'historical' con esas 6 temperaturas.
     - Genera features y predice [6h, 12h, 24h] con rf_temp.
     - Construye 'future' a partir de la última fecha +6h, +12h, +24h.
@@ -152,20 +153,30 @@ def predict_from_csv():
     # 7) Ordenar cronológicamente por 'date'
     df_all = df_all.sort_values('date').reset_index(drop=True)
 
-    # 8) Asegurarse de que hay al menos 6 filas válidas
-    if len(df_all) < 6:
-        return jsonify({"error": "No hay suficientes datos (menos de 6 filas válidas)."}), 400
+    # 8) Resample horaria: tomar la última lectura de cada hora
+    df_hourly = (
+        df_all
+        .set_index('date')
+        .resample('1H')                     # agrupa cada hora calendario
+        .last()                             # toma la última lectura disponible en esa hora
+        .dropna(subset=['tempreature'])     # elimina horas sin dato de tempreature
+        .reset_index()
+    )
 
-    # 9) Tomar las últimas 6 filas (ventana de 6 horas más recientes)
-    df_hist = df_all.iloc[-6:].copy()
+    # 9) Asegurarse de que hay al menos 6 filas (6 horas)
+    if len(df_hourly) < 6:
+        return jsonify({"error": "Menos de 6 horas disponibles en el CSV."}), 400
 
-    # 10) Construir 'historical' con las 6 temperaturas
+    # 10) Tomar las últimas 6 filas (6 horas más recientes)
+    df_hist = df_hourly.iloc[-6:].copy()
+
+    # 11) Construir 'historical' con las 6 temperaturas
     historical = [
         {"timestamp": row['date'].isoformat(), "value": float(row['tempreature'])}
         for _, row in df_hist.iterrows()
     ]
 
-    # 11) Generar features y predecir
+    # 12) Generar features y predecir
     try:
         X_row = generar_features_desde_df(df_hist)
     except Exception as e:
@@ -173,7 +184,7 @@ def predict_from_csv():
 
     y_temp_pred = rf_temp.predict(X_row)[0]  # [pred_6h, pred_12h, pred_24h]
 
-    # 12) Construir 'future' (a partir de la última fecha válida)
+    # 13) Construir 'future' (a partir de la última fecha válida)
     ultima_fecha = df_hist.iloc[-1]['date']
     future = [
         {"timestamp": (ultima_fecha + timedelta(hours=6)).isoformat(),  "value": float(y_temp_pred[0])},
@@ -181,7 +192,7 @@ def predict_from_csv():
         {"timestamp": (ultima_fecha + timedelta(hours=24)).isoformat(), "value": float(y_temp_pred[2])}
     ]
 
-    # 13) Construir summary y trend
+    # 14) Construir summary y trend
     summary = {
         "updated": pd.Timestamp.now().isoformat(),
         "text":    f"Predicción de {horas} horas para invernadero {invernadero_id}"
@@ -197,7 +208,7 @@ def predict_from_csv():
         "color":      "success" if diff_pct >= 0 else "warning"
     }
 
-    # 14) Devolver JSON
+    # 15) Devolver JSON
     return jsonify({
         "historical": historical,
         "future":     future,
