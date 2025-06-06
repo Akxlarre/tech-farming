@@ -66,11 +66,12 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
                 id="zonaSelect"
                 class="select select-bordered select-sm w-full"
                 [(ngModel)]="filtros.zonaId"
+                (change)="onZonaChange()"
                 [disabled]="!filtros.invernaderoId"
                 [ngClass]="{ 'opacity-50 cursor-not-allowed': !filtros.invernaderoId }"
                 aria-label="Selecciona Zona"
               >
-                <option [ngValue]="null" disabled selected>— Zona —</option>
+                <option [ngValue]="null">— Zona —</option>
                 <option *ngFor="let z of zonasMap[filtros.invernaderoId!]" [ngValue]="z.id">
                   {{ z.nombre }}
                 </option>
@@ -463,6 +464,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     this.filtros.zonaId = null;
     this.cargarZonasYsensores();
     this.cargarAlertas();
+  }
+
+  onZonaChange(): void {
+    this.cargarAlertas();
+    this.cambiarIntervalo(this.intervaloSeleccionado);
   }
 
   aplicarFiltros(): void {
