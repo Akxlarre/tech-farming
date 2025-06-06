@@ -424,6 +424,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     return order[a] >= order[b] ? a : b;
   }
 
+  private updateEstadoCard(): void {
+    const card = this.kpiCards.find((c) => c.label === 'Estado');
+    if (card) {
+      card.icon = this.estadoIcono;
+      card.value = this.estadoTexto;
+      card.customClasses = this.estadoClasses;
+    }
+  }
+
   // ───────── GRÁFICA 24H ─────────
   sensoresDisponibles: Sensor[] = [];
   variablesDisponibles: Array<{ id: number; nombre: 'Temperatura' | 'Humedad' | 'Nitrógeno'; unidad?: string }> = [];
@@ -482,6 +491,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── FILTROS ─────────
   onInvernaderoChange(): void {
     this.filtros.zonaId = null;
+    this.estadoSistema = 'sinRiesgo';
+    this.updateEstadoCard();
     this.cargarZonasYsensores();
     this.cargarAlertas();
   }
@@ -676,6 +687,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
                 const nuevo: 'critica' | 'advertencia' =
                   desactualizados === lects.length ? 'critica' : 'advertencia';
                 this.estadoSistema = this.peorEstado(this.estadoSistema, nuevo);
+                this.updateEstadoCard();
               }
             },
             error: () => this.notify.error('Error al obtener lecturas'),
@@ -712,6 +724,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
             nuevoEstado = 'advertencia';
           }
           this.estadoSistema = this.peorEstado(this.estadoSistema, nuevoEstado);
+          this.updateEstadoCard();
         },
         error: () => this.notify.error('Error al cargar alertas'),
       });
