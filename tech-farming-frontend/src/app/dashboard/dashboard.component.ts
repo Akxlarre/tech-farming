@@ -564,6 +564,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     this.dashSvc.getInvernaderos().subscribe({
       next: (list) => {
         this.invernaderos = list;
+        if (list.length) {
+          this.filtros.invernaderoId = list[0].id;
+          this.onInvernaderoChange();
+        }
         this.loading = false;
       },
       error: () => {
