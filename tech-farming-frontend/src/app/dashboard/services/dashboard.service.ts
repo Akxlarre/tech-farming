@@ -1,7 +1,7 @@
 // src/app/dashboard/services/dashboard.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { Invernadero, Zona, Sensor } from '../../models';
 import { BatchLectura, TimeSeriesService, HistorialResponse } from '../../sensores/time-series.service';
@@ -27,9 +27,17 @@ export class DashboardService {
     return this.http.get<Zona[]>(`${this.apiUrl}/invernaderos/${invernaderoId}/zonas`);
   }
 
-  /** GET /api/sensores/por-invernadero/{id} */
+  /** GET /api/zonas/{id}/sensores */
+  getSensoresPorZona(zonaId: number): Observable<Sensor[]> {
+    return this.http.get<Sensor[]>(`${this.apiUrl}/zonas/${zonaId}/sensores`);
+  }
+
+  /** GET /api/sensores?invernadero={id}&pageSize=1000 */
   getSensores(invernaderoId: number): Observable<Sensor[]> {
-    return this.http.get<Sensor[]>(`${this.apiUrl}/sensores/por-invernadero/${invernaderoId}`);
+    const url = `${this.apiUrl}/sensores?invernadero=${invernaderoId}&pageSize=1000`;
+    return this.http.get<{ data: Sensor[] }>(url).pipe(
+      map((resp) => resp.data)
+    );
   }
 
   /** GET /api/sensores/lecturas?ids=1,2,3 */

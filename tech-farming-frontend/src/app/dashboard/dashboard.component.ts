@@ -66,72 +66,34 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
                 id="zonaSelect"
                 class="select select-bordered select-sm w-full"
                 [(ngModel)]="filtros.zonaId"
+                (change)="onZonaChange()"
                 [disabled]="!filtros.invernaderoId"
                 [ngClass]="{ 'opacity-50 cursor-not-allowed': !filtros.invernaderoId }"
                 aria-label="Selecciona Zona"
+                (change)="onZonaChange()"
               >
-                <option [ngValue]="null" disabled selected>— Zona —</option>
+                <option [ngValue]="null">— Zona —</option>
                 <option *ngFor="let z of zonasMap[filtros.invernaderoId!]" [ngValue]="z.id">
                   {{ z.nombre }}
                 </option>
               </select>
             </div>
 
-            <!-- Botón Aplicar Filtros -->
-            <button
-              class="btn btn-success btn-sm mt-2 sm:mt-0"
-              (click)="aplicarFiltros()"
-              aria-label="Aplicar filtros generales"
-            >
-              Aplicar
-            </button>
           </div>
         </div>
       </header>
 
       <!-- ─────── 2) KPI CARDS ─────── -->
       <section class="flex-none bg-base-200 px-4 md:px-8 py-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <!-- Temperatura -->
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-4">
           <app-kpi-card
-            icon="ri-temperature-line"
-            [value]="tempActual"
-            unit="°C"
-            unitTitle="grados Celsius"
-            label="Temperatura"
-          ></app-kpi-card>
-
-          <!-- Humedad -->
-          <app-kpi-card
-            icon="ri-droplet-line"
-            [value]="humedadActual"
-            unit="%"
-            unitTitle="por ciento"
-            label="Humedad"
-          ></app-kpi-card>
-
-          <!-- Nitrógeno -->
-          <app-kpi-card
-            icon="ri-flask-line"
-            [value]="nitrogenoActual"
-            unit="ppm"
-            unitTitle="partes por millón"
-            label="Nitrógeno"
-          ></app-kpi-card>
-
-          <!-- Sensores Activos -->
-          <app-kpi-card
-            icon="ri-hardware-chip-line"
-            [value]="sensoresActivos + ' / ' + totalSensores"
-            label="Sensores activos"
-          ></app-kpi-card>
-
-          <!-- Estado General -->
-          <app-kpi-card
-            [icon]="estadoIcono"
-            [value]="estadoTexto"
-            label="Estado"
-            [customClasses]="estadoClasses"
+            *ngFor="let card of kpiCards"
+            [icon]="card.icon"
+            [value]="card.value"
+            [unit]="card.unit"
+            [unitTitle]="card.unitTitle"
+            [label]="card.label"
+            [customClasses]="card.customClasses"
           ></app-kpi-card>
         </div>
       </section>
@@ -392,6 +354,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   sparkSens = { labels: [] as string[], data: [] as number[] };
   private readonly LECTURA_MAX_AGE_MS = 60 * 60 * 1000; // 1h
 
+  kpiCards: Array<{
+    label: string;
+    icon: string;
+    value: any;
+    unit?: string;
+    unitTitle?: string;
+    customClasses?: string;
+  }> = [];
+
   get estadoIcono(): string {
     switch (this.estadoSistema) {
       case 'critica':
@@ -498,11 +469,17 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     this.cargarAlertas();
   }
 
+  onZonaChange(): void {
+    this.cargarAlertas();
+    this.cambiarIntervalo(this.intervaloSeleccionado);
+  }
+
   aplicarFiltros(): void {
     this.cargarZonasYsensores();
     this.cargarAlertas();
     this.cambiarIntervalo(this.intervaloSeleccionado);
   }
+
 
   // ───────── CAMBIAR VARIABLE ─────────
   onVariableChange(): void {
@@ -575,6 +552,14 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     return map[variable];
   }
 
+  private getIconForParam(nombre: string): string {
+    const n = nombre.toLowerCase();
+    if (n.includes('temper')) return 'ri-temperature-line';
+    if (n.includes('hum')) return 'ri-droplet-line';
+    if (n.includes('nitr')) return 'ri-flask-line';
+    return 'ri-dashboard-2-line';
+  }
+
   private cargarInvernaderos() {
     this.dashSvc.getInvernaderos().subscribe({
       next: (list) => {
@@ -596,11 +581,52 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       error: () => this.notify.error('Error al cargar zonas')
     });
 
-    this.dashSvc.getSensores(id).subscribe({
+    const sensoresObs = this.filtros.zonaId
+      ? this.dashSvc.getSensoresPorZona(this.filtros.zonaId)
+      : this.dashSvc.getSensores(id);
+
+    sensoresObs.subscribe({
       next: (sens) => {
         this.sensoresDisponibles = sens.map((s) => s.nombre);
         this.totalSensores = sens.length;
-        this.sensoresActivos = sens.length;
+        this.sensoresActivos = sens.filter((s) => s.estado === 'Activo').length;
+
+        this.sensorSeleccionado = this.sensoresDisponibles[0] ?? null;
+        if (this.sensorSeleccionado) {
+          this.cambiarIntervalo(this.intervaloSeleccionado);
+        }
+
+        const paramMap = new Map<string, string | undefined>();
+        sens.forEach((s) =>
+          s.parametros.forEach((p) => {
+            if (!paramMap.has(p.nombre)) paramMap.set(p.nombre, p.unidad);
+          })
+        );
+
+        this.kpiCards = [];
+        paramMap.forEach((unidad, nombre) => {
+          this.kpiCards.push({
+            label: nombre,
+            icon: this.getIconForParam(nombre),
+            value: 0,
+            unit: unidad,
+            unitTitle: unidad,
+          });
+        });
+
+        this.kpiCards.push({
+          label: 'Sensores activos',
+          icon: 'ri-hardware-chip-line',
+          value: `${this.sensoresActivos} / ${this.totalSensores}`,
+        });
+
+        this.kpiCards.push({
+          label: 'Estado',
+          icon: this.estadoIcono,
+          value: this.estadoTexto,
+          customClasses: this.estadoClasses,
+        });
+
         const ids = sens.map((s) => s.id);
         if (ids.length) {
           this.dashSvc.getLecturas(ids).subscribe({
@@ -614,6 +640,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
                 }
                 l.parametros.forEach((p, i) => {
                   const val = l.valores[i];
+                  const card = this.kpiCards.find(
+                    (c) => c.label.toLowerCase() === p.toLowerCase()
+                  );
+                  if (card) card.value = val;
                   const name = p.toLowerCase();
                   if (name.includes('temper')) this.tempActual = val;
                   if (name.includes('hum')) this.humedadActual = val;
@@ -627,7 +657,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
                 this.estadoSistema = this.peorEstado(this.estadoSistema, nuevo);
               }
             },
-            error: () => this.notify.error('Error al obtener lecturas')
+            error: () => this.notify.error('Error al obtener lecturas'),
           });
         }
       },
