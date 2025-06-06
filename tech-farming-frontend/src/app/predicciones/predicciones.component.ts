@@ -3,7 +3,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { FormsModule }       from '@angular/forms';
-import { HttpClientModule }  from '@angular/common/http';     // <--- Importa HttpClientModule
+import { HttpClientModule }  from '@angular/common/http';
 
 import { MatFormFieldModule }from '@angular/material/form-field';
 import { MatSelectModule }   from '@angular/material/select';
@@ -61,7 +61,8 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
         <!-- FILTROS -->
-        <div class="grid gap-4" style="grid-template-columns: calc(100% * var(--inv-phi)) 1fr minmax(auto, 20rem);">
+        <div class="grid gap-4"
+             style="grid-template-columns: calc(100% * var(--inv-phi)) 1fr minmax(auto, 20rem);">
           <app-filtro-select
             label="Invernadero"
             [options]="optInvernadero"
@@ -84,8 +85,14 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
           ></app-filtro-select>
         </div>
 
+        <!-- MENSAJE TEMPORAL “No existen datos…” DURANTE 5s -->
+        <div *ngIf="showNoDataMsg"
+             class="absolute left-0 right-0 mt-4 mx-auto w-fit px-4 py-2 bg-red-100 border border-red-300 text-red-800 rounded shadow">
+          No existen datos para predicción.
+        </div>
+
         <!-- GRÁFICO -->
-        <mat-card class="bg-base-100 p-6 shadow-xl animate-fade-in-down">
+        <mat-card class="bg-base-100 p-6 shadow-xl animate-fade-in-down relative" style="min-height: 320px;">
           <div class="w-full" style="height: min(max(300px, 40vh), 55vh);">
             <app-prediction-chart
               [historical]="data?.historical ?? []"
@@ -97,6 +104,8 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
 
         <!-- RESUMEN & TENDENCIA -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          <!-- SummaryCardComponent internamente mostrará “No hay un resumen disponible” 
+               si recibe summary = undefined -->
           <app-summary-card class="h-full" [summary]="data?.summary"></app-summary-card>
           <app-trend-card    class="h-full" [trend]="uiTrend"></app-trend-card>
         </div>
@@ -104,7 +113,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     </div>
   `,
   styles: [`
-    :host { display: block; }
+    :host { display: block; position: relative; }
     :root {
       --phi: 1.618;
       --inv-phi: 0.618;
@@ -117,26 +126,37 @@ export class PrediccionesComponent implements OnInit {
   zonas:            Zona[]         = [];
   optInvernadero:  {id:number;label:string}[] = [];
   optZona:         {id:number;label:string}[] = [];
+
   optProjection = [
     { id: 6,  label: '6 horas'  },
     { id: 12, label: '12 horas' },
     { id: 24, label: '24 horas' }
   ];
 
+  /** Filtros seleccionados */
   selectedInvernadero?: number;
   selectedZona?:         number;
   selectedProjection = 6;
 
+  /** Resultado de la llamada al backend (o undefined si no hay datos) */
   data?: PredicResult;
   uiTrend?: UITrend;
+
+  /** Control para mostrar el mensaje “No existen datos…” durante 5s */
+  showNoDataMsg = false;
 
   constructor(private svc: PrediccionesService) {}
 
   ngOnInit() {
-    // Llama a getInvernaderos(), que ahora unwrappea response.data
-    this.svc.getInvernaderos().subscribe(list => {
-      this.invernaderos   = list;
-      this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
+    // Cargar la lista de invernaderos
+    this.svc.getInvernaderos().subscribe({
+      next: (list) => {
+        this.invernaderos   = list;
+        this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
+      },
+      error: (err) => {
+        console.error('Error al cargar invernaderos:', err);
+      }
     });
   }
 
@@ -145,40 +165,76 @@ export class PrediccionesComponent implements OnInit {
   }
 
   onInvernaderoChange(id: number | undefined) {
-    if (id == null) return;
+    if (id == null) {
+      this.selectedZona = undefined;
+      this.zonas = [];
+      return;
+    }
     this.selectedInvernadero = id;
-
-    // Llama a getZonasByInvernadero(), que unwrappea response.data de zonas
-    this.svc.getZonasByInvernadero(id).subscribe(list => {
-      this.zonas   = list;
-      this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+    // Cargar zonas asociadas al invernadero
+    this.svc.getZonasByInvernadero(id).subscribe({
+      next: (list) => {
+        this.zonas   = list;
+        this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+      },
+      error: (err) => {
+        console.error('Error al cargar zonas:', err);
+        this.zonas = [];
+      }
     });
   }
 
   onZonaChange(id: number | undefined) {
-    if (id == null) return;
-    this.selectedZona = id;
+    this.selectedZona = id ?? undefined;
   }
 
   onProjectionChange(h: number | undefined) {
-    if (h == null) return;
-    this.selectedProjection = h as 6|12|24;
+    if (h != null) {
+      this.selectedProjection = h as 6|12|24;
+    }
   }
 
   reload() {
-    if (!this.selectedInvernadero) return;
+    if (!this.selectedInvernadero) {
+      // Si no hay invernadero seleccionado, nada que hacer
+      return;
+    }
+
     const params: PredicParams = {
       invernaderoId: this.selectedInvernadero,
       zonaId:        this.selectedZona,
       horas:         this.selectedProjection as 6|12|24
     };
+
     this.svc.getPredicciones(params).subscribe({
       next: (res: PredicResult) => {
-        this.data    = res;
+        // Si no hay historiales (o están vacíos), activar mensaje temporal
+        if (!res.historical || res.historical.length === 0) {
+          this.data = undefined;
+          this.uiTrend = undefined;
+          this.mostrarMensajeNoData();
+          return;
+        }
+        // Si sí hay datos, asignar normalmente
+        this.data = res;
         this.uiTrend = this.mapTrend(res.trend);
       },
-      error: err => console.error('Error al obtener predicciones:', err)
+      error: (err) => {
+        // Ante cualquier error, limpiar data y mostrar mensaje
+        console.warn('No se pudieron obtener predicciones:', err);
+        this.data = undefined;
+        this.uiTrend = undefined;
+        this.mostrarMensajeNoData();
+      }
     });
+  }
+
+  /** Activa showNoDataMsg por 5 segundos */
+  private mostrarMensajeNoData() {
+    this.showNoDataMsg = true;
+    setTimeout(() => {
+      this.showNoDataMsg = false;
+    }, 5000);
   }
 
   private mapTrend(api: APITrend): UITrend {
