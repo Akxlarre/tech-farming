@@ -540,7 +540,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
   private cargarInvernaderos() {
     this.dashSvc.getInvernaderos().subscribe({
-      next: (list) => (this.invernaderos = list),
+      next: (list) => {
+        this.invernaderos = list;
+        if (list.length) {
+          this.filtros.invernaderoId = list[0].id;
+          this.onInvernaderoChange();
+        }
+      },
       error: () => this.notify.error('Error al cargar invernaderos')
     });
   }
@@ -558,6 +564,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
         this.sensoresDisponibles = sens.map((s) => s.nombre);
         this.totalSensores = sens.length;
         this.sensoresActivos = sens.filter((s) => s.estado === 'Activo').length;
+
+        this.sensorSeleccionado = this.sensoresDisponibles[0] ?? null;
+        if (this.sensorSeleccionado) {
+          this.cambiarIntervalo(this.intervaloSeleccionado);
+        }
 
         const paramMap = new Map<string, string | undefined>();
         sens.forEach((s) =>
