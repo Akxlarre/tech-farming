@@ -70,4 +70,8 @@ export class DashboardService {
       filtros.perPage
     );
   }
+
+  resolverAlerta(id: number) {
+    return this.alertSvc.resolverAlerta(id);
+  }
 }
