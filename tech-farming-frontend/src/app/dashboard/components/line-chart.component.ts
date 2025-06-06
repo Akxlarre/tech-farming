@@ -19,12 +19,7 @@ Chart.register(...registerables);
   imports: [CommonModule, FormsModule],
   template: `
     <div class="relative w-full h-full">
-      <!-- El <canvas> solo se muestra cuando chartReady = true -->
-      <canvas
-        #chartCanvas
-        class="w-full h-full"
-        *ngIf="chartReady"
-      ></canvas>
+      <canvas #chartCanvas class="w-full h-full"></canvas>
 
       <!-- Spinner mientras el gráfico no está listo -->
       <div *ngIf="!chartReady" class="absolute inset-0 flex items-center justify-center bg-base-200">
@@ -220,6 +215,12 @@ export class LineChartComponent implements OnInit, AfterViewInit {
     this.labels = nuevasLabels;
     this.data = nuevosValores;
     this.variable = nuevaVariable;
+
+    // Si el gráfico aún no se ha inicializado, créalo ahora
+    if (!this.chartInstance) {
+      this.createChart();
+      return;
+    }
 
     // Reconfigurar dataset
     let borderColor = '#2B6B4A';

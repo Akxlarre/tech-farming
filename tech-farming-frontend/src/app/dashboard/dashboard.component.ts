@@ -13,6 +13,9 @@ import { LineChartComponent } from './components/line-chart.component';
 import { AlertCardComponent } from './components/alert-card.component';
 import { TabsPanelComponent } from './components/tabs-panel.component';
 import { FooterComponent } from './components/footer.component';
+import { DashboardService } from './services/dashboard.service';
+import { NotificationService } from '../shared/services/notification.service';
+import { Invernadero, Zona, Sensor, Alerta } from '../models';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -27,7 +30,7 @@ import { FooterComponent } from './components/footer.component';
     FooterComponent,
   ],
   template: `
-    <div class="flex flex-col h-full bg-base-200">
+    <div *ngIf="!loading; else loadingTpl" class="flex flex-col h-full bg-base-200">
 
       <!-- ─────── 1) HEADER MEJORADO ─────── -->
       <header class="sticky top-0 z-20 bg-base-200">
@@ -63,72 +66,34 @@ import { FooterComponent } from './components/footer.component';
                 id="zonaSelect"
                 class="select select-bordered select-sm w-full"
                 [(ngModel)]="filtros.zonaId"
+                (change)="onZonaChange()"
                 [disabled]="!filtros.invernaderoId"
                 [ngClass]="{ 'opacity-50 cursor-not-allowed': !filtros.invernaderoId }"
                 aria-label="Selecciona Zona"
+                (change)="onZonaChange()"
               >
-                <option [ngValue]="null" disabled selected>— Zona —</option>
+                <option [ngValue]="null">— Zona —</option>
                 <option *ngFor="let z of zonasMap[filtros.invernaderoId!]" [ngValue]="z.id">
                   {{ z.nombre }}
                 </option>
               </select>
             </div>
 
-            <!-- Botón Aplicar Filtros -->
-            <button
-              class="btn btn-success btn-sm mt-2 sm:mt-0"
-              (click)="aplicarFiltros()"
-              aria-label="Aplicar filtros generales"
-            >
-              Aplicar
-            </button>
           </div>
         </div>
       </header>
 
       <!-- ─────── 2) KPI CARDS ─────── -->
       <section class="flex-none bg-base-200 px-4 md:px-8 py-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <!-- Temperatura -->
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-4">
           <app-kpi-card
-            icon="ri-temperature-line"
-            [value]="tempActual"
-            unit="°C"
-            unitTitle="grados Celsius"
-            label="Temperatura"
-          ></app-kpi-card>
-
-          <!-- Humedad -->
-          <app-kpi-card
-            icon="ri-droplet-line"
-            [value]="humedadActual"
-            unit="%"
-            unitTitle="por ciento"
-            label="Humedad"
-          ></app-kpi-card>
-
-          <!-- Nitrógeno -->
-          <app-kpi-card
-            icon="ri-flask-line"
-            [value]="nitrogenoActual"
-            unit="ppm"
-            unitTitle="partes por millón"
-            label="Nitrógeno"
-          ></app-kpi-card>
-
-          <!-- Sensores Activos -->
-          <app-kpi-card
-            icon="ri-hardware-chip-line"
-            [value]="sensoresActivos + ' / ' + totalSensores"
-            label="Sensores activos"
-          ></app-kpi-card>
-
-          <!-- Estado General -->
-          <app-kpi-card
-            [icon]="estadoIcono"
-            [value]="estadoTexto"
-            label="Estado"
-            [customClasses]="estadoClasses"
+            *ngFor="let card of kpiCards"
+            [icon]="card.icon"
+            [value]="card.value"
+            [unit]="card.unit"
+            [unitTitle]="card.unitTitle"
+            [label]="card.label"
+            [customClasses]="card.customClasses"
           ></app-kpi-card>
         </div>
       </section>
@@ -151,14 +116,15 @@ import { FooterComponent } from './components/footer.component';
               <!-- Select Sensor -->
               <div class="form-control w-40">
                 <label class="label label-text text-sm">Sensor</label>
-                <select
+              <select
                   id="sensorSelect"
                   class="select select-bordered select-sm w-full"
                   [(ngModel)]="sensorSeleccionado"
+                  (change)="onSensorChange()"
                   aria-label="Selecciona Sensor"
                 >
                   <option [ngValue]="null" disabled selected>— Sensor —</option>
-                  <option *ngFor="let s of sensoresDisponibles" [ngValue]="s">{{ s }}</option>
+                  <option *ngFor="let s of sensoresDisponibles" [ngValue]="s.id">{{ s.nombre }}</option>
                 </select>
               </div>
 
@@ -173,7 +139,7 @@ import { FooterComponent } from './components/footer.component';
                   aria-label="Selecciona Variable"
                 >
                   <option [ngValue]="null" disabled selected>— Variable —</option>
-                  <option *ngFor="let v of variablesDisponibles" [ngValue]="v">{{ v }}</option>
+                  <option *ngFor="let v of variablesDisponibles" [ngValue]="v">{{ v.nombre }}</option>
                 </select>
               </div>
 
@@ -240,7 +206,8 @@ import { FooterComponent } from './components/footer.component';
                   #lineChart
                   [labels]="graficaData.labels"
                   [data]="graficaData.valores"
-                  [variable]="variableSeleccionada"
+                  [variable]="variableSeleccionada!.nombre"
+
                   [intervalo]="intervaloSeleccionado"
                   class="w-full h-full"
                 ></app-line-chart>
@@ -282,6 +249,9 @@ import { FooterComponent } from './components/footer.component';
                     [mensaje]="a.mensaje"
                     [fecha]="a.fecha"
                     [zona]="a.zona"
+                    [showResolve]="true"
+                    [resolviendo]="resolviendoId === a.id"
+                    (resolver)="resolverAlerta(a.id)"
                   ></app-alert-card>
                 </div>
               </ng-container>
@@ -350,6 +320,11 @@ import { FooterComponent } from './components/footer.component';
         <app-footer [ultimaActualizacion]="ultimaActualizacion"></app-footer>
       </div>
     </div>
+    <ng-template #loadingTpl>
+      <div class="flex flex-col h-full items-center justify-center bg-base-200">
+        <span class="loading loading-spinner loading-xl"></span>
+      </div>
+    </ng-template>
   `,
   styles: [
     `
@@ -363,36 +338,32 @@ import { FooterComponent } from './components/footer.component';
 })
 export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── FILTROS ─────────
-  invernaderos = [
-    { id: 1, nombre: 'Invernadero A' },
-    { id: 2, nombre: 'Invernadero B' },
-    { id: 3, nombre: 'Invernadero C' },
-  ];
-  zonasMap: Record<number, { id: number; nombre: string }[]> = {
-    1: [
-      { id: 11, nombre: 'Zona Norte' },
-      { id: 12, nombre: 'Zona Sur' },
-    ],
-    2: [{ id: 21, nombre: 'Zona Centro' }],
-    3: [
-      { id: 31, nombre: 'Zona Este' },
-      { id: 32, nombre: 'Zona Oeste' },
-    ],
-  };
+  invernaderos: Invernadero[] = [];
+  zonasMap: Record<number, Zona[]> = {};
   filtros = { invernaderoId: null as number | null, zonaId: null as number | null };
+  loading = true;
 
   // ───────── KPI PRINCIPALES ─────────
-  tempActual = 24.5;
-  humedadActual = 66;
-  nitrogenoActual = 8;
-  totalSensores = 12;
-  sensoresActivos = 12; // Simulado
+  tempActual = 0;
+  humedadActual = 0;
+  nitrogenoActual = 0;
+  totalSensores = 0;
+  sensoresActivos = 0;
   estadoSistema: 'sinRiesgo' | 'advertencia' | 'critica' = 'sinRiesgo';
+  sparkTemp = { labels: [] as string[], data: [] as number[] };
+  sparkHum = { labels: [] as string[], data: [] as number[] };
+  sparkNit = { labels: [] as string[], data: [] as number[] };
+  sparkSens = { labels: [] as string[], data: [] as number[] };
+  private readonly LECTURA_MAX_AGE_MS = 60 * 60 * 1000; // 1h
 
-  sparkTemp = { labels: this.generarNDias(3), data: [23, 24.1, 24.5] };
-  sparkHum = { labels: this.generarNDias(3), data: [65, 66, 66] };
-  sparkNit = { labels: this.generarNDias(3), data: [7, 8, 8] };
-  sparkSens = { labels: this.generarNDias(3), data: [10, 11, 12] };
+  kpiCards: Array<{
+    label: string;
+    icon: string;
+    value: any;
+    unit?: string;
+    unitTitle?: string;
+    customClasses?: string;
+  }> = [];
 
   get estadoIcono(): string {
     switch (this.estadoSistema) {
@@ -425,58 +396,42 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private peorEstado(a: 'sinRiesgo' | 'advertencia' | 'critica', b: 'sinRiesgo' | 'advertencia' | 'critica'): 'sinRiesgo' | 'advertencia' | 'critica' {
+    const order: Record<'sinRiesgo' | 'advertencia' | 'critica', number> = {
+      sinRiesgo: 0,
+      advertencia: 1,
+      critica: 2
+    };
+    return order[a] >= order[b] ? a : b;
+  }
+
   // ───────── GRÁFICA 24H ─────────
-  sensoresDisponibles = ['Sensor 1', 'Sensor 2', 'Sensor 3'];
-  variablesDisponibles: ('Temperatura' | 'Humedad' | 'Nitrógeno')[] = [
-    'Temperatura',
-    'Humedad',
-    'Nitrógeno',
-  ];
-  sensorSeleccionado: string | null = 'Sensor 1';
-  variableSeleccionada: 'Temperatura' | 'Humedad' | 'Nitrógeno' = 'Temperatura';
+  sensoresDisponibles: Sensor[] = [];
+  variablesDisponibles: Array<{ id: number; nombre: 'Temperatura' | 'Humedad' | 'Nitrógeno'; unidad?: string }> = [];
+  sensorSeleccionado: number | null = null;
+  variableSeleccionada: { id: number; nombre: 'Temperatura' | 'Humedad' | 'Nitrógeno'; unidad?: string } | null = null;
   intervaloSeleccionado: 6 | 12 | 24 = 24;
 
   graficaData = {
-    labels: this.generarLabelsHoras(24),
-    valores: this.generarRandomArray(24, 18, 30),
+    labels: [] as string[],
+    valores: [] as number[],
   };
   ultimaActualizacion = new Date();
-  tooltipFijo = `${this.graficaData.valores[this.graficaData.valores.length - 1]} °C`;
+  tooltipFijo = '';
   formattedLastUpdate: string = '';
 
   @ViewChild('lineChart', { static: false })
   lineChartComp!: LineChartComponent;
 
   // ───────── ALERTAS ACTIVAS ─────────
-  alertas: {
+  alertas: Array<{
     id: number;
     nivel: 'critica' | 'advertencia';
     mensaje: string;
     fecha: Date;
     zona: string;
-  }[] = [
-    {
-      id: 1,
-      nivel: 'critica',
-      mensaje: 'Alta temperatura detectada',
-      fecha: new Date('2025-06-05T11:45:00'),
-      zona: 'Zona Norte',
-    },
-    {
-      id: 2,
-      nivel: 'advertencia',
-      mensaje: 'Nivel de humedad bajo',
-      fecha: new Date('2025-06-05T10:15:00'),
-      zona: 'Zona Norte',
-    },
-    {
-      id: 3,
-      nivel: 'critica',
-      mensaje: 'Nivel de nitrógeno alto',
-      fecha: new Date('2025-06-05T09:30:00'),
-      zona: 'Zona Sur',
-    },
-  ];
+  }> = [];
+  resolviendoId: number | null = null;
 
   // ───────── PREDICCIONES SIMULADAS ─────────
   predicciones: {
@@ -490,10 +445,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── TAB ACTIVA ─────────
   tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
 
-  constructor() {}
+  constructor(
+    private dashSvc: DashboardService,
+    private notify: NotificationService
+  ) {}
 
   ngOnInit(): void {
-    this.simularPredicciones();
+    this.cargarInvernaderos();
     this.updateFormattedLastUpdate();
   }
 
@@ -505,11 +463,30 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   // ───────── FILTROS ─────────
   onInvernaderoChange(): void {
     this.filtros.zonaId = null;
+    this.cargarZonasYsensores();
+    this.cargarAlertas();
+  }
+
+  onZonaChange(): void {
+    this.cargarAlertas();
+    this.cambiarIntervalo(this.intervaloSeleccionado);
   }
 
   aplicarFiltros(): void {
+    this.cargarZonasYsensores();
+    this.cargarAlertas();
     this.cambiarIntervalo(this.intervaloSeleccionado);
   }
+
+  onSensorChange(): void {
+    const sensor = this.sensoresDisponibles.find((s) => s.id === this.sensorSeleccionado);
+    this.variablesDisponibles = sensor ? sensor.parametros.map((p) => ({ id: p.id, nombre: p.nombre as 'Temperatura' | 'Humedad' | 'Nitrógeno', unidad: p.unidad })) : [];
+    this.variableSeleccionada = this.variablesDisponibles[0] ?? null;
+    if (this.variableSeleccionada) {
+      this.cambiarIntervalo(this.intervaloSeleccionado);
+    }
+  }
+
 
   // ───────── CAMBIAR VARIABLE ─────────
   onVariableChange(): void {
@@ -520,47 +497,207 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   cambiarIntervalo(horas: 6 | 12 | 24): void {
     this.intervaloSeleccionado = horas;
 
-    // Generar nuevas etiquetas y datos aleatorios
-    this.graficaData = {
-      labels: this.generarLabelsHoras(horas),
-      valores: this.generarRandomArray(horas, 18, 30),
-    };
+    if (!this.filtros.invernaderoId || !this.variableSeleccionada || !this.sensorSeleccionado) return;
 
-    // Actualizar el componente hijo (LineChartComponent)
-    if (this.lineChartComp) {
-      this.lineChartComp.actualizarData(
-        this.graficaData.labels,
-        this.graficaData.valores,
-        this.variableSeleccionada
-      );
-    }
+    const hasta = new Date();
+    const desde = new Date(hasta.getTime() - horas * 60 * 60 * 1000);
+    const tipoId = this.variableSeleccionada ? this.variableSeleccionada.id : 0;
 
-    // Actualizar tooltip fijo y timestamp
-    const ultimoVal = this.graficaData.valores[this.graficaData.valores.length - 1];
-    const unidad = this.getUnidad(this.variableSeleccionada);
-    this.tooltipFijo = `${ultimoVal} ${unidad}`;
+    this.dashSvc
+      .getHistorial({
+        invernaderoId: this.filtros.invernaderoId,
+        zonaId: this.filtros.zonaId ?? undefined,
+        sensorId: this.sensorSeleccionado ?? undefined,
+        tipoParametroId: tipoId,
+        desde: desde.toISOString(),
+        hasta: hasta.toISOString(),
+      })
+      .subscribe({
+        next: (resp) => {
+          this.graficaData = {
+            labels: resp.series.map((s) =>
+              new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            ),
+            valores: resp.series.map((s) => s.value),
+          };
 
-    this.ultimaActualizacion = new Date();
-    this.updateFormattedLastUpdate();
+          if (this.lineChartComp && this.variableSeleccionada) {
+            this.lineChartComp.actualizarData(
+              this.graficaData.labels,
+              this.graficaData.valores,
+              this.variableSeleccionada.nombre
+            );
+          }
+
+          const ultimoVal = this.graficaData.valores[this.graficaData.valores.length - 1];
+          const unidad = this.getUnidad(this.variableSeleccionada?.nombre ?? 'Temperatura');
+          this.tooltipFijo = `${ultimoVal ?? '-'} ${unidad}`;
+          this.ultimaActualizacion = new Date();
+          this.updateFormattedLastUpdate();
+        },
+        error: () => this.notify.error('Error al cargar historial')
+      });
   }
 
-  // ───────── SIMULAR PREDICCIONES ─────────
-  private simularPredicciones(): void {
-    this.predicciones = [6, 12, 24].map((h) => {
-      const valor = parseFloat((Math.random() * (28 - 20) + 20).toFixed(1));
-      const confianza = Math.floor(Math.random() * (99 - 80) + 80);
-      const recomendacion = `Ventilar si > ${Math.floor(
-        Math.random() * (25 - 22) + 22
-      )} °C`;
-      return {
-        intervalo: h as 6 | 12 | 24,
-        valor,
-        confianza,
-        recomendacion,
-        variable: this.variableSeleccionada,
-      };
+  resolverAlerta(id: number) {
+    this.resolviendoId = id;
+    this.dashSvc.resolverAlerta(id).subscribe({
+      next: () => {
+        this.notify.success('Alerta resuelta');
+        this.cargarAlertas();
+      },
+      error: () => this.notify.error('Error al resolver alerta'),
+      complete: () => (this.resolviendoId = null)
     });
   }
+
+
+  private getIconForParam(nombre: string): string {
+    const n = nombre.toLowerCase();
+    if (n.includes('temper')) return 'ri-temperature-line';
+    if (n.includes('hum')) return 'ri-droplet-line';
+    if (n.includes('nitr')) return 'ri-flask-line';
+    return 'ri-dashboard-2-line';
+  }
+
+  private cargarInvernaderos() {
+    this.dashSvc.getInvernaderos().subscribe({
+      next: (list) => {
+        this.invernaderos = list;
+        if (list.length) {
+          this.filtros.invernaderoId = list[0].id;
+          this.onInvernaderoChange();
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.notify.error('Error al cargar invernaderos');
+      }
+    });
+  }
+
+  private cargarZonasYsensores() {
+    const id = this.filtros.invernaderoId;
+    if (!id) return;
+    this.dashSvc.getZonas(id).subscribe({
+      next: (z) => (this.zonasMap[id] = z),
+      error: () => this.notify.error('Error al cargar zonas')
+    });
+
+    const sensoresObs = this.filtros.zonaId
+      ? this.dashSvc.getSensoresPorZona(this.filtros.zonaId)
+      : this.dashSvc.getSensores(id);
+
+    sensoresObs.subscribe({
+      next: (sens) => {
+        this.sensoresDisponibles = sens;
+        this.totalSensores = sens.length;
+        this.sensoresActivos = sens.filter((s) => s.estado === 'Activo').length;
+
+        this.sensorSeleccionado = this.sensoresDisponibles[0]?.id ?? null;
+        this.onSensorChange();
+
+        const paramMap = new Map<string, string | undefined>();
+        sens.forEach((s) =>
+          s.parametros.forEach((p) => {
+            if (!paramMap.has(p.nombre)) paramMap.set(p.nombre, p.unidad);
+          })
+        );
+
+        this.kpiCards = [];
+        paramMap.forEach((unidad, nombre) => {
+          this.kpiCards.push({
+            label: nombre,
+            icon: this.getIconForParam(nombre),
+            value: 0,
+            unit: unidad,
+            unitTitle: unidad,
+          });
+        });
+
+        this.kpiCards.push({
+          label: 'Sensores activos',
+          icon: 'ri-hardware-chip-line',
+          value: `${this.sensoresActivos} / ${this.totalSensores}`,
+        });
+
+        this.kpiCards.push({
+          label: 'Estado',
+          icon: this.estadoIcono,
+          value: this.estadoTexto,
+          customClasses: this.estadoClasses,
+        });
+
+        const ids = sens.map((s) => s.id);
+        if (ids.length) {
+          this.dashSvc.getLecturas(ids).subscribe({
+            next: (lects) => {
+              let desactualizados = 0;
+              const ahora = Date.now();
+              lects.forEach((l) => {
+                const lecturaTime = l.time ? new Date(l.time).getTime() : 0;
+                if (!lecturaTime || ahora - lecturaTime > this.LECTURA_MAX_AGE_MS) {
+                  desactualizados++;
+                }
+                l.parametros.forEach((p, i) => {
+                  const val = l.valores[i];
+                  const card = this.kpiCards.find(
+                    (c) => c.label.toLowerCase() === p.toLowerCase()
+                  );
+                  if (card) card.value = val;
+                  const name = p.toLowerCase();
+                  if (name.includes('temper')) this.tempActual = val;
+                  if (name.includes('hum')) this.humedadActual = val;
+                  if (name.includes('nitr')) this.nitrogenoActual = val;
+                });
+              });
+
+              if (desactualizados) {
+                const nuevo: 'critica' | 'advertencia' =
+                  desactualizados === lects.length ? 'critica' : 'advertencia';
+                this.estadoSistema = this.peorEstado(this.estadoSistema, nuevo);
+              }
+            },
+            error: () => this.notify.error('Error al obtener lecturas'),
+          });
+        }
+      },
+      error: () => this.notify.error('Error al cargar sensores')
+    });
+  }
+
+  private cargarAlertas() {
+    this.dashSvc
+      .getAlertas({
+        estado: 'Activa',
+        invernadero_id: this.filtros.invernaderoId ?? undefined,
+        zona_id: this.filtros.zonaId ?? undefined,
+        perPage: 5,
+      })
+      .subscribe({
+        next: (resp) => {
+          this.alertas = resp.data.map((a) => ({
+            id: a.id,
+            nivel: a.nivel === 'Crítico' ? 'critica' : 'advertencia',
+            mensaje: a.mensaje,
+            fecha: new Date(a.fecha_hora),
+            zona: a.sensor_nombre || '',
+          }));
+
+          const niveles = resp.data.map((a) => a.nivel);
+          let nuevoEstado: 'sinRiesgo' | 'advertencia' | 'critica' = 'sinRiesgo';
+          if (niveles.includes('Crítico')) {
+            nuevoEstado = 'critica';
+          } else if (niveles.length) {
+            nuevoEstado = 'advertencia';
+          }
+          this.estadoSistema = this.peorEstado(this.estadoSistema, nuevoEstado);
+        },
+        error: () => this.notify.error('Error al cargar alertas'),
+      });
+  }
+
 
   /** Obtiene unidad según variable seleccionada */
   getUnidad(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): string {

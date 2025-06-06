@@ -1,5 +1,5 @@
 // src/app/dashboard/components/alert-card.component.ts
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -65,6 +65,18 @@ import { CommonModule } from '@angular/common';
           {{ fecha | date:'HH:mm' }} · {{ zona }}
         </p>
       </div>
+      <button
+        *ngIf="showResolve"
+        class="btn btn-outline btn-xs ml-2"
+        (click)="resolver.emit()"
+        [disabled]="resolviendo"
+        aria-label="Resolver alerta"
+      >
+        <ng-container *ngIf="resolviendo; else texto">
+          <span class="loading loading-spinner loading-sm"></span>
+        </ng-container>
+        <ng-template #texto>Resolver</ng-template>
+      </button>
     </div>
   `,
 })
@@ -73,4 +85,7 @@ export class AlertCardComponent {
   @Input() mensaje!: string;
   @Input() fecha!: Date;
   @Input() zona!: string;
+  @Input() showResolve = false;
+  @Input() resolviendo = false;
+  @Output() resolver = new EventEmitter<void>();
 }
