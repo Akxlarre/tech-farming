@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { AppLogoComponent } from "../app-logo.component";
 
 @Component({
@@ -8,4 +8,6 @@ import { AppLogoComponent } from "../app-logo.component";
   styleUrls: ['./splash.component.css'],
   imports: [AppLogoComponent],
 })
-export class SplashComponent {}
+export class SplashComponent {
+  @Input() fadeOut = false;
+}

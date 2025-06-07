@@ -1,4 +1,4 @@
-<div class="fixed inset-0 bg-white z-[99999] flex items-center justify-center">
+<div class="fixed inset-0 bg-white z-[99999] flex items-center justify-center" [ngClass]="{'fade-out': fadeOut}">
     <!-- Flare animación de fondo -->
     <div class="absolute inset-0 z-[99998] pointer-events-none flare-animation"></div>
   
@@ -7,11 +7,11 @@
   
       <!-- Branding con imagen -->
       <div class="flex items-center gap-4 flex-wrap justify-center text-center">
-        <img src="assets/img/hoja-logo.png" 
+        <img src="assets/img/hoja-logo.png"
              alt="Logo Tech Farming"
-             class="w-[4rem] sm:w-[5rem] md:w-[6rem] h-auto rounded-full drop-shadow-xl saturate-[1.2] animate-splashIcon">
+             class="w-[6rem] sm:w-[8rem] md:w-[10rem] h-auto rounded-full drop-shadow-xl saturate-[1.2] animate-splashIcon">
   
-        <h1 class="text-[2rem] sm:text-[2.75rem] md:text-[4rem] font-extrabold text-green-800 tracking-tight animate-splashText drop-shadow-md">
+        <h1 class="text-[3rem] sm:text-[4rem] md:text-[5rem] font-extrabold text-green-800 tracking-tight animate-splashText drop-shadow-md">
           Tech Farming
         </h1>
       </div>
