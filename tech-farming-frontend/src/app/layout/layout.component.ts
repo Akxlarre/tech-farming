@@ -24,10 +24,13 @@ export class LayoutComponent {
   ) { }
 
   showSplash = true;
+  hideSplash = false;
 
   ngOnInit() {
     setTimeout(() => {
-      this.showSplash = false;
+      this.hideSplash = true;
+      setTimeout(() => {
+        this.showSplash = false;
 
       this.route.queryParams.subscribe(params => {
         const vieneDeInvitacion = params['invitacion'] === 'true';
@@ -36,8 +39,9 @@ export class LayoutComponent {
           this.router.navigateByUrl('/dashboard');
         }
       });
+      }, 500);
 
 
-    }, 2000);
+    }, 4000);
   }
 }

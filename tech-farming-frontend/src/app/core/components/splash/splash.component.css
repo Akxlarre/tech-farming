@@ -64,12 +64,22 @@
     100% { content: '.'; }
   }
   
-  .dots-animation::after {
+.dots-animation::after {
     content: '.';
     animation: blinkDots 1.5s steps(3, end) infinite;
     position: absolute;
     top: 0;
     right: -1.5ch;
     width: 2ch;
-    text-align: left;
-  }
+  text-align: left;
+}
+
+/* Fade out when closing */
+@keyframes splashFadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.9); }
+}
+
+.fade-out {
+  animation: splashFadeOut 0.5s ease-in-out forwards;
+}

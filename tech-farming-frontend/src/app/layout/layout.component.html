@@ -1,7 +1,7 @@
 <!-- layout.component.html -->
 
 <!-- Splash -->
-<app-splash *ngIf="showSplash" class="fixed inset-0 z-[9999]"></app-splash>
+<app-splash *ngIf="showSplash" [fadeOut]="hideSplash" class="fixed inset-0 z-[9999]"></app-splash>
 
 <!-- Contenido principal (se oculta mientras el splash está activo) -->
 <ng-container *ngIf="!showSplash">
