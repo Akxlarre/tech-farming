@@ -8,7 +8,7 @@ import { SensorModalType } from '../sensor-modal.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="card bg-base-100 shadow-lg p-6">
+    <div *ngIf="!loading; else cardSkeleton" class="card bg-base-100 shadow-lg p-6">
       <!-- Header -->
       <div class="flex justify-between items-center mb-2">
         <h3 class="text-lg font-semibold">{{ sensor.nombre }}</h3>
@@ -115,6 +115,14 @@ import { SensorModalType } from '../sensor-modal.service';
         </button>
       </div>
     </div>
+    <ng-template #cardSkeleton>
+      <div class="card bg-base-100 shadow-lg p-6 animate-pulse space-y-4">
+        <div class="h-4 w-32 rounded bg-base-300 skeleton"></div>
+        <div class="h-4 w-24 rounded bg-base-300 skeleton"></div>
+        <div class="h-4 w-20 rounded bg-base-300 skeleton"></div>
+        <div class="h-4 w-28 rounded bg-base-300 skeleton"></div>
+      </div>
+    </ng-template>
   `,
   styles: [`
     :host { display: block; }
@@ -122,6 +130,7 @@ import { SensorModalType } from '../sensor-modal.service';
 })
 export class SensorCardComponent {
   @Input() sensor!: Sensor;
+  @Input() loading = false;
   @Output() accion = new EventEmitter<{ tipo: SensorModalType; sensor: Sensor }>();
 
   getUnidad(param: string): string {
