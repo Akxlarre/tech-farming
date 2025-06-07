@@ -23,9 +23,9 @@ import { Observable } from 'rxjs';
         class="
           logo-svg
           fill-current
-          w-6 h-6       /* xs: 24×24 */
-          sm:w-8 sm:h-8 /* sm: 32×32 */
-          md:w-10 md:h-10 /* md: 40×40 */
+          w-10 h-10       /* xs: 24×24 */
+          sm:w-14 sm:h-14 /* sm: 32×32 */
+          md:w-16 md:h-16 /* md: 40×40 */
           lg:w-12 lg:h-12 /* lg+: 48×48 */
           transition-all
         "
