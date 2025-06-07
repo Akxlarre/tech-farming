@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AppLogoComponent } from '../../core/components/app-logo.component';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
@@ -19,7 +20,7 @@ interface LoginForm {
 @Component({
   standalone: true,
   selector: 'app-login',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, AppLogoComponent],
   templateUrl: './login.component.html',
 })
 
