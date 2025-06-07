@@ -23,64 +23,42 @@ import { SensorModalType } from '../sensor-modal.service';
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody *ngIf="!loading; else loadingRows">
           <tr *ngFor="let s of sensores; trackBy: trackByFn" class="hover">
             <td>{{ s.nombre }}</td>
             <td>{{ s.tipo_sensor.nombre }}</td>
             <td>{{ getZonaName(s) }}</td>
             <td>{{ getInvernaderoName(s) }}</td>
             <td>
-              <ng-container *ngIf="s.alertaActiva !== undefined; else loadingEstado">
-                <span
-                  class="badge badge-md"
-                  [ngClass]="{
-                    'badge-error': s.alertaActiva,
-                    'badge-success': !s.alertaActiva && s.estado === 'Activo',
-                    'badge-warning': !s.alertaActiva && s.estado === 'Inactivo',
-                    'badge-neutral': !s.alertaActiva && s.estado === 'Mantenimiento'
-                  }">
-                  {{
-                    s.alertaActiva
-                      ? 'Alerta'
-                      : s.estado
-                  }}
-                </span>
-              </ng-container>
-              <ng-template #loadingEstado>
-                <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
-              </ng-template>
+              <span
+                class="badge badge-md"
+                [ngClass]="{
+                  'badge-error': s.alertaActiva,
+                  'badge-success': !s.alertaActiva && s.estado === 'Activo',
+                  'badge-warning': !s.alertaActiva && s.estado === 'Inactivo',
+                  'badge-neutral': !s.alertaActiva && s.estado === 'Mantenimiento'
+                }">
+                {{ s.alertaActiva ? 'Alerta' : s.estado }}
+              </span>
             </td>
             <td>
-            <ng-container *ngIf="s.ultimaLectura !== undefined; else loadingLectura">
               <ng-container *ngIf="s.ultimaLectura?.time as t; else noData">
                 {{ t | date: 'short' }}
               </ng-container>
               <ng-template #noData>— sin datos —</ng-template>
-            </ng-container>
-            <ng-template #loadingLectura>
-            <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
-            </ng-template>
-          </td>
+            </td>
             <td>
               <ul class="space-y-1">
                 <li *ngFor="let param of s.parametros">{{ param.nombre }}</li>
               </ul>
             </td>
             <td>
-              <ng-container *ngIf="s.ultimaLectura !== undefined; else loadingValores">
-                <ng-container *ngIf="s.ultimaLectura?.parametros?.length; else noData">
-                  <div *ngFor="let line of getValorLines(s)">
-                    {{ line }}
-                  </div>
-                </ng-container>
-                <ng-template #noData>—</ng-template>
-              </ng-container>
-
-              <ng-template #loadingValores>
-                <div class="space-y-1">
-                  <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+              <ng-container *ngIf="s.ultimaLectura?.parametros?.length; else noVal">
+                <div *ngFor="let line of getValorLines(s)">
+                  {{ line }}
                 </div>
-              </ng-template>
+              </ng-container>
+              <ng-template #noVal>—</ng-template>
             </td>
             <td class="flex justify-center space-x-1">
               <!-- Ver sensor -->
@@ -132,6 +110,13 @@ import { SensorModalType } from '../sensor-modal.service';
             </td>
           </tr>
         </tbody>
+        <ng-template #loadingRows>
+          <tr *ngFor="let _ of skeletonArray" class="hover">
+            <td colspan="9">
+              <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+            </td>
+          </tr>
+        </ng-template>
       </table>
     </div>
   `,
@@ -140,12 +125,14 @@ import { SensorModalType } from '../sensor-modal.service';
     ul { margin: 0; padding: 0; list-style: none; }
   `]
 })
-export class SensorTableComponent {
-  @Input() puedeEditar = false;
-  @Input() puedeEliminar = false;
-  @Input() sensores: Sensor[] = [];
-  @Input() trackByFn!: (_: number, item: Sensor) => any;
-  @Output() accion = new EventEmitter<{ tipo: SensorModalType; sensor: Sensor }>();
+  export class SensorTableComponent {
+    @Input() puedeEditar = false;
+    @Input() puedeEliminar = false;
+    @Input() sensores: Sensor[] = [];
+    @Input() loading = false;
+    @Input() rowCount = 5;
+    @Input() trackByFn!: (_: number, item: Sensor) => any;
+    @Output() accion = new EventEmitter<{ tipo: SensorModalType; sensor: Sensor }>();
   getZonaName(s: Sensor): string {
     return s.zona?.nombre ?? '— sin zona —';
   }
@@ -154,9 +141,9 @@ export class SensorTableComponent {
     return s.invernadero?.nombre ?? '— sin invernadero —';
   }
 
-  getValorLines(s: Sensor): string[] {
-    const ult = s.ultimaLectura;
-    if (!ult?.parametros?.length) return [];
+    getValorLines(s: Sensor): string[] {
+      const ult = s.ultimaLectura;
+      if (!ult?.parametros?.length) return [];
     return ult.parametros.map((nombre, idx) => {
       const valor = Array.isArray(ult.valores) && ult.valores[idx] != null
         ? ult.valores[idx]
@@ -165,5 +152,9 @@ export class SensorTableComponent {
       const unidad = meta?.unidad ? ` ${meta.unidad}` : '';
       return `${nombre}: ${valor}${unidad}`.trim();
     });
+  }
+
+  get skeletonArray() {
+    return Array.from({ length: this.rowCount });
   }
 }
