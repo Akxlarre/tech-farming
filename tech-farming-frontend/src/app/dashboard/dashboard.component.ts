@@ -99,9 +99,9 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
       </section>
 
       <!-- ─────── 3) CONTENEDOR PRINCIPAL (Gráfica + Panel Derecho) ─────── -->
-      <section class="flex flex-grow overflow-hidden px-4 md:px-8">
+      <section class="flex flex-col lg:flex-row flex-grow overflow-hidden px-4 md:px-8">
         <!-- ─── 3A) Gráfica 24h ─── -->
-        <div class="w-full lg:w-7/12 card bg-base-100 shadow-lg border border-base-200 flex flex-col mr-4">
+        <div class="w-full lg:w-7/12 card bg-base-100 shadow-lg border border-base-200 flex flex-col lg:mr-4">
           <!-- Card Header (Título + Controles + Última actualización) -->
           <div class="card-body p-4 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
             <!-- Título Gráfico -->
