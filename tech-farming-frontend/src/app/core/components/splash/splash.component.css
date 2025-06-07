@@ -1,40 +1,31 @@
- /* Fondo flare */
- @keyframes flarePulse {
-    0%   { opacity: 0; transform: scale(1); }
-    50%  { opacity: 0.6; transform: scale(1.2); }
-    100% { opacity: 0; transform: scale(1.4); }
-  }
+/* Fondo flare */
+@keyframes flarePulse {
+  0%   { opacity: 0; transform: scale(1); }
+  50%  { opacity: 0.6; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
 
-  .flare-animation {
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
-    animation: flarePulse 2s ease-out forwards;  }
+.flare-animation {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+  animation: flarePulse 2s ease-out forwards;
+}
 
-  /* Animaciones de entrada */
-  @keyframes splashPulse {
-    0%   { transform: scale(0.9); opacity: 0; }
-    50%  { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-  }
+/* Animaciones inspiradas en los modales */
+@keyframes overlayIn   { from { opacity: 0 } to { opacity: 1 } }
+@keyframes overlayOut  { from { opacity: 1 } to { opacity: 0 } }
+.animate-overlayIn  { animation: overlayIn  0.3s ease-out forwards }
+.animate-overlayOut { animation: overlayOut 0.25s ease-in forwards }
 
-  @keyframes splashIcon {
-    0%   { transform: scale(0.6); opacity: 0; }
-    40%  { transform: scale(1.1); opacity: 1; }
-    70%  { transform: scale(0.95); }
-    100% { transform: scale(1); }
-  }
-  
-  .animate-splashIcon {
-    animation: splashIcon 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  }
-
-  @keyframes splashText {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .animate-splashPulse { animation: splashPulse 1.6s ease-out; }
-  .animate-splashIcon  { animation: splashIcon 1.4s ease-out; }
-  .animate-splashText  { animation: splashText 1.2s ease-out; }
+@keyframes fadeInZoom  {
+  from { opacity:0; transform:scale(0.95) translateY(10px); }
+  to   { opacity:1; transform:scale(1)    translateY(0); }
+}
+@keyframes fadeOutZoom {
+  from { opacity:1; transform:scale(1)    translateY(0); }
+  to   { opacity:0; transform:scale(0.95) translateY(10px); }
+}
+.animate-fadeInZoom  { animation: fadeInZoom  0.3s ease-out forwards }
+.animate-fadeOutZoom { animation: fadeOutZoom 0.25s ease-in forwards }
 
   /* Spinner */
   @keyframes spinnerSoft {
@@ -74,12 +65,3 @@
   text-align: left;
 }
 
-/* Fade out when closing */
-@keyframes splashFadeOut {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(0.9); }
-}
-
-.fade-out {
-  animation: splashFadeOut 0.5s ease-in-out forwards;
-}
