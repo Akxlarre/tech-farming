@@ -428,7 +428,7 @@ import {
             <div class="relative">
               <!-- Tabla Desktop -->
               <table
-                *ngIf="sensoresPage.data.length"
+                *ngIf="!isLoadingSensores && sensoresPage.data.length; else tableSkeleton"
                 class="table w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
@@ -461,6 +461,18 @@ import {
                   </tr>
                 </tbody>
               </table>
+
+              <ng-template #tableSkeleton>
+                <table class="table w-full hidden sm:table">
+                  <tbody>
+                    <tr *ngFor="let _ of skeletonArray" class="hover">
+                      <td colspan="5">
+                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-template>
   
               <!-- Sin Sensores -->
               <div
@@ -472,7 +484,7 @@ import {
   
               <!-- Lista Mobile -->
               <ul
-                *ngIf="sensoresPage.data.length"
+                *ngIf="!isLoadingSensores && sensoresPage.data.length; else listSkeleton"
                 class="sm:hidden flex flex-col divide-y divide-base-200"
                 role="list"
               >
@@ -502,6 +514,17 @@ import {
                   </div>
                 </li>
               </ul>
+
+              <ng-template #listSkeleton>
+                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                  <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
+                    <div class="space-y-2">
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                    </div>
+                  </li>
+                </ul>
+              </ng-template>
   
               <!-- Overlay de carga -->
               <div
@@ -1369,6 +1392,10 @@ import {
      */
     trackBySensor(index: number, s: SensorDetalle): number {
       return s.id;
+    }
+
+    get skeletonArray() {
+      return Array.from({ length: this.sensoresPageSize });
     }
   
     /**
