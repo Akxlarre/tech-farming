@@ -5,10 +5,7 @@
     100% { opacity: 0; transform: scale(1.4); }
   }
 
-  .flare-animation {
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
-    animation: flarePulse 0.9s ease-out forwards;
-  }
+
 
   /* Animaciones de entrada */
   @keyframes splashPulse {
@@ -28,7 +25,7 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .animate-splashPulse { animation: splashPulse 1.6s ease-out; }
+  .animate-splashPulse { animation: splashPulse 12s ease-out; }
   .animate-splashIcon  { animation: splashIcon 1.4s ease-out; }
   .animate-splashText  { animation: splashText 1.2s ease-out; }
 

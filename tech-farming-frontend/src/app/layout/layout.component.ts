@@ -38,6 +38,6 @@ export class LayoutComponent {
       });
 
 
-    }, 2000);
+    }, 6000);
   }
 }
