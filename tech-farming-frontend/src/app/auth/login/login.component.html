@@ -1,4 +1,4 @@
-<section class="hero min-h-screen bg-gradient-to-br from-base-300 to-base-100">
+<section class="hero min-h-screen bg-base-200">
   <div class="hero-content flex-col w-full">
     <div class="card w-full max-w-md shadow-xl bg-base-100/70 backdrop-blur-lg border border-base-300">
       <div class="card-body space-y-4">
@@ -39,7 +39,7 @@
               </div>
               <div class="flex justify-end gap-2 mt-4">
                 <button class="btn btn-outline" (click)="closeResetPasswordModal()">Cancelar</button>
-                <button class="btn btn-primary flex items-center gap-2" [disabled]="cargandoResetPassword()" (click)="sendResetPasswordEmail()">
+                <button class="btn btn-success text-base-content flex items-center gap-2" [disabled]="cargandoResetPassword()" (click)="sendResetPasswordEmail()">
                   <span *ngIf="!cargandoResetPassword(); else spinner">Enviar</span>
                   <ng-template #spinner>
                     <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -54,15 +54,15 @@
           <!-- Success Modal -->
           <div *ngIf="showSuccessModal()" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm">
             <div class="relative w-full max-w-md bg-base-100 rounded-xl shadow-lg p-6 space-y-4 border border-base-300">
-              <h3 class="text-lg font-bold text-success flex items-center gap-2">✅ ¡Correo Enviado!</h3>
+              <h3 class="text-lg font-bold text-success flex items-center gap-2">¡Correo Enviado!</h3>
               <p class="text-sm opacity-70">Hemos enviado un enlace de recuperación a tu correo.</p>
               <div class="flex justify-end mt-4">
-                <button class="btn btn-primary" (click)="showSuccessModal.set(false)">Cerrar</button>
+                <button class="btn btn-success text-base-content" (click)="showSuccessModal.set(false)">Cerrar</button>
               </div>
             </div>
           </div>
           <div class="relative w-full">
-            <button type="submit" class="btn btn-primary w-full font-semibold shadow-lg flex items-center justify-center gap-2 transition-all duration-200">
+            <button type="submit" class="btn btn-success text-base-content w-full font-semibold shadow-lg flex items-center justify-center gap-2 transition-all duration-200">
               <span *ngIf="!cargando(); else loadingText">Acceder</span>
               <ng-template #loadingText>
                 <div class="flex items-center justify-center">
@@ -73,7 +73,7 @@
                 </div>
               </ng-template>
             </button>
-            <div *ngIf="cargando()" class="absolute inset-0 bg-primary opacity-60 flex items-center justify-center pointer-events-none rounded-lg"></div>
+            <div *ngIf="cargando()" class="absolute inset-0 bg-success opacity-60 flex items-center justify-center pointer-events-none rounded-lg"></div>
           </div>
         </form>
       </div>
