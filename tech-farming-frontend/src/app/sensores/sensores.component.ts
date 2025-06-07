@@ -212,6 +212,8 @@ export class SensoresComponent implements OnInit, OnDestroy {
   isDataFullyLoaded = false;
   loading = false;
   private loadCount = 0;
+  private initialLoad = true;
+
   // paginación
   pageSize     = 5;
   currentPage  = 1;
@@ -336,6 +338,8 @@ export class SensoresComponent implements OnInit, OnDestroy {
       
         if (!this.isDataFullyLoaded) {
           this.isDataFullyLoaded = true;
+          this.endLoading();
+
         }
       })
     );
@@ -368,16 +372,22 @@ export class SensoresComponent implements OnInit, OnDestroy {
   }
 
   private startLoading(): void {
+    if (!this.initialLoad) return;
+
     this.loadCount++;
     this.loading = true;
   }
 
   private endLoading(): void {
+    if (!this.initialLoad) return;
+
     if (this.loadCount > 0) {
       this.loadCount--;
     }
     if (this.loadCount === 0) {
       this.loading = false;
+      this.initialLoad = false;
+
     }
   }
 
