@@ -2,7 +2,7 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule }           from '@angular/common';
 import { timer, Subscription, of, combineLatest }                   from 'rxjs';
-import { catchError, exhaustMap, tap }               from 'rxjs/operators';
+import { catchError, exhaustMap, tap, switchMap }               from 'rxjs/operators';
 
 import {
   SensoresService,
@@ -45,6 +45,7 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
     SensorDeleteModalComponent
   ],
   template: `
+    <div *ngIf="!loading; else loadingTpl">
     <!-- HEADER -->
     <app-sensor-header
       (create)="modal.openModal('create')"
@@ -66,7 +67,9 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
           [puedeEditar]="puedeEditar"
           [puedeEliminar]="puedeEliminar"
           (accion)="onAccion($event)"
-          [trackByFn]="trackBySensorId">
+          [trackByFn]="trackBySensorId"
+          [loading]="!isDataFullyLoaded"
+          [rowCount]="pageSize">
         </app-sensor-table>
       </div>
 
@@ -75,6 +78,7 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
         <app-sensor-card
           *ngFor="let s of sensoresConLectura; trackBy: trackBySensorId"
           [sensor]="s"
+          [loading]="!isDataFullyLoaded"
           (accion)="onAccion($event)">
         </app-sensor-card>
       </div>
@@ -175,12 +179,39 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
         </ng-container>
       </ng-container>
     </app-sensor-modal-wrapper>
+    </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg
+          class="animate-spin w-8 h-8 text-success mx-auto"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8z"
+          ></path>
+        </svg>
+      </div>
+    </ng-template>
   `
 })
 export class SensoresComponent implements OnInit, OnDestroy {
   sensoresConLectura: Sensor[] = [];
   refreshSub?: Subscription;
-  isDataFullyLoaded = false; 
+  isDataFullyLoaded = false;
+  loading = false;
+  private loadCount = 0;
   // paginación
   pageSize     = 5;
   currentPage  = 1;
@@ -257,6 +288,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
   }
 
   private loadPage(page: number) {
+    this.startLoading();
     this.currentPage = page;
     this.refreshSub?.unsubscribe();
     this.isDataFullyLoaded = false;
@@ -266,14 +298,17 @@ export class SensoresComponent implements OnInit, OnDestroy {
         tap(resp => {
           this.sensoresConLectura = resp.data;
           this.totalSensors = resp.total;
+          this.endLoading();
         }),
-        exhaustMap(() =>
+        switchMap(() =>
           timer(0, 60000).pipe(
             exhaustMap(() => this.updateLecturas().pipe(catchError(() => of([]))))
           )
         )
       )
-      .subscribe();
+      .subscribe({
+        error: () => this.endLoading()
+      });
   }
 
   private updateLecturas() {
@@ -299,7 +334,9 @@ export class SensoresComponent implements OnInit, OnDestroy {
           }
         });
       
-        this.isDataFullyLoaded = true;
+        if (!this.isDataFullyLoaded) {
+          this.isDataFullyLoaded = true;
+        }
       })
     );
   }
@@ -328,6 +365,20 @@ export class SensoresComponent implements OnInit, OnDestroy {
   goToPage(p: number) {
     if (p < 1 || p > this.totalPages) return;
     this.loadPage(p);
+  }
+
+  private startLoading(): void {
+    this.loadCount++;
+    this.loading = true;
+  }
+
+  private endLoading(): void {
+    if (this.loadCount > 0) {
+      this.loadCount--;
+    }
+    if (this.loadCount === 0) {
+      this.loading = false;
+    }
   }
 
   onAccion(evt: { tipo: SensorModalType; sensor: Sensor }) {
