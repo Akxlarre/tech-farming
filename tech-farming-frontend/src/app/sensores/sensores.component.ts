@@ -210,7 +210,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
   sensoresConLectura: Sensor[] = [];
   refreshSub?: Subscription;
   isDataFullyLoaded = false;
-  loading = false;
+  loading = true;
   private loadCount = 0;
   private initialLoad = true;
 
