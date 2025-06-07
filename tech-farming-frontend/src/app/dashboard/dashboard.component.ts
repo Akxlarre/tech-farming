@@ -16,6 +16,7 @@ import { FooterComponent } from './components/footer.component';
 import { DashboardService } from './services/dashboard.service';
 import { NotificationService } from '../shared/services/notification.service';
 import { Invernadero, Zona, Sensor, Alerta } from '../models';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-page',
