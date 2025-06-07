@@ -43,7 +43,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
           <!-- Filtros Rápidos -->
           <div class="mt-4 md:mt-0 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <!-- Select Invernadero -->
-            <div class="form-control w-48">
+            <div class="form-control w-full sm:w-48">
               <label class="label label-text text-sm">Invernadero</label>
               <select
                 id="invernaderoSelect"
@@ -60,7 +60,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
             </div>
 
             <!-- Select Zona -->
-            <div class="form-control w-48">
+            <div class="form-control w-full sm:w-48">
               <label class="label label-text text-sm">Zona</label>
               <select
                 id="zonaSelect"
@@ -99,9 +99,9 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
       </section>
 
       <!-- ─────── 3) CONTENEDOR PRINCIPAL (Gráfica + Panel Derecho) ─────── -->
-      <section class="flex flex-grow overflow-hidden px-4 md:px-8">
+      <section class="flex flex-col lg:flex-row flex-grow overflow-hidden px-4 md:px-8">
         <!-- ─── 3A) Gráfica 24h ─── -->
-        <div class="w-full lg:w-7/12 card bg-base-100 shadow-lg border border-base-200 flex flex-col mr-4">
+        <div class="w-full lg:w-7/12 card bg-base-100 shadow-lg border border-base-200 flex flex-col lg:mr-4">
           <!-- Card Header (Título + Controles + Última actualización) -->
           <div class="card-body p-4 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
             <!-- Título Gráfico -->
@@ -225,7 +225,7 @@ import { Invernadero, Zona, Sensor, Alerta } from '../models';
         </div>
 
         <!-- ─── 3B) Panel Derecho con Tabs ─── -->
-        <div class="w-full lg:w-5/12 bg-base-100 rounded-lg shadow-lg border border-base-200 flex flex-col">
+        <div class="w-full lg:w-5/12 bg-base-100 rounded-lg shadow-lg border border-base-200 flex flex-col mt-4 lg:mt-0">
           <!-- Header Tabs (ya no envolvemos con p-4 innecesario) -->
           <app-tabs-panel
             [activeTab]="tabActiva"
