@@ -361,6 +361,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   zonasMap: Record<number, Zona[]> = {};
   filtros = { invernaderoId: null as number | null, zonaId: null as number | null };
   loading = true;
+  private loadCount = 0;
+  private initialLoad = true;
 
   // ───────── KPI PRINCIPALES ─────────
   tempActual = 0;
@@ -533,6 +535,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     const desde = new Date(hasta.getTime() - horas * 60 * 60 * 1000);
     const tipoId = this.variableSeleccionada ? this.variableSeleccionada.id : 0;
 
+    this.startLoading();
     this.dashSvc
       .getHistorial({
         invernaderoId: this.filtros.invernaderoId,
@@ -542,6 +545,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
         desde: desde.toISOString(),
         hasta: hasta.toISOString(),
       })
+      .pipe(finalize(() => this.endLoading()))
       .subscribe({
         next: (resp) => {
           this.graficaData = {
@@ -591,36 +595,44 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }
 
   private cargarInvernaderos() {
-    this.dashSvc.getInvernaderos().subscribe({
-      next: (list) => {
-        this.invernaderos = list;
-        if (list.length) {
-          this.filtros.invernaderoId = list[0].id;
-          this.onInvernaderoChange();
+    this.startLoading();
+    this.dashSvc
+      .getInvernaderos()
+      .pipe(finalize(() => this.endLoading()))
+      .subscribe({
+        next: (list) => {
+          this.invernaderos = list;
+          if (list.length) {
+            this.filtros.invernaderoId = list[0].id;
+            this.onInvernaderoChange();
+          }
+        },
+        error: () => {
+          this.notify.error('Error al cargar invernaderos');
         }
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.notify.error('Error al cargar invernaderos');
-      }
-    });
+      });
   }
 
   private cargarZonasYsensores() {
     const id = this.filtros.invernaderoId;
     if (!id) return;
-    this.dashSvc.getZonas(id).subscribe({
-      next: (z) => (this.zonasMap[id] = z),
-      error: () => this.notify.error('Error al cargar zonas')
-    });
+    this.startLoading();
+    this.dashSvc
+      .getZonas(id)
+      .pipe(finalize(() => this.endLoading()))
+      .subscribe({
+        next: (z) => (this.zonasMap[id] = z),
+        error: () => this.notify.error('Error al cargar zonas'),
+      });
 
     const sensoresObs = this.filtros.zonaId
       ? this.dashSvc.getSensoresPorZona(this.filtros.zonaId)
       : this.dashSvc.getSensores(id);
-
-    sensoresObs.subscribe({
-      next: (sens) => {
+    this.startLoading();
+    sensoresObs
+      .pipe(finalize(() => this.endLoading()))
+      .subscribe({
+        next: (sens) => {
         this.sensoresDisponibles = sens;
         this.totalSensores = sens.length;
         this.sensoresActivos = sens.filter((s) => s.estado === 'Activo').length;
@@ -661,8 +673,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
         const ids = sens.map((s) => s.id);
         if (ids.length) {
-          this.dashSvc.getLecturas(ids).subscribe({
-            next: (lects) => {
+          this.startLoading();
+          this.dashSvc
+            .getLecturas(ids)
+            .pipe(finalize(() => this.endLoading()))
+            .subscribe({
+              next: (lects) => {
               let desactualizados = 0;
               const ahora = Date.now();
               lects.forEach((l) => {
@@ -690,8 +706,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
                 this.updateEstadoCard();
               }
             },
-            error: () => this.notify.error('Error al obtener lecturas'),
-          });
+              error: () => this.notify.error('Error al obtener lecturas'),
+            });
         }
       },
       error: () => this.notify.error('Error al cargar sensores')
@@ -699,6 +715,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }
 
   private cargarAlertas() {
+    this.startLoading();
     this.dashSvc
       .getAlertas({
         estado: 'Activa',
@@ -706,6 +723,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
         zona_id: this.filtros.zonaId ?? undefined,
         perPage: 5,
       })
+      .pipe(finalize(() => this.endLoading()))
       .subscribe({
         next: (resp) => {
           this.alertas = resp.data.map((a) => ({
@@ -726,7 +744,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
           this.estadoSistema = this.peorEstado(this.estadoSistema, nuevoEstado);
           this.updateEstadoCard();
         },
-        error: () => this.notify.error('Error al cargar alertas'),
+        error: () => this.notify.error('Error al cargar alertas')
       });
   }
 
@@ -766,6 +784,23 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       arr.push(`${dia}/${mes}`);
     }
     return arr;
+  }
+
+  private startLoading(): void {
+    if (!this.initialLoad) return;
+    this.loadCount++;
+    this.loading = true;
+  }
+
+  private endLoading(): void {
+    if (!this.initialLoad) return;
+    if (this.loadCount > 0) {
+      this.loadCount--;
+    }
+    if (this.loadCount === 0) {
+      this.loading = false;
+      this.initialLoad = false;
+    }
   }
 
   private updateFormattedLastUpdate(): void {
