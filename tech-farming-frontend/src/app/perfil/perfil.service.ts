@@ -20,7 +20,12 @@ export class PerfilService {
     return { usuario: data, error };
   }
 
-  async actualizarUsuario(uid: string, cambios: Partial<{ nombre: string; apellido: string; telefono: string }>) {
+  async actualizarUsuario(uid: string, cambios: Partial<{
+    nombre: string;
+    apellido: string; 
+    telefono: string;
+    avatar_url: string 
+  }>) {
     const { error } = await this._supabaseClient
       .from('usuarios')
       .update(cambios)
@@ -28,4 +33,17 @@ export class PerfilService {
 
     return { error };
   }
+
+  async actualizarCorreo(nuevoCorreo: string) {
+    const emailRedirectTo = `${window.location.origin}/confirm-email`;
+    const { error: authError } = await this._supabaseClient.auth.updateUser({ email: nuevoCorreo }, { emailRedirectTo });
+    if (authError) {
+      return { error: authError };
+    }
+
+    return { error: null };
+  }
 }
+
+
+
