@@ -13,8 +13,13 @@ import { PerfilService } from '../../perfil/perfil.service';
       <button (click)="toggleMenu()"
               aria-label="Perfil"
               class="flex items-center btn btn-ghost px-2 space-x-2 focus:ring-2 focus:ring-success">
-        <div class="w-10 h-10 rounded-full overflow-hidden ring ring-success ring-offset-base-100 ring-offset-2">
-          <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" />
+        <div class="w-10 h-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2 overflow-hidden">
+          <ng-container *ngIf="!cargandoAvatar; else skeletonAvatar">
+            <img [src]="avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+          </ng-container>
+          <ng-template #skeletonAvatar>
+            <div class="w-full h-full bg-gray-300 animate-pulse rounded-full"></div>
+          </ng-template>
         </div>
         <div class="hidden lg:flex items-center gap-1 font-medium">
           <ng-container *ngIf="!cargandoNombre; else cargandoNombreTpl">
@@ -104,16 +109,49 @@ export class ProfileMenuComponent {
   private authService = inject(AuthService);
   private perfilService = inject(PerfilService);
   nombre = '';
+  avatarUrl = '';
   cargandoNombre = true;
+  cargandoAvatar = true;
 
   async ngOnInit() {
     const { user, error: authError } = await this.perfilService.getUsuarioAutenticado();
     if (authError || !user) return;
 
     const { usuario, error: dbError } = await this.perfilService.getDatosPerfil(user.id);
-    if (!dbError && usuario?.nombre) {
+
+    if (dbError || !usuario) return;
+
+    // Asignar nombre para mostrar
+    if (usuario.nombre) {
       this.nombre = usuario.nombre;
     }
+
+    // Verificar y asignar avatar si no hay
+    if (!usuario.avatar_url) {
+      const opciones = [
+        'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar1.png',
+        'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar2.png',
+        'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar3.png',
+        'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar4.png',
+        'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar5.png'
+      ];
+      const aleatorio = opciones[Math.floor(Math.random() * opciones.length)];
+
+      await this.perfilService.actualizarUsuario(user.id, { avatar_url: aleatorio });
+      this.avatarUrl = aleatorio;
+    } else {
+      this.avatarUrl = usuario.avatar_url;
+    }
+
+    const img = new Image();
+    img.src = this.avatarUrl;
+    img.onload = () => {
+      this.cargandoAvatar = false;
+    };
+    img.onerror = () => {
+      this.cargandoAvatar = false;
+    };
+
     this.cargandoNombre = false;
   }
 

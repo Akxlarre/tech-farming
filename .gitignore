@@ -7,6 +7,8 @@
 /tech-farming-backend/__pycache__/
 /tech-farming-backend/.venv/
 /tech-farming-backend/venv/
+/tech-farming-backend/venv312/
+/tech-farming-backend/venv313/
 /tech-farming-backend/env/
 /tech-farming-backend/*.pyc
 

@@ -17,7 +17,7 @@ export const routes: Routes = [
       { path: 'historial', loadComponent: () => import('./historial/historial.component').then(m => m.HistorialComponent) },
       { path: 'admin', loadComponent: () => import('./admin/admin.component').then(m => m.AdminComponent), canActivate: [adminGuard] },
       { path: 'predicciones', loadComponent: () => import('./predicciones/predicciones.component').then(m => m.PrediccionesComponent) },
-      { path: 'perfil', loadComponent: () => import('./perfil/perfil.component').then(m => m.PerfilComponent)}
+      { path: 'perfil', loadComponent: () => import('./perfil/perfil.component').then(m => m.PerfilComponent) }
     ]
   },
   {
@@ -32,6 +32,10 @@ export const routes: Routes = [
   {
     path: 'set-password',
     loadComponent: () => import('./auth/set-password/set-password.component').then(m => m.SetPasswordComponent)
+  },
+  {
+    path: 'confirm-email',
+    loadComponent: () => import('./auth/confirm-email/confirm-email.component').then(m => m.ConfirmEmailComponent)
   },
   {
     path: '**',
