@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { AlertService, Alerta } from './alertas.service';
 import { UmbralModalService } from './umbral-modal.service';
 import { AlertsHeaderComponent } from './components/alertas-header.component';
@@ -207,7 +208,7 @@ import { UmbralListComponent } from './components/umbral-list.component';
   
   `
 })
-export class AlertasComponent implements OnInit {
+export class AlertasComponent implements OnInit, OnDestroy {
   nivelControl = new FormControl<'Advertencia' | 'Crítico' | null>(null);
   invernaderoControl = new FormControl<number | null>(null);
   zonaControl = new FormControl<number | null>(null);
@@ -228,6 +229,8 @@ export class AlertasComponent implements OnInit {
   currentPage = 1;
   totalPages = 1;
   totalAlertas = 0;
+  private invSub?: Subscription;
+  private zonaSub?: Subscription;
 
   constructor(
     private alertService: AlertService,
@@ -249,7 +252,7 @@ export class AlertasComponent implements OnInit {
     this.filterForm.get('zona')!.disable({ emitEvent: false });
     this.filterForm.get('sensor')!.disable({ emitEvent: false });
 
-    this.filterForm.get('invernadero')!.valueChanges.subscribe(invId => {
+    this.invSub = this.filterForm.get('invernadero')!.valueChanges.subscribe(invId => {
       const zonaCtrl = this.filterForm.get('zona')!;
       const sensorCtrl = this.filterForm.get('sensor')!;
       zonaCtrl.reset(); zonaCtrl.disable();
@@ -266,7 +269,7 @@ export class AlertasComponent implements OnInit {
       }
     });
 
-    this.filterForm.get('zona')!.valueChanges.subscribe(zonaId => {
+    this.zonaSub = this.filterForm.get('zona')!.valueChanges.subscribe(zonaId => {
       const sensorCtrl = this.filterForm.get('sensor')!;
       sensorCtrl.reset(); sensorCtrl.disable();
       this.sensores = [];
@@ -442,5 +445,10 @@ export class AlertasComponent implements OnInit {
   }
   abrirConfiguracionUmbrales() {
     this.modal.openModal('view');
+  }
+
+  ngOnDestroy(): void {
+    this.invSub?.unsubscribe();
+    this.zonaSub?.unsubscribe();
   }
 }

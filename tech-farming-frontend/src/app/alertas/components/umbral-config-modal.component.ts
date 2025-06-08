@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { UmbralService } from '../umbral.service';
 import { UmbralModalService } from '../umbral-modal.service';
 import { Umbral } from '../../models/index';
@@ -209,7 +210,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     </div>
   `
 })
-export class UmbralConfigModalComponent implements OnInit {
+export class UmbralConfigModalComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   isEdit = false;
   loading = false;
@@ -223,6 +224,12 @@ export class UmbralConfigModalComponent implements OnInit {
   ayudaVisible = false;
   confirmacionVisible = false;
   mensajeConfirmacion = '';
+
+  private formSub?: Subscription;
+  private ambitoSub?: Subscription;
+  private invernaderoSub?: Subscription;
+  private sensorSub?: Subscription;
+  private tipoParametroSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -251,7 +258,7 @@ export class UmbralConfigModalComponent implements OnInit {
       activo: [sel?.activo ?? true]
     }, { validators: this.validarRangos() });
 
-    this.form.valueChanges.subscribe(() => {
+    this.formSub = this.form.valueChanges.subscribe(() => {
     });
 
     // Cargar datos iniciales
@@ -259,9 +266,9 @@ export class UmbralConfigModalComponent implements OnInit {
     this.tpSvc.obtenerTiposParametro().subscribe(list => this.tiposParametro = list);
 
     // Reactividad entre campos
-    this.form.get('ambito')!.valueChanges.subscribe(() => this.resetScopeFields());
+    this.ambitoSub = this.form.get('ambito')!.valueChanges.subscribe(() => this.resetScopeFields());
 
-    this.form.get('invernadero_id')!.valueChanges.subscribe((invId) => {
+    this.invernaderoSub = this.form.get('invernadero_id')!.valueChanges.subscribe((invId) => {
       const ambito = this.form.get('ambito')!.value;
 
       if (!this.isEdit) {
@@ -275,9 +282,9 @@ export class UmbralConfigModalComponent implements OnInit {
       }
     });
 
-    this.form.get('sensor_id')!.valueChanges.subscribe(id => this.loadSensorParametros(id));
+    this.sensorSub = this.form.get('sensor_id')!.valueChanges.subscribe(id => this.loadSensorParametros(id));
 
-    this.form.get('tipo_parametro_id')!.valueChanges.subscribe((tipo_parametro_id) => {
+    this.tipoParametroSub = this.form.get('tipo_parametro_id')!.valueChanges.subscribe((tipo_parametro_id) => {
       const sensorParam = this.sensorParametrosCompletos.find(p => p.id == tipo_parametro_id);
 
       if (sensorParam?.sensor_parametro_id) {
@@ -483,5 +490,13 @@ export class UmbralConfigModalComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
+    this.ambitoSub?.unsubscribe();
+    this.invernaderoSub?.unsubscribe();
+    this.sensorSub?.unsubscribe();
+    this.tipoParametroSub?.unsubscribe();
   }
 }

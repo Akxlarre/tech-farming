@@ -4,7 +4,8 @@ import {
   OnInit,
   AfterViewInit,
   ViewChild,
-  ElementRef
+  ElementRef,
+  OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +29,7 @@ Chart.register(...registerables);
     </div>
   `,
 })
-export class LineChartComponent implements OnInit, AfterViewInit {
+export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() labels!: string[];    // Por ejemplo: ['00:00','01:00',...]
   @Input() data!: number[];      // Por ejemplo: [22,24,23,...]
   @Input() variable!: 'Temperatura' | 'Humedad' | 'Nitrógeno';
@@ -240,5 +241,11 @@ export class LineChartComponent implements OnInit, AfterViewInit {
     this.chartInstance.data.datasets[0].borderColor = borderColor;
     this.chartInstance.data.datasets[0].backgroundColor = backgroundColor;
     this.chartInstance.update();
+  }
+
+  ngOnDestroy(): void {
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+    }
   }
 }

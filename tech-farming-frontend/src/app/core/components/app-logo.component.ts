@@ -17,7 +17,7 @@ import { Observable } from 'rxjs';
   imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a routerLink="/" class="flex items-center gap-2 sm:gap-3 md:gap-4 text-success">
+    <a routerLink="/" class="flex items-center text-success">
       <!-- SVG inline, con fill=currentColor para que herede text-success -->
       <svg
         class="
