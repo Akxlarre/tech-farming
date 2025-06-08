@@ -1,7 +1,8 @@
 // src/app/sensores/components/sensor-filters.component.ts
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 import { TipoSensor }        from '../models/tipo-sensor.model';
 import { Zona, Invernadero } from '../../invernaderos/models/invernadero.model';
@@ -171,7 +172,7 @@ import { ZonaService }       from '../../invernaderos/zona.service';
     </div>
   `
 })
-export class SensorFiltersComponent implements OnInit {
+export class SensorFiltersComponent implements OnInit, OnDestroy {
   @Input() tiposSensor:     TipoSensor[]  = [];
   @Input() invernaderos:    Invernadero[] = [];
 
@@ -187,6 +188,7 @@ export class SensorFiltersComponent implements OnInit {
   }>();
 
   filterForm!: FormGroup;
+  private invSub?: Subscription;
   private labelMap: Record<string,string> = {
     invernadero: 'Invernadero',
     zona:        'Zona',
@@ -211,7 +213,7 @@ export class SensorFiltersComponent implements OnInit {
       search:       ['', [Validators.maxLength(15)]],  // límite 15 chars
     });
 
-    this.filterForm.get('invernadero')!
+    this.invSub = this.filterForm.get('invernadero')!
       .valueChanges
       .subscribe(invId => {
         const zonaCtrl = this.filterForm.get('zona')!;
@@ -296,5 +298,9 @@ export class SensorFiltersComponent implements OnInit {
     this.zonasDisponibles = [];
     this.filterForm.get('zona')!.disable({ emitEvent: false });
     this.apply();
+  }
+
+  ngOnDestroy(): void {
+    this.invSub?.unsubscribe();
   }
 }

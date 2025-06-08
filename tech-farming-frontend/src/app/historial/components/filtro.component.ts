@@ -1,6 +1,6 @@
 // src/app/historial/filtro/filtro.component.ts
 
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -20,6 +20,7 @@ import {
   HistorialParams
 } from '../../models';
 import { filter, switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-filtro-global',
@@ -207,7 +208,7 @@ import { filter, switchMap } from 'rxjs/operators';
     .label-text { font-weight: 600; }
   `]
 })
-export class FiltroComponent implements OnInit {
+export class FiltroComponent implements OnInit, OnDestroy {
   /** Listas que llenamos desde el servicio */
   invernaderos:   Invernadero[]   = [];
   zonas:          Zona[]          = [];
@@ -216,6 +217,8 @@ export class FiltroComponent implements OnInit {
 
   /** FormGroup que contiene todos los filtros */
   form!: FormGroup;
+  private invSub?: Subscription;
+  private zonaSub?: Subscription;
 
   /** Emitimos el objeto completo de filtros cuando el usuario pulsa “Aplicar” */
   @Output() filtrosSubmit = new EventEmitter<HistorialParams>();
@@ -251,7 +254,7 @@ export class FiltroComponent implements OnInit {
     });
 
     // 3) Suscripción a cambios en invernadero → cargar Zonas
-    this.form.get('invernaderoId')!
+    this.invSub = this.form.get('invernaderoId')!
       .valueChanges
       .pipe(
         filter(id => id != null),
@@ -274,7 +277,7 @@ export class FiltroComponent implements OnInit {
       });
 
     // 4) Suscripción a cambios en zona → cargar Sensores
-    this.form.get('zonaId')!
+    this.zonaSub = this.form.get('zonaId')!
       .valueChanges
       .pipe(
         filter(id => id != null),
@@ -339,5 +342,10 @@ export class FiltroComponent implements OnInit {
   private formatDate(date: Date): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
+  ngOnDestroy(): void {
+    this.invSub?.unsubscribe();
+    this.zonaSub?.unsubscribe();
   }
 }
