@@ -396,11 +396,33 @@ export class AlertasComponent implements OnInit, OnDestroy {
   cargarAmbasListas() {
     const f = this.filterForm.getRawValue();
 
-    this.alertService.getAlertas('Activa', f.nivel, f.invernadero, f.zona, f.sensor)
-      .subscribe(resp => this.alertasActivas = resp.data);
+    this.alertService
+      .getAlertas(
+        'Activa',
+        f.nivel,
+        f.invernadero,
+        f.zona,
+        f.sensor,
+        this.currentPage,
+        this.pageSize
+      )
+      .subscribe(resp => {
+        this.alertasActivas = resp.data;
+        this.totalPages = resp.pagination.pages;
+        this.totalAlertas = resp.pagination.total;
+      });
 
-    this.alertService.getAlertas('Resuelta', f.nivel, f.invernadero, f.zona, f.sensor)
-      .subscribe(resp => this.alertasResueltas = resp.data);
+    this.alertService
+      .getAlertas(
+        'Resuelta',
+        f.nivel,
+        f.invernadero,
+        f.zona,
+        f.sensor,
+        this.currentPage,
+        this.pageSize
+      )
+      .subscribe(resp => (this.alertasResueltas = resp.data));
   }
 
   get paginationItems(): Array<number | string> {
