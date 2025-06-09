@@ -11,12 +11,12 @@ import { NotificationService, NotificationPayload } from '../services/notificati
   template: `
     <div
       *ngIf="message"
-      class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white transition-opacity duration-300"
+      class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300"
       [ngClass]="{
-        'bg-green-600': type === 'success',
-        'bg-red-600':   type === 'error',
-        'bg-blue-600':  type === 'info',
-        'bg-yellow-600': type === 'warning'
+        'bg-success text-success-content': type === 'success',
+        'bg-error text-error-content':   type === 'error',
+        'bg-info text-info-content':    type === 'info',
+        'bg-warning text-warning-content': type === 'warning'
       }"
       [style.opacity]="visible ? '1' : '0'"
     >

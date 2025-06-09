@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   template: `
     <!-- Confirmación Eliminar -->
     <div *ngIf="confirmDeleteVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-3">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-3 border border-base-300">
         <h3 class="text-lg font-semibold text-error">¿Eliminar Umbral?</h3>
         <p class="text-sm text-base-content/80">Esta acción desactivará el umbral de forma permanente.</p>
         <div class="flex justify-center gap-4 pt-2">
@@ -24,8 +24,8 @@ import { FormsModule } from '@angular/forms';
 
     <!-- Confirmación Éxito -->
     <div *ngIf="deleteExitosoVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
-        <h3 class="text-xl font-semibold text-green-600">✅ ¡Éxito!</h3>
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-success">✅ ¡Éxito!</h3>
         <p>{{ mensajeDeleteExitoso }}</p>
       </div>
     </div>
