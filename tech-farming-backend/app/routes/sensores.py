@@ -453,6 +453,8 @@ def recibir_datos():
         for m in mediciones:
             parametro = m.get("parametro")
             valor     = m.get("valor")
+            timestamp = m.get("timestamp") or datetime.utcnow().timestamp()
+
             if parametro is None or valor is None:
                 continue
             point = (
@@ -460,7 +462,7 @@ def recibir_datos():
                 .tag("sensor_id",    str(sensor.id))
                 .field("valor",      float(valor))
                 .field("parametro",  parametro)
-                .time(datetime.utcnow())
+                .time(datetime.fromtimestamp(timestamp))
             )
             write_api.write(bucket="temporalSeries_v3", record=point)
 
