@@ -12,7 +12,7 @@ import { PerfilSharedService } from './perfil-shared.service';
   template: `
     <!-- Modal cambio de correo -->
     <div *ngIf="confirmarCambioCorreoVisible" class="fixed inset-0 bg-black/30 z-50 flex justify-center items-center">
-      <div class="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-sm space-y-4 text-center">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl w-[90%] max-w-sm space-y-4 text-center border border-base-300">
         <h3 class="text-lg font-semibold text-warning">⚠️ Confirmar cambio de correo</h3>
         <p>¿Estás seguro de que deseas cambiar tu correo?<br>Deberás confirmar el nuevo correo desde tu bandeja de entrada.</p>
 
@@ -30,16 +30,16 @@ import { PerfilSharedService } from './perfil-shared.service';
 
     <!-- Modal Éxito -->
     <div *ngIf="modalExitoVisible" class="fixed inset-0 bg-black/30 z-50 flex justify-center items-center">
-      <div class="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-sm text-center space-y-3">
-        <h3 class="text-green-600 text-lg font-semibold">✅ ¡Éxito!</h3>
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl w-[90%] max-w-sm text-center space-y-3 border border-base-300">
+        <h3 class="text-success text-lg font-semibold">✅ ¡Éxito!</h3>
         <p>{{ mensajeExito }}</p>
       </div>
     </div>
 
     <!-- Modal Error -->
     <div *ngIf="modalErrorVisible" class="fixed inset-0 bg-black/30 z-50 flex justify-center items-center">
-      <div class="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-sm text-center space-y-3">
-        <h3 class="text-red-600 text-lg font-semibold">❌ Error</h3>
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl w-[90%] max-w-sm text-center space-y-3 border border-base-300">
+        <h3 class="text-error text-lg font-semibold">❌ Error</h3>
         <p>{{ mensajeError }}</p>
         <button class="btn btn-sm btn-outline mt-3" (click)="modalErrorVisible = false">Cerrar</button>
       </div>
@@ -55,7 +55,7 @@ import { PerfilSharedService } from './perfil-shared.service';
             <!-- Skeleton -->
             <div
               *ngIf="avatarCargando"
-              class="w-24 h-24 rounded-full bg-gray-300 animate-pulse"
+              class="w-24 h-24 rounded-full bg-base-300 animate-pulse"
             ></div>
 
             <div *ngIf="!avatarCargando" class="w-24 rounded-full ring ring-success ring-offset-base-100 ring-offset-2">
@@ -63,11 +63,11 @@ import { PerfilSharedService } from './perfil-shared.service';
             </div>
           </div>
           <button
-            class="absolute bottom-0 right-0 bg-white p-1 rounded-full border shadow hover:bg-gray-100 transition"
+            class="absolute bottom-0 right-0 bg-base-100 p-1 rounded-full border shadow hover:bg-base-200 transition"
             (click)="mostrarOpcionesAvatar = !mostrarOpcionesAvatar"
             aria-label="Cambiar avatar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-base-content" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a1.875 1.875 0 112.65 2.65L7.5 18.15l-4 1 1-4L16.862 3.487z" />
             </svg>
           </button>
@@ -317,7 +317,7 @@ export class PerfilComponent {
       }
     }
 
-    goToReset() {
-      this.router.navigate(['perfil/reset-password']);
-    }
+  goToReset() {
+    this.router.navigate(['perfil/reset-password'], { queryParams: { from: 'perfil' } });
+
   }
