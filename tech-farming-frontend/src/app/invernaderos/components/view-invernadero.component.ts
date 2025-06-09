@@ -16,10 +16,12 @@ import {
   import { CommonModule } from '@angular/common';
   import { FormsModule } from '@angular/forms';
   import { HttpClientModule, HttpClient, HttpParams } from '@angular/common/http';
-  import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
   
-  import { InvernaderoService } from '../invernaderos.service';
-  import { AlertService } from '../../alertas/alertas.service';
+import { InvernaderoService } from '../invernaderos.service';
+import { ZonaService } from '../zona.service';
+import { AlertService } from '../../alertas/alertas.service';
   
   interface SensorDetalle {
     id: number;
@@ -75,6 +77,7 @@ import {
     standalone: true,
     imports: [CommonModule, FormsModule, HttpClientModule],
     template: `
+      <div *ngIf="!isLoading; else loadingTpl">
       <section
         #snapContainer
         class="w-full max-w-[70vw] max-h-[70vh] snap-container bg-base-100 text-base-content relative"
@@ -89,7 +92,7 @@ import {
           (click)="close.emit()"
           [attr.aria-label]="'Cerrar modal'"
           [attr.title]="'Cerrar modal'"
-          class="absolute top-4 right-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
+          class="sticky top-4 float-right mr-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -259,7 +262,7 @@ import {
             <div class="relative">
               <!-- Tabla Desktop -->
               <table
-                *ngIf="zonasList.length"
+                *ngIf="!isLoadingZonas && zonasList.length; else tableZonasSkeleton"
                 class="table w-full hidden sm:table"
               >
                 <thead class="bg-base-200">
@@ -298,6 +301,18 @@ import {
                   </tr>
                 </tbody>
               </table>
+
+              <ng-template #tableZonasSkeleton>
+                <table class="table w-full hidden sm:table">
+                  <tbody>
+                    <tr *ngFor="let _ of skeletonArray" class="hover">
+                      <td colspan="5">
+                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-template>
   
               <!-- Sin Zonas -->
               <div
@@ -309,7 +324,7 @@ import {
   
               <!-- Lista Mobile -->
               <ul
-                *ngIf="zonasList.length"
+                *ngIf="!isLoadingZonas && zonasList.length; else listZonasSkeleton"
                 class="sm:hidden flex flex-col divide-y divide-base-200"
                 role="list"
               >
@@ -359,6 +374,17 @@ import {
                   </div>
                 </li>
               </ul>
+
+              <ng-template #listZonasSkeleton>
+                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                  <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
+                    <div class="space-y-2">
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                    </div>
+                  </li>
+                </ul>
+              </ng-template>
   
               <!-- Overlay de carga -->
               <div
@@ -602,7 +628,7 @@ import {
             <div class="relative">
               <!-- Tabla Desktop -->
               <table
-                *ngIf="alertasPage.data.length"
+                *ngIf="!isLoadingAlertas && alertasPage.data.length; else tableAlertasSkeleton"
                 class="table w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
@@ -646,6 +672,18 @@ import {
                   </tr>
                 </tbody>
               </table>
+
+              <ng-template #tableAlertasSkeleton>
+                <table class="table w-full hidden sm:table">
+                  <tbody>
+                    <tr *ngFor="let _ of skeletonArray" class="hover">
+                      <td colspan="5">
+                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-template>
   
               <!-- Sin Alertas -->
               <div
@@ -657,7 +695,7 @@ import {
   
               <!-- Lista Mobile -->
               <ul
-                *ngIf="alertasPage.data.length"
+                *ngIf="!isLoadingAlertas && alertasPage.data.length; else listAlertasSkeleton"
                 class="sm:hidden flex flex-col divide-y divide-base-200"
                 role="list"
               >
@@ -694,6 +732,17 @@ import {
                   </div>
                 </li>
               </ul>
+
+              <ng-template #listAlertasSkeleton>
+                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                  <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
+                    <div class="space-y-2">
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                    </div>
+                  </li>
+                </ul>
+              </ng-template>
   
               <!-- Overlay de carga -->
               <div
@@ -956,6 +1005,15 @@ import {
             </svg>
         </button>
         </nav>
+      </div>
+      <ng-template #loadingTpl>
+        <div class="p-8 text-center">
+          <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+        </div>
+      </ng-template>
     `,
     styles: [
       `
@@ -1061,7 +1119,7 @@ import {
     @Input() invernaderoId!: number;
     @Output() close = new EventEmitter<void>();
   
-    @ViewChild('snapContainer', { static: true, read: ElementRef })
+    @ViewChild('snapContainer', { static: false, read: ElementRef })
     snapContainer!: ElementRef<HTMLElement>;
   
     public invernaderoDetalle?: InvernaderoDetalle;
@@ -1087,7 +1145,9 @@ import {
     public alertasPageIndex = 1;
     public alertasPageSize = 10;
     public totalPagAlertas = 1;
-  
+
+    public isLoading = true;
+
     public isLoadingZonas = false;
     public isLoadingSensores = false;
     public isLoadingAlertas = false;
@@ -1109,7 +1169,8 @@ import {
     constructor(
       private invSvc: InvernaderoService,
       private http: HttpClient,
-      private alertSvc: AlertService
+      private alertSvc: AlertService,
+      private zonaSvc: ZonaService
     ) {}
   
     ngOnInit() {
@@ -1128,13 +1189,26 @@ import {
     }
   
     ngAfterViewInit() {
-      // Usamos IntersectionObserver para detectar qué sección está al menos 50% visible
+      if (!this.isLoading) {
+        this.setupObserver();
+      }
+    }
+
+    private setupObserver() {
+      if (!this.snapContainer) {
+        return;
+      }
+
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+
       const opciones = {
         root: this.snapContainer.nativeElement,
         rootMargin: '0px',
         threshold: 0.5
       };
-  
+
       this.observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
@@ -1150,8 +1224,7 @@ import {
           }
         }
       }, opciones);
-  
-      // Observamos cada sección
+
       const seccionIds: Array<'seccion-general' | 'seccion-zonas' | 'seccion-sensores' | 'seccion-alertas'> = [
         'seccion-general',
         'seccion-zonas',
@@ -1217,69 +1290,90 @@ import {
     }
   
     private inicializarDatos() {
-      this.cargarDetalleYResumenConAlertasActivas();
-      this.recargarSensores();
-      this.recargarAlertas();
+      this.isLoading = true;
+      forkJoin([
+        this.cargarDetalleYResumenConAlertasActivas(),
+        this.recargarSensores(true),
+        this.recargarAlertas(true)
+      ])
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+            // Esperamos a que Angular renderice las secciones
+            setTimeout(() => this.setupObserver());
+          })
+        )
+        .subscribe({
+          error: (err) => console.error('Error inicializando datos:', err)
+        });
     }
   
-    private cargarDetalleYResumenConAlertasActivas() {
-      forkJoin({
-        detalle: this.invSvc.getInvernaderoDetalle(this.invernaderoId),
-        resumen: this.invSvc.obtenerResumenEliminacion(this.invernaderoId),
-        activas: this.invSvc.getAlertasActivasCount(this.invernaderoId)
-      }).subscribe({
-        next: ({
-          detalle,
-          resumen,
-          activas
-        }: {
-          detalle: any;
-          resumen: { zonasCount: number; sensoresCount: number; alertasCount: number };
-          activas: { alertasActivasCount: number };
-        }) => {
-          this.invernaderoDetalle = {
-            id: detalle.id,
-            nombre: detalle.nombre,
-            descripcion: detalle.descripcion,
-            creado_en: detalle.creado_en,
-            zonas: detalle.zonas.map((z: any) => ({
+  
+  private cargarDetalleYResumenConAlertasActivas() {
+    return forkJoin({
+      detalle: this.invSvc.getInvernaderoDetalle(this.invernaderoId),
+      resumen: this.invSvc.obtenerResumenEliminacion(this.invernaderoId),
+      activas: this.invSvc.getAlertasActivasCount(this.invernaderoId)
+    }).pipe(
+      tap(({ detalle, resumen, activas }) => {
+        this.invernaderoDetalle = {
+          id: detalle.id,
+          nombre: detalle.nombre,
+          descripcion: detalle.descripcion,
+          creado_en: detalle.creado_en,
+          zonas: detalle.zonas.map((z: any) => ({
+            id: z.id,
+            nombre: z.nombre,
+            descripcion: z.descripcion,
+            activo: z.activo,
+            creado_en: z.creado_en,
+            sensores_count: Array.isArray(z.sensores) ? z.sensores.length : 0,
+            sensores: z.sensores
+          }))
+        } as InvernaderoDetalle;
+
+        this.resumenDelete = {
+          zonasCount: resumen.zonasCount,
+          sensoresCount: resumen.sensoresCount,
+          alertasCount: resumen.alertasCount,
+          alertasActivasCount: activas.alertasActivasCount
+        };
+        this.recargarZonas();
+      }),
+      catchError((err) => {
+        console.error('Error cargando detalle/summary/activas:', err);
+        return of(null);
+      })
+    );
+  }
+    recargarZonas(asObservable = false) {
+      this.isLoadingZonas = true;
+
+      const req$ = this.zonaSvc
+        .getZonasByInvernadero(this.invernaderoId)
+        .pipe(
+          tap((zonas) => {
+            this.zonasList = zonas.map((z) => ({
               id: z.id,
               nombre: z.nombre,
               descripcion: z.descripcion,
               activo: z.activo,
               creado_en: z.creado_en,
-              sensores_count: Array.isArray(z.sensores) ? z.sensores.length : 0,
-              sensores: z.sensores
-            }))
-          };
-  
-          this.resumenDelete = {
-            zonasCount: resumen.zonasCount,
-            sensoresCount: resumen.sensoresCount,
-            alertasCount: resumen.alertasCount,
-            alertasActivasCount: activas.alertasActivasCount
-          };
-          this.recargarZonas();
-        },
-        error: (err) => console.error('Error cargando detalle/summary/activas:', err)
-      });
+              sensoresCount: Array.isArray(z.sensores) ? z.sensores.length : 0
+            }));
+          }),
+          catchError((err) => {
+            console.error('Error cargando zonas:', err);
+            this.zonasList = [];
+            return of([]);
+          }),
+          finalize(() => (this.isLoadingZonas = false))
+        );
+
+      return asObservable ? req$ : req$.subscribe();
     }
   
-    recargarZonas() {
-      if (!this.invernaderoDetalle) return;
-      this.isLoadingZonas = true;
-      this.zonasList = this.invernaderoDetalle.zonas.map((z) => ({
-        id: z.id,
-        nombre: z.nombre,
-        descripcion: z.descripcion,
-        activo: z.activo,
-        creado_en: z.creado_en,
-        sensoresCount: Array.isArray(z.sensores) ? z.sensores.length : 0
-      }));
-      this.isLoadingZonas = false;
-    }
-  
-    recargarSensores() {
+    recargarSensores(asObservable = false) {
       this.isLoadingSensores = true;
       const params = new HttpParams()
         .set('invernadero', this.invernaderoId.toString())
@@ -1288,23 +1382,25 @@ import {
         .set('search', this.filtroSensores.nombre || '')
         .set('estado', this.filtroSensores.estado || '');
   
-      this.http
+      const req$ = this.http
         .get<{ data: SensorDetalle[]; total: number }>(`http://localhost:5000/api/sensores`, { params })
-        .subscribe({
-          next: (resp) => {
+        .pipe(
+          tap((resp) => {
             this.sensoresPage.data = resp.data;
             this.sensoresPage.total = resp.total;
             this.totalPagSensores = Math.ceil(resp.total / this.sensoresPageSize);
-            this.isLoadingSensores = false;
-          },
-          error: (err) => {
+          }),
+          catchError((err) => {
             console.error('Error cargando sensores:', err);
-            this.isLoadingSensores = false;
-          }
-        });
+            return of({ data: [], total: 0 });
+          }),
+          finalize(() => (this.isLoadingSensores = false))
+        );
+
+      return asObservable ? req$ : req$.subscribe();
     }
   
-    recargarAlertas() {
+    recargarAlertas(asObservable = false) {
       this.isLoadingAlertas = true;
       const params = new HttpParams()
         .set('invernadero_id', this.invernaderoId.toString())
@@ -1312,23 +1408,25 @@ import {
         .set('page', this.alertasPageIndex.toString())
         .set('perPage', this.alertasPageSize.toString());
   
-      this.http
+      const req$ = this.http
         .get<{
           data: AlertaResumen[];
           pagination: { total: number; pages: number; per_page: number; page: number };
         }>(`http://localhost:5000/api/alertas`, { params })
-        .subscribe({
-          next: (resp) => {
+        .pipe(
+          tap((resp) => {
             this.alertasPage.data = resp.data;
             this.alertasPage.total = resp.pagination.total;
             this.totalPagAlertas = resp.pagination.pages;
-            this.isLoadingAlertas = false;
-          },
-          error: (err) => {
+          }),
+          catchError((err) => {
             console.error('Error cargando alertas:', err);
-            this.isLoadingAlertas = false;
-          }
-        });
+            return of({ data: [], pagination: { total: 0, pages: 0, per_page: 0, page: 0 } });
+          }),
+          finalize(() => (this.isLoadingAlertas = false))
+        );
+
+      return asObservable ? req$ : req$.subscribe();
     }
   
     resolverAlerta(alertaId: number) {
