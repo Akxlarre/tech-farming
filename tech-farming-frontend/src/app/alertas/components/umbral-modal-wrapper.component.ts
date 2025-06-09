@@ -7,14 +7,15 @@ import { UmbralModalService } from '../umbral-modal.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="modal modal-open z-[9998]" (click)="onOverlayClick($event)">
+    <dialog class="modal" open (click)="onOverlayClick($event)">
+
       <div
         #modalContent
         class="modal-box bg-base-100 rounded-2xl shadow-xl w-full max-w-3xl overflow-auto"
       >
         <ng-content></ng-content>
       </div>
-    </div>
+    </dialog>
   `,
   styles: []
 })
