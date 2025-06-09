@@ -6,6 +6,8 @@ export interface Alerta {
   id: number;
   sensor_parametro_id: number;
   sensor_nombre: string;
+  /** Nombre del tipo de parámetro asociado al sensor */
+  tipo_parametro?: string;
   tipo: string;
   nivel: 'Advertencia' | 'Crítico';
   valor_detectado: number;
