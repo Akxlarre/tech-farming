@@ -91,7 +91,8 @@ import { catchError, finalize, tap } from 'rxjs/operators';
           (click)="close.emit()"
           [attr.aria-label]="'Cerrar modal'"
           [attr.title]="'Cerrar modal'"
-          class="sticky top-4 right-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
+          class="sticky top-4 float-right mr-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
+
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -1256,8 +1257,6 @@ import { catchError, finalize, tap } from 'rxjs/operators';
             setTimeout(() => this.setupObserver());
           })
         )
-
-      
         .subscribe({
           error: (err) => console.error('Error inicializando datos:', err)
         });
