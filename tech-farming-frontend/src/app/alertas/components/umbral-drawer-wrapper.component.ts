@@ -25,7 +25,7 @@ import {
       <!-- Drawer -->
       <div
         #drawer
-        class="fixed top-0 right-0 h-full bg-white shadow-xl z-50 w-full sm:w-1/2 md:w-1/3 transform transition-transform duration-300 ease-in-out overflow-auto"
+        class="fixed top-0 right-0 h-full bg-base-100 shadow-xl z-50 w-full sm:w-1/2 md:w-1/3 transform transition-transform duration-300 ease-in-out overflow-auto border-l border-base-300"
         [ngClass]="{ 'translate-x-full': closing, 'translate-x-0': !closing }"
       >
         <ng-content></ng-content>
