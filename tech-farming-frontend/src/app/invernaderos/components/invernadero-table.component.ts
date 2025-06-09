@@ -19,7 +19,7 @@ import { Invernadero } from '../models/invernadero.model';
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody *ngIf="!loading; else loadingRows">
           <tr *ngFor="let inv of invernaderos" class="hover">
             <td>{{ inv.nombre }}</td>
             <td>{{ inv.zonasActivas ?? 0 }}</td>
@@ -88,6 +88,13 @@ import { Invernadero } from '../models/invernadero.model';
             </td>
           </tr>
         </tbody>
+        <ng-template #loadingRows>
+          <tr *ngFor="let _ of skeletonArray" class="hover">
+            <td colspan="6">
+              <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+            </td>
+          </tr>
+        </ng-template>
       </table>
     </div>
   `
@@ -96,7 +103,13 @@ export class InvernaderoTableComponent {
   @Input() puedeEditar = false;
   @Input() puedeEliminar = false;
   @Input() invernaderos: Invernadero[] = [];
+  @Input() loading = false;
+  @Input() rowCount = 5;
   @Output() viewInvernadero   = new EventEmitter<Invernadero>();
   @Output() editInvernadero   = new EventEmitter<Invernadero>();
   @Output() deleteInvernadero = new EventEmitter<Invernadero>();
+
+  get skeletonArray() {
+    return Array.from({ length: this.rowCount });
+  }
 }
