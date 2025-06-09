@@ -1,8 +1,9 @@
-import { Component, HostListener, ElementRef, signal, inject } from '@angular/core';
+import { Component, HostListener, ElementRef, signal, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { PerfilService } from '../../perfil/perfil.service';
+import { PerfilSharedService } from '../../perfil/perfil-shared.service';
 
 @Component({
   standalone: true,
@@ -15,7 +16,7 @@ import { PerfilService } from '../../perfil/perfil.service';
               class="flex items-center btn btn-ghost px-2 space-x-2 focus:ring-2 focus:ring-success">
         <div class="w-10 h-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2 overflow-hidden">
           <ng-container *ngIf="!cargandoAvatar; else skeletonAvatar">
-            <img [src]="avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+            <img [src]="avatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
           </ng-container>
           <ng-template #skeletonAvatar>
             <div class="w-full h-full bg-gray-300 animate-pulse rounded-full"></div>
@@ -23,7 +24,7 @@ import { PerfilService } from '../../perfil/perfil.service';
         </div>
         <div class="hidden lg:flex items-center gap-1 font-medium">
           <ng-container *ngIf="!cargandoNombre; else cargandoNombreTpl">
-            {{ nombre }}
+            {{ nombre() }}
           </ng-container>
           <ng-template #cargandoNombreTpl>
             <div class="h-3 w-12 bg-base-100 rounded animate-pulse"></div>
@@ -108,8 +109,9 @@ export class ProfileMenuComponent {
   private host = inject(ElementRef);
   private authService = inject(AuthService);
   private perfilService = inject(PerfilService);
-  nombre = '';
-  avatarUrl = '';
+  private perfilSharedService = inject(PerfilSharedService);
+  nombre = computed(() => this.perfilSharedService.nombre());
+  avatarUrl = computed(() => this.perfilSharedService.avatarUrl());
   cargandoNombre = true;
   cargandoAvatar = true;
 
@@ -123,11 +125,12 @@ export class ProfileMenuComponent {
 
     // Asignar nombre para mostrar
     if (usuario.nombre) {
-      this.nombre = usuario.nombre;
+      this.perfilSharedService.nombre.set(usuario.nombre);
     }
 
     // Verificar y asignar avatar si no hay
-    if (!usuario.avatar_url) {
+    let avatarInicial = usuario.avatar_url;
+    if (!avatarInicial) {
       const opciones = [
         'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar1.png',
         'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar2.png',
@@ -135,22 +138,16 @@ export class ProfileMenuComponent {
         'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar4.png',
         'https://efejsncxndycbgfyhvcv.supabase.co/storage/v1/object/public/avatares/avatar5.png'
       ];
-      const aleatorio = opciones[Math.floor(Math.random() * opciones.length)];
-
-      await this.perfilService.actualizarUsuario(user.id, { avatar_url: aleatorio });
-      this.avatarUrl = aleatorio;
-    } else {
-      this.avatarUrl = usuario.avatar_url;
+      avatarInicial = opciones[Math.floor(Math.random() * opciones.length)];
+      await this.perfilService.actualizarUsuario(user.id, { avatar_url: avatarInicial });
     }
 
+    this.perfilSharedService.avatarUrl.set(avatarInicial);
+
     const img = new Image();
-    img.src = this.avatarUrl;
-    img.onload = () => {
-      this.cargandoAvatar = false;
-    };
-    img.onerror = () => {
-      this.cargandoAvatar = false;
-    };
+    img.src = this.avatarUrl();
+    img.onload = () => this.cargandoAvatar = false;
+    img.onerror = () => this.cargandoAvatar = false;
 
     this.cargandoNombre = false;
   }
