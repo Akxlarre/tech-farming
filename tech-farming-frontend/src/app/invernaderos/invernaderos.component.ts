@@ -49,6 +49,7 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
     ViewInvernaderoComponent
   ],
   template: `
+    <div *ngIf="!loading; else loadingTpl">
     <section class="space-y-6">
 
       <!-- HEADER + BOTON “Crear” -->
@@ -68,11 +69,15 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
         (viewInvernadero)="open('view',   $event)"
         (editInvernadero)="open('edit',   $event)"
         (deleteInvernadero)="open('delete',$event)"
+        [loading]="!isDataFullyLoaded"
+        [rowCount]="pageSize"
       ></app-invernadero-table>
 
       <app-invernadero-card-list
         *ngIf="invernaderos.length && isMobile"
         [invernaderos]="invernaderos"
+        [loading]="!isDataFullyLoaded"
+        [rowCount]="pageSize"
       ></app-invernadero-card-list>
 
       <!-- PAGINACION -->
@@ -169,6 +174,15 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
         </app-invernadero-modal-wrapper>
       </ng-container>
     </section>
+    </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+      </div>
+    </ng-template>
   `
 })
 export class InvernaderosComponent implements OnInit, OnDestroy {
@@ -183,6 +197,11 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
   puedeCrear = false;
   puedeEditar = false;
   puedeEliminar = false;
+  // estado de carga
+  loading = true;
+  isDataFullyLoaded = false;
+  private loadCount = 0;
+  private initialLoad = true;
 
   /** Detectar si estamos en móvil para mostrar la lista en tarjetas */
   get isMobile(): boolean {
@@ -281,15 +300,22 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
    * Actualiza invernaderos[] y totalCount.
    */
   private loadPage(page: number) {
+    this.startLoading();
     this.currentPage = page;
+    this.isDataFullyLoaded = false;
     this.svc.getInvernaderosPage(page, this.pageSize, this.appliedFilters)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: resp => {
           this.invernaderos = resp.data;
           this.totalCount = resp.total;
+          this.isDataFullyLoaded = true;
+          this.endLoading();
         },
-        error: err => console.error('Error al cargar invernaderos', err)
+        error: err => {
+          console.error('Error al cargar invernaderos', err);
+          this.endLoading();
+        }
       });
   }
 
@@ -382,6 +408,23 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
         this.notify.error('No se pudo eliminar el invernadero.');
       }
     });
+  }
+
+  private startLoading(): void {
+    if (!this.initialLoad) return;
+    this.loadCount++;
+    this.loading = true;
+  }
+
+  private endLoading(): void {
+    if (!this.initialLoad) return;
+    if (this.loadCount > 0) {
+      this.loadCount--;
+    }
+    if (this.loadCount === 0) {
+      this.loading = false;
+      this.initialLoad = false;
+    }
   }
 
   ngOnDestroy() {

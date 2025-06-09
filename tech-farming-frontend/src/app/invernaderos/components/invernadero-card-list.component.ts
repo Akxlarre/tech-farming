@@ -11,24 +11,34 @@ import { Invernadero } from '../models/invernadero.model';
   template: `
     <!-- Tarjetas móviles -->
     <div class="grid gap-4 md:hidden">
-      <div *ngFor="let inv of pagedInvernaderos" class="card p-4 space-y-2 bg-white rounded-lg shadow">
-        <h2 class="font-bold text-lg">{{ inv.nombre }}</h2>
-        <p><strong>Sensores Activos:</strong> {{ inv.sensoresActivos ?? 0 }}</p>
-        <p>
-          <strong>Estado:</strong>
-          <span [ngClass]="{
-            'badge badge-success': inv.estado === 'Activo',
-            'badge badge-warning': inv.estado === 'Inactivo',
-            'badge badge-error': inv.estado === 'Mantenimiento'
-          }">{{ inv.estado }}</span>
-        </p>
-        <p><strong>Creado:</strong> {{ inv.creado_en | date:'short' }}</p>
-        <div class="flex gap-2 mt-2">
-          <button class="btn btn-sm btn-outline" (click)="view(inv)">👁️ Ver</button>
-          <button class="btn btn-sm btn-outline" (click)="edit(inv)">✏️ Editar</button>
-          <button class="btn btn-sm btn-error text-white" (click)="delete(inv)">🗑️ Eliminar</button>
+      <ng-container *ngIf="!loading; else cardSkeletons">
+        <div *ngFor="let inv of pagedInvernaderos" class="card p-4 space-y-2 bg-white rounded-lg shadow">
+          <h2 class="font-bold text-lg">{{ inv.nombre }}</h2>
+          <p><strong>Sensores Activos:</strong> {{ inv.sensoresActivos ?? 0 }}</p>
+          <p>
+            <strong>Estado:</strong>
+            <span [ngClass]="{
+              'badge badge-success': inv.estado === 'Activo',
+              'badge badge-warning': inv.estado === 'Inactivo',
+              'badge badge-error': inv.estado === 'Mantenimiento'
+            }">{{ inv.estado }}</span>
+          </p>
+          <p><strong>Creado:</strong> {{ inv.creado_en | date:'short' }}</p>
+          <div class="flex gap-2 mt-2">
+            <button class="btn btn-sm btn-outline" (click)="view(inv)">👁️ Ver</button>
+            <button class="btn btn-sm btn-outline" (click)="edit(inv)">✏️ Editar</button>
+            <button class="btn btn-sm btn-error text-white" (click)="delete(inv)">🗑️ Eliminar</button>
+          </div>
         </div>
-      </div>
+      </ng-container>
+      <ng-template #cardSkeletons>
+        <div *ngFor="let _ of skeletonArray" class="card p-4 space-y-2 bg-white rounded-lg shadow animate-pulse">
+          <div class="h-4 w-32 bg-base-300 rounded skeleton"></div>
+          <div class="h-4 w-24 bg-base-300 rounded skeleton"></div>
+          <div class="h-4 w-20 bg-base-300 rounded skeleton"></div>
+          <div class="h-4 w-28 bg-base-300 rounded skeleton"></div>
+        </div>
+      </ng-template>
     </div>
 
     <!-- Paginación móvil -->
@@ -56,6 +66,8 @@ import { Invernadero } from '../models/invernadero.model';
 })
 export class InvernaderoCardListComponent implements OnChanges {
   @Input() invernaderos: Invernadero[] = [];
+  @Input() loading = false;
+  @Input() rowCount = 3;
 
   page = 1;
   pageSize = 10;
@@ -100,5 +112,9 @@ export class InvernaderoCardListComponent implements OnChanges {
   }
   delete(inv: Invernadero) {
     this.modal.openModal('delete', inv);
+  }
+
+  get skeletonArray() {
+    return Array.from({ length: this.rowCount });
   }
 }
