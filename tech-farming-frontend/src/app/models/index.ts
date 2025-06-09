@@ -83,6 +83,11 @@ export interface PredicParams {
 export interface Summary {
   updated: string;
   text:    string;
+  lastValue?:  number;
+  prediction?: number;
+  histMin?:    number;
+  histMax?:    number;
+  diff?:       number;
   action?: string;
 }
 
