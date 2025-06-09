@@ -45,9 +45,9 @@ import { FormsModule } from '@angular/forms';
           </a>
         </div>
         <button
-          *ngIf="puedeCrear" 
-          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content" 
-          (click)="nuevoUmbral()"
+          *ngIf="puedeCrear"
+          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content"
+          (click)="nuevoUmbral(); $event.stopPropagation()"
         >
           + Nuevo Umbral
         </button>
@@ -75,7 +75,7 @@ import { FormsModule } from '@angular/forms';
             <td>{{ u.advertencia_min }} – {{ u.advertencia_max }}</td>
             <td>{{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</td>
             <td class="text-right">
-              <button *ngIf="puedeEditar" class="btn btn-sm btn-outline mr-2" (click)="editar(u)">✏️</button>
+              <button *ngIf="puedeEditar" class="btn btn-sm btn-outline mr-2" (click)="editar(u); $event.stopPropagation()">✏️</button>
               <button *ngIf="puedeEliminar" class="btn btn-sm btn-error" (click)="eliminar(u)">🗑️</button>
             </td>
           </tr>
