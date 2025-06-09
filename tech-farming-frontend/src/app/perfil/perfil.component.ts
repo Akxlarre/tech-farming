@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PerfilService } from './perfil.service';
-import { AuthService } from '../services/auth.service';
+import { PerfilSharedService } from './perfil-shared.service';
 
 @Component({
   selector: 'app-perfil',
@@ -190,6 +190,7 @@ export class PerfilComponent {
   mensajeError = '';
 
   private perfilService = inject(PerfilService);
+  private perfilSharedService = inject(PerfilSharedService);
   private router = inject(Router);
 
   async ngOnInit() {
@@ -261,57 +262,62 @@ export class PerfilComponent {
       alert(`Error al actualizar ${campo}.`);
     } else {
       console.log(`${campo} actualizado correctamente.`);
+      if (campo === 'nombre') {
+        this.perfilSharedService.nombre.set(this.nombre);
+      }
     }
   }
 
   async confirmarCambioCorreo() {
-    if (!this.userId) return;
+      if (!this.userId) return;
 
-    this.actualizandoCampo = 'correo';
-    this.confirmarCambioCorreoVisible = false;
+      this.actualizandoCampo = 'correo';
+      this.confirmarCambioCorreoVisible = false;
 
-    const { error } = await this.perfilService.actualizarCorreo(this.nuevoCorreoPendiente);
+      const { error } = await this.perfilService.actualizarCorreo(this.nuevoCorreoPendiente);
 
-    if (error) {
-      console.error('Error al cambiar correo:', error);
-      this.mensajeError = 'Error al cambiar el correo. Intenta más tarde.';
-      this.modalErrorVisible = true;
-    } else {
-      this.mensajeExito = '📧 Correo pendiente de confirmación. Revisa la bandeja de entrada del correo nuevo. Tu sesión podría cerrarse automáticamente.';
-      this.modalExitoVisible = true;
+      if (error) {
+        console.error('Error al cambiar correo:', error);
+        this.mensajeError = 'Error al cambiar el correo. Intenta más tarde.';
+        this.modalErrorVisible = true;
+      } else {
+        this.mensajeExito = '📧 Correo pendiente de confirmación. Revisa la bandeja de entrada del correo nuevo. Tu sesión podría cerrarse automáticamente.';
+        this.modalExitoVisible = true;
 
-      setTimeout(() => {
-        this.modalExitoVisible = false;
-      }, 3500);
+        setTimeout(() => {
+          this.modalExitoVisible = false;
+        }, 3500);
+      }
+
+      this.actualizandoCampo = null;
+      this.editando = null;
     }
 
-    this.actualizandoCampo = null;
-    this.editando = null;
-  }
-
-  cancelarCambioCorreo() {
-    this.confirmarCambioCorreoVisible = false;
-    this.correo = '';
-  }
+    cancelarCambioCorreo() {
+      this.confirmarCambioCorreoVisible = false;
+      this.correo = '';
+    }
 
   async cambiarAvatar(url: string) {
-    if (!this.userId || url === this.avatarSeleccionado) return;
+      if (!this.userId || url === this.avatarSeleccionado) return;
 
-    this.avatarSeleccionado = url;
-    const { error } = await this.perfilService.actualizarUsuario(this.userId, { avatar_url: url });
+      this.avatarSeleccionado = url;
+      const { error } = await this.perfilService.actualizarUsuario(this.userId, { avatar_url: url });
 
-    if (error) {
-      this.mensajeError = 'No se pudo cambiar el avatar.';
-      this.modalErrorVisible = true;
-    } else {
-      this.mensajeExito = 'Avatar actualizado correctamente.';
-      this.modalExitoVisible = true;
-      this.mostrarOpcionesAvatar = false;
-      setTimeout(() => (this.modalExitoVisible = false), 2500);
+      if (error) {
+        this.mensajeError = 'No se pudo cambiar el avatar.';
+        this.modalErrorVisible = true;
+      } else {
+        this.mensajeExito = 'Avatar actualizado correctamente.';
+        this.modalExitoVisible = true;
+        this.mostrarOpcionesAvatar = false;
+        this.perfilSharedService.avatarUrl.set(url);
+
+        setTimeout(() => (this.modalExitoVisible = false), 2500);
+      }
+    }
+
+    goToReset() {
+      this.router.navigate(['perfil/reset-password']);
     }
   }
-
-  goToReset() {
-    this.router.navigate(['perfil/reset-password']);
-  }
-}
