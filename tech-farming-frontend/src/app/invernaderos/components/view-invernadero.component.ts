@@ -19,8 +19,9 @@ import {
 import { forkJoin, of } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
   
-  import { InvernaderoService } from '../invernaderos.service';
-  import { AlertService } from '../../alertas/alertas.service';
+import { InvernaderoService } from '../invernaderos.service';
+import { ZonaService } from '../zona.service';
+import { AlertService } from '../../alertas/alertas.service';
   
   interface SensorDetalle {
     id: number;
@@ -92,7 +93,6 @@ import { catchError, finalize, tap } from 'rxjs/operators';
           [attr.aria-label]="'Cerrar modal'"
           [attr.title]="'Cerrar modal'"
           class="sticky top-4 float-right mr-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
-
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -262,7 +262,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
             <div class="relative">
               <!-- Tabla Desktop -->
               <table
-                *ngIf="zonasList.length"
+                *ngIf="!isLoadingZonas && zonasList.length; else tableZonasSkeleton"
                 class="table w-full hidden sm:table"
               >
                 <thead class="bg-base-200">
@@ -301,6 +301,18 @@ import { catchError, finalize, tap } from 'rxjs/operators';
                   </tr>
                 </tbody>
               </table>
+
+              <ng-template #tableZonasSkeleton>
+                <table class="table w-full hidden sm:table">
+                  <tbody>
+                    <tr *ngFor="let _ of skeletonArray" class="hover">
+                      <td colspan="5">
+                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-template>
   
               <!-- Sin Zonas -->
               <div
@@ -312,7 +324,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
   
               <!-- Lista Mobile -->
               <ul
-                *ngIf="zonasList.length"
+                *ngIf="!isLoadingZonas && zonasList.length; else listZonasSkeleton"
                 class="sm:hidden flex flex-col divide-y divide-base-200"
                 role="list"
               >
@@ -362,6 +374,17 @@ import { catchError, finalize, tap } from 'rxjs/operators';
                   </div>
                 </li>
               </ul>
+
+              <ng-template #listZonasSkeleton>
+                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                  <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
+                    <div class="space-y-2">
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                    </div>
+                  </li>
+                </ul>
+              </ng-template>
   
               <!-- Overlay de carga -->
               <div
@@ -605,7 +628,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
             <div class="relative">
               <!-- Tabla Desktop -->
               <table
-                *ngIf="alertasPage.data.length"
+                *ngIf="!isLoadingAlertas && alertasPage.data.length; else tableAlertasSkeleton"
                 class="table w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
@@ -649,6 +672,18 @@ import { catchError, finalize, tap } from 'rxjs/operators';
                   </tr>
                 </tbody>
               </table>
+
+              <ng-template #tableAlertasSkeleton>
+                <table class="table w-full hidden sm:table">
+                  <tbody>
+                    <tr *ngFor="let _ of skeletonArray" class="hover">
+                      <td colspan="5">
+                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-template>
   
               <!-- Sin Alertas -->
               <div
@@ -660,7 +695,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
   
               <!-- Lista Mobile -->
               <ul
-                *ngIf="alertasPage.data.length"
+                *ngIf="!isLoadingAlertas && alertasPage.data.length; else listAlertasSkeleton"
                 class="sm:hidden flex flex-col divide-y divide-base-200"
                 role="list"
               >
@@ -697,6 +732,17 @@ import { catchError, finalize, tap } from 'rxjs/operators';
                   </div>
                 </li>
               </ul>
+
+              <ng-template #listAlertasSkeleton>
+                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                  <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
+                    <div class="space-y-2">
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                    </div>
+                  </li>
+                </ul>
+              </ng-template>
   
               <!-- Overlay de carga -->
               <div
@@ -1123,7 +1169,8 @@ import { catchError, finalize, tap } from 'rxjs/operators';
     constructor(
       private invSvc: InvernaderoService,
       private http: HttpClient,
-      private alertSvc: AlertService
+      private alertSvc: AlertService,
+      private zonaSvc: ZonaService
     ) {}
   
     ngOnInit() {
@@ -1249,7 +1296,6 @@ import { catchError, finalize, tap } from 'rxjs/operators';
         this.recargarSensores(true),
         this.recargarAlertas(true)
       ])
-
         .pipe(
           finalize(() => {
             this.isLoading = false;
@@ -1300,18 +1346,31 @@ import { catchError, finalize, tap } from 'rxjs/operators';
       })
     );
   }
-    recargarZonas() {
-      if (!this.invernaderoDetalle) return;
+    recargarZonas(asObservable = false) {
       this.isLoadingZonas = true;
-      this.zonasList = this.invernaderoDetalle.zonas.map((z) => ({
-        id: z.id,
-        nombre: z.nombre,
-        descripcion: z.descripcion,
-        activo: z.activo,
-        creado_en: z.creado_en,
-        sensoresCount: Array.isArray(z.sensores) ? z.sensores.length : 0
-      }));
-      this.isLoadingZonas = false;
+
+      const req$ = this.zonaSvc
+        .getZonasByInvernadero(this.invernaderoId)
+        .pipe(
+          tap((zonas) => {
+            this.zonasList = zonas.map((z) => ({
+              id: z.id,
+              nombre: z.nombre,
+              descripcion: z.descripcion,
+              activo: z.activo,
+              creado_en: z.creado_en,
+              sensoresCount: Array.isArray(z.sensores) ? z.sensores.length : 0
+            }));
+          }),
+          catchError((err) => {
+            console.error('Error cargando zonas:', err);
+            this.zonasList = [];
+            return of([]);
+          }),
+          finalize(() => (this.isLoadingZonas = false))
+        );
+
+      return asObservable ? req$ : req$.subscribe();
     }
   
     recargarSensores(asObservable = false) {
