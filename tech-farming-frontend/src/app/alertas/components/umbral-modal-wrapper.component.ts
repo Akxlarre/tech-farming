@@ -8,6 +8,7 @@ import { UmbralModalService } from '../umbral-modal.service';
   imports: [CommonModule],
   template: `
     <dialog class="modal" open (click)="onOverlayClick($event)">
+
       <div
         #modalContent
         class="modal-box bg-base-100 rounded-2xl shadow-xl w-full max-w-3xl overflow-auto"
