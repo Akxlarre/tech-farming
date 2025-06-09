@@ -321,3 +321,4 @@ export class PerfilComponent {
     this.router.navigate(['perfil/reset-password'], { queryParams: { from: 'perfil' } });
 
   }
+}
