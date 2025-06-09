@@ -12,22 +12,22 @@ import { firstValueFrom } from 'rxjs';
     <!-- Modal de Confirmación de Éxito -->
     <div *ngIf="confirmacionVisible"
         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
-        <h3 class="text-xl font-semibold text-green-600">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-success">
           ✅ ¡Éxito!
         </h3>
         <p>{{ mensajeConfirmacion }}</p>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl">
+    <div class="bg-base-100 rounded-xl shadow-xl p-6 w-full max-w-2xl border border-base-300">
       <h3 class="font-bold text-2xl mb-4">Editar permisos del usuario</h3>
 
       <form class="space-y-4" (ngSubmit)="guardarCambios()">
         <!-- Nombre (solo lectura) -->
         <div class="form-control">
           <label class="label font-semibold">Nombre</label>
-          <input class="input input-bordered w-full bg-gray-100" [value]="usuario.nombre + ' ' + usuario.apellido" disabled />
+          <input class="input input-bordered w-full bg-base-200" [value]="usuario.nombre + ' ' + usuario.apellido" disabled />
         </div>
 
         <!-- Permisos -->

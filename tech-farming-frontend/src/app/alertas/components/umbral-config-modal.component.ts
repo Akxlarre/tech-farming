@@ -20,8 +20,8 @@ import { Sensor } from '../../sensores/models/sensor.model';
     <!-- Modal de Confirmación -->
     <div *ngIf="confirmacionVisible"
          class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
-        <h3 class="text-xl font-semibold text-green-600">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-success">
           ✅ ¡Éxito!
         </h3>
         <p>{{ mensajeConfirmacion }}</p>
@@ -31,7 +31,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     <!-- Modal de Ayuda -->
     <div *ngIf="ayudaVisible"
         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-white w-[600px] max-h-[50vh] p-6 rounded-2xl shadow-xl relative overflow-y-auto pr-2">
+      <div class="bg-base-100 w-[600px] max-h-[50vh] p-6 rounded-2xl shadow-xl relative overflow-y-auto pr-2 border border-base-300">
 
         <div class="space-y-4">
           <h3 class="text-xl font-bold text-success">¿Cómo deben relacionarse los valores de advertencia y crítico?</h3>
@@ -48,17 +48,17 @@ import { Sensor } from '../../sensores/models/sensor.model';
             <li>
               <strong>Advertencia Mínima</strong> debe ser menor que la <strong>Advertencia Máxima</strong>.
               <br />
-              <span class="text-gray-500">→ Define un rango aceptable antes de que el sistema emita una advertencia.</span>
+              <span class="text-base-content/60">→ Define un rango aceptable antes de que el sistema emita una advertencia.</span>
             </li>
             <li>
               <strong>Crítico Mínimo</strong> (si se usa) debe ser menor que la <strong>Advertencia Mínima</strong>.
               <br />
-              <span class="text-gray-500">→ Valores demasiado bajos indican un riesgo grave (por ejemplo, temperaturas bajo cero, niveles de humedad extremadamente bajos, etc.).</span>
+              <span class="text-base-content/60">→ Valores demasiado bajos indican un riesgo grave (por ejemplo, temperaturas bajo cero, niveles de humedad extremadamente bajos, etc.).</span>
             </li>
             <li>
               <strong>Crítico Máximo</strong> (si se usa) debe ser mayor que la <strong>Advertencia Máxima</strong>.
               <br />
-              <span class="text-gray-500">→ Valores demasiado altos también son peligrosos (como calor extremo).</span>
+              <span class="text-base-content/60">→ Valores demasiado altos también son peligrosos (como calor extremo).</span>
             </li>
             <li>
               Si defines ambos críticos, el <strong>Crítico Mínimo</strong> debe ser menor que el <strong>Crítico Máximo</strong>.
@@ -84,12 +84,12 @@ import { Sensor } from '../../sensores/models/sensor.model';
     </div>
 
     <!-- Modal Principal -->
-    <div class="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl space-y-6">
+    <div class="w-full max-w-3xl p-6 bg-base-100 rounded-2xl shadow-xl space-y-6 border border-base-300">
       <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
         {{ isEdit ? 'Editar Umbral' : 'Crear Umbral' }}
          <button type="button"
                 (click)="mostrarAyuda()"
-                class="btn btn-circle btn-outline border-black text-black"
+                class="btn btn-circle btn-outline border-base-content text-base-content"
                 style="width: 2.25rem; height: 2.25rem; font-size: 1.125rem;"
                 title="¿Cómo funcionan los umbrales?">
           ?

@@ -12,15 +12,15 @@ import { SupabaseService } from '../../services/supabase.service';
     <!-- Modal de Confirmación de Éxito -->
     <div *ngIf="confirmacionVisible"
         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2">
-        <h3 class="text-xl font-semibold text-green-600">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-success">
           ✅ ¡Éxito!
         </h3>
         <p>{{ mensajeConfirmacion }}</p>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl">
+    <div class="bg-base-100 rounded-xl shadow-xl p-6 w-full max-w-2xl border border-base-300">
       <h3 class="font-bold text-2xl mb-4">Agregar nuevo usuario trabajador</h3>
 
       <!-- FORMULARIO -->
@@ -47,7 +47,7 @@ import { SupabaseService } from '../../services/supabase.service';
         <div class="form-control">
           <label class="label font-semibold">Teléfono</label>
           <div class="flex gap-2 items-center">
-            <span class="text-md font-medium px-2 border rounded bg-gray-100">+56</span>
+            <span class="text-md font-medium px-2 border rounded bg-base-200">+56</span>
             <input [(ngModel)]="nuevoUsuario.telefono" name="telefono" class="input input-bordered w-full" maxlength="9" pattern="[0-9]{7,9}" required />
           </div>
         </div>

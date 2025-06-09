@@ -1,19 +1,21 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { AppLogoComponent } from '../../../core/components/app-logo.component';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
   standalone: true,
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, AppLogoComponent],
   templateUrl: './reset-password.component.html',
 })
 export class ResetPasswordComponent {
   private _formBuilder = inject(FormBuilder);
   private _authService = inject(AuthService);
   private _router = inject(Router);
+  private _route = inject(ActivatedRoute);
 
   resetForm = this._formBuilder.group({
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -24,8 +26,10 @@ export class ResetPasswordComponent {
   passwordsDoNotMatch = false;
   showSuccessModal = signal(false);
   sessionActiva = signal(false);
+  fromPerfil = false;
 
   ngOnInit() {
+    this.fromPerfil = this._route.snapshot.queryParamMap.get('from') === 'perfil';
     // Verificar si hay una sesión válida, ya sea normal o de recuperación
     this._authService.session().then(({ data }) => {
       if (data.session) {
@@ -74,5 +78,13 @@ export class ResetPasswordComponent {
     this.showSuccessModal.set(false);
     await this._authService.logout();
     this._router.navigateByUrl('/login');
+  }
+
+  goBack() {
+    if (this.fromPerfil) {
+      this._router.navigateByUrl('/perfil');
+    } else {
+      this._router.navigateByUrl('/dashboard');
+    }
   }
 }
