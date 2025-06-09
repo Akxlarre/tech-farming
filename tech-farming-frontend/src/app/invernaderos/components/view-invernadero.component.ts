@@ -1248,6 +1248,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
         this.recargarSensores(true),
         this.recargarAlertas(true)
       ])
+
         .pipe(
           finalize(() => {
             this.isLoading = false;
@@ -1255,6 +1256,8 @@ import { catchError, finalize, tap } from 'rxjs/operators';
             setTimeout(() => this.setupObserver());
           })
         )
+
+      
         .subscribe({
           error: (err) => console.error('Error inicializando datos:', err)
         });
