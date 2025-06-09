@@ -91,7 +91,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
           (click)="close.emit()"
           [attr.aria-label]="'Cerrar modal'"
           [attr.title]="'Cerrar modal'"
-          class="absolute top-4 right-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
+          class="sticky top-4 right-4 btn btn-ghost btn-sm z-50 hover:bg-base-200/50"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -1072,7 +1072,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
     @Input() invernaderoId!: number;
     @Output() close = new EventEmitter<void>();
   
-    @ViewChild('snapContainer', { static: true, read: ElementRef })
+    @ViewChild('snapContainer', { static: false, read: ElementRef })
     snapContainer!: ElementRef<HTMLElement>;
   
     public invernaderoDetalle?: InvernaderoDetalle;
@@ -1141,13 +1141,26 @@ import { catchError, finalize, tap } from 'rxjs/operators';
     }
   
     ngAfterViewInit() {
-      // Usamos IntersectionObserver para detectar qué sección está al menos 50% visible
+      if (!this.isLoading) {
+        this.setupObserver();
+      }
+    }
+
+    private setupObserver() {
+      if (!this.snapContainer) {
+        return;
+      }
+
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+
       const opciones = {
         root: this.snapContainer.nativeElement,
         rootMargin: '0px',
         threshold: 0.5
       };
-  
+
       this.observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
@@ -1163,8 +1176,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
           }
         }
       }, opciones);
-  
-      // Observamos cada sección
+
       const seccionIds: Array<'seccion-general' | 'seccion-zonas' | 'seccion-sensores' | 'seccion-alertas'> = [
         'seccion-general',
         'seccion-zonas',
@@ -1236,7 +1248,16 @@ import { catchError, finalize, tap } from 'rxjs/operators';
         this.recargarSensores(true),
         this.recargarAlertas(true)
       ])
-        .pipe(finalize(() => (this.isLoading = false)))
+
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+            // Esperamos a que Angular renderice las secciones
+            setTimeout(() => this.setupObserver());
+          })
+        )
+
+      
         .subscribe({
           error: (err) => console.error('Error inicializando datos:', err)
         });
