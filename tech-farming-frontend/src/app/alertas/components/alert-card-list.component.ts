@@ -17,7 +17,7 @@ import { Alerta } from '../models/index';
             </span>
           </div>
           <div class="text-sm">{{ a.sensor_nombre || '-' }} · {{ a.tipo_parametro || '-' }}</div>
-          <p class="text-sm">{{ a.mensaje }}</p>
+          <p class="text-xs">{{ a.mensaje }}</p>
           <div *ngIf="a.resuelta_por" class="text-xs text-base-content/60">Resuelta por {{ a.resuelta_por }}</div>
           <div class="text-right" *ngIf="showResolver">
             <button class="btn btn-outline btn-sm" (click)="resolver.emit(a)" [disabled]="resolviendoId === a.id">
