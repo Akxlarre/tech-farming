@@ -80,7 +80,7 @@ import { AlertService } from '../../alertas/alertas.service';
       <div *ngIf="!isLoading; else loadingTpl">
       <section
         #snapContainer
-        class="w-full h-[100dvh] overflow-y-auto snap-container lg:overflow-y-hidden max-w-full"
+        class="w-full h-auto overflow-y-auto snap-container lg:max-h-[80vh] lg:max-w-[70vw] lg:rounded-2xl lg:shadow-lg"
         role="region"
         aria-labelledby="titulo-invernadero"
       >
@@ -198,7 +198,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </div>
             </div>
   
-            <div class="bg-base-100 p-6 rounded-lg shadow-md mt-8">
+            <div class="bg-base-200 rounded-lg p-4 mb-6">
               <h3 class="text-2xl font-bold mb-4">Detalles del Invernadero</h3>
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <ul class="space-y-2">
@@ -323,7 +323,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Lista Mobile -->
               <ul
                 *ngIf="!isLoadingZonas && zonasList.length; else listZonasSkeleton"
-                class="sm:hidden flex flex-col divide-y divide-base-200"
+                class="sm:hidden flex flex-col divide-y divide-base-300"
                 role="list"
               >
                 <li *ngFor="let z of zonasList; trackBy: trackByZona" class="py-4" role="listitem">
@@ -374,7 +374,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </ul>
 
               <ng-template #listZonasSkeleton>
-                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                <ul class="sm:hidden flex flex-col divide-y divide-base-300" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
                       <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
@@ -509,13 +509,13 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Lista Mobile -->
               <ul
                 *ngIf="!isLoadingSensores && sensoresPage.data.length; else listSkeleton"
-                class="sm:hidden flex flex-col divide-y divide-base-200"
+                class="sm:hidden flex flex-col divide-y divide-base-300"
                 role="list"
               >
                 <li *ngFor="let s of sensoresPage.data; trackBy: trackBySensor" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium text-xs">{{ s.nombre }}</p>
+                      <p class="font-medium text-xs truncate max-w-[90%]">{{ s.nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ s.zona?.nombre || '—' }}
                       </p>
@@ -540,7 +540,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </ul>
 
               <ng-template #listSkeleton>
-                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                <ul class="sm:hidden flex flex-col divide-y divide-base-300" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
                       <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
@@ -566,7 +566,7 @@ import { AlertService } from '../../alertas/alertas.service';
             >
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="sensoresPageIndex === 1 || isLoadingSensores"
                 (click)="cambiarPagina('sensores', -1)"
                 [attr.aria-label]="'Página anterior de sensores'"
@@ -581,12 +581,12 @@ import { AlertService } from '../../alertas/alertas.service';
                   />
                 </svg>
               </button>
-              <span class="px-2" aria-live="polite">
+              <span class="px-2 text-sm" aria-live="polite">
                 Página {{ sensoresPageIndex }} de {{ totalPagSensores }}
               </span>
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="sensoresPageIndex === totalPagSensores || isLoadingSensores"
                 (click)="cambiarPagina('sensores', +1)"
                 [attr.aria-label]="'Página siguiente de sensores'"
@@ -694,13 +694,13 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Lista Mobile -->
               <ul
                 *ngIf="!isLoadingAlertas && alertasPage.data.length; else listAlertasSkeleton"
-                class="sm:hidden flex flex-col divide-y divide-base-200"
+                class="sm:hidden flex flex-col divide-y divide-base-300"
                 role="list"
               >
                 <li *ngFor="let a of alertasPage.data; trackBy: trackByAlerta" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium text-xs">{{ a.sensor_nombre }}</p>
+                      <p class="font-medium text-xs truncate max-w-[90%]">{{ a.sensor_nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ a.fecha_hora | date:'short':'':'es' }}
                       </p>
@@ -732,7 +732,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </ul>
 
               <ng-template #listAlertasSkeleton>
-                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                <ul class="sm:hidden flex flex-col divide-y divide-base-300" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
                       <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
@@ -758,7 +758,7 @@ import { AlertService } from '../../alertas/alertas.service';
             >
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="alertasPageIndex === 1 || isLoadingAlertas"
                 (click)="cambiarPagina('alertas', -1)"
                 [attr.aria-label]="'Página anterior de alertas'"
@@ -773,12 +773,12 @@ import { AlertService } from '../../alertas/alertas.service';
                   />
                 </svg>
               </button>
-              <span class="px-2" aria-live="polite">
+              <span class="px-2 text-sm" aria-live="polite">
                 Página {{ alertasPageIndex }} de {{ totalPagAlertas }}
               </span>
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="alertasPageIndex === totalPagAlertas || isLoadingAlertas"
                 (click)="cambiarPagina('alertas', +1)"
                 [attr.aria-label]="'Página siguiente de alertas'"
@@ -1151,8 +1151,6 @@ import { AlertService } from '../../alertas/alertas.service';
         /* ================= scroll-snap container y secciones ================= */
         .snap-container {
           scroll-snap-type: y mandatory;
-          height: 100vh;
-          overflow-y: hidden;      /* Deshabilitar scroll manual */
           scrollbar-width: none;
         }
         .snap-container::-webkit-scrollbar {
