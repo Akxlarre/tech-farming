@@ -6,26 +6,30 @@ const routerInjection = () => inject(Router);
 
 const authService = () => inject(AuthService);
 
-export const privateGuard: CanActivateFn = () => {
+export const privateGuard: CanActivateFn = async () => {
   const router = routerInjection();
 
-  const session = authService().currentSession;
+  const { data } = await authService().session();
+  const session = data.session;
 
   if (!session) {
     router.navigateByUrl('/login');
+    return false;
   }
 
-  return !!session;
+  return true;
 };
 
-export const publicGuard: CanActivateFn = () => {
+export const publicGuard: CanActivateFn = async () => {
   const router = routerInjection();
 
-  const session = authService().currentSession;
+  const { data } = await authService().session();
+  const session = data.session;
 
   if (session) {
     router.navigateByUrl('/');
+    return false;
   }
 
-  return !session;
+  return true;
 };

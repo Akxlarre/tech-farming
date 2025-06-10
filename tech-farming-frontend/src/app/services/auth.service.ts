@@ -8,6 +8,12 @@ export class AuthService {
 
   private _currentSession: Session | null = null;
 
+  constructor() {
+    this._supabaseClient.auth.onAuthStateChange((_event, session) => {
+      this._currentSession = session;
+    });
+  }
+
   get currentSession() {
     return this._currentSession;
   }
