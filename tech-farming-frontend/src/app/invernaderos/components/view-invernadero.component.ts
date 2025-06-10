@@ -263,7 +263,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Tabla Desktop -->
               <table
                 *ngIf="!isLoadingZonas && zonasList.length; else tableZonasSkeleton"
-                class="table w-full hidden sm:table"
+                class="table table-xs w-full hidden sm:table"
               >
                 <thead class="bg-base-200">
                   <tr>
@@ -303,7 +303,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </table>
 
               <ng-template #tableZonasSkeleton>
-                <table class="table w-full hidden sm:table">
+              <table class="table table-xs w-full hidden sm:table">
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
@@ -455,7 +455,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Tabla Desktop -->
               <table
                 *ngIf="!isLoadingSensores && sensoresPage.data.length; else tableSkeleton"
-                class="table w-full hidden sm:table"
+                class="table table-xs w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
                   <tr>
@@ -489,7 +489,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </table>
 
               <ng-template #tableSkeleton>
-                <table class="table w-full hidden sm:table">
+                <table class="table table-xs w-full hidden sm:table">
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
@@ -629,7 +629,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Tabla Desktop -->
               <table
                 *ngIf="!isLoadingAlertas && alertasPage.data.length; else tableAlertasSkeleton"
-                class="table w-full hidden sm:table"
+                class="table table-xs w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
                   <tr>
@@ -674,7 +674,7 @@ import { AlertService } from '../../alertas/alertas.service';
               </table>
 
               <ng-template #tableAlertasSkeleton>
-                <table class="table w-full hidden sm:table">
+                <table class="table table-xs w-full hidden sm:table">
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
