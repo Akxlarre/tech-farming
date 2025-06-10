@@ -176,15 +176,28 @@ export class PrediccionesComponent implements OnInit {
       zonaId:        this.selectedZona,
       horas:         this.selectedProjection as 6|12|24
     };
-
+    console.log('→ Llamando a predict con params:', params);
     this.svc.getPredicciones(params).subscribe({
       next: (res: PredicResult) => {
+        // — Depuración: comprueba que Angular recibe los arrays completos —
+        console.log('[DEBUG] historical.length =', res.historical?.length);
+        console.log('[DEBUG] future.length     =', res.future?.length);
+        if (res.historical?.length) {
+          console.log('[DEBUG] historical[0]    =', res.historical[0]);
+          console.log('[DEBUG] historical[last] =', res.historical[res.historical.length - 1]);
+        }
+        if (res.future?.length) {
+          console.log('[DEBUG] future[0]        =', res.future[0]);
+          console.log('[DEBUG] future[last]     =', res.future[res.future.length - 1]);
+        }
+
         // si no hay historial
         if (!res.historical?.length) {
           this.data = undefined;
           this.uiTrend = undefined;
           return;
         }
+
         this.data = res;
         this.uiTrend = this.mapTrend(res.trend);
 
