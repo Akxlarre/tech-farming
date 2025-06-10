@@ -358,3 +358,4 @@ export class PerfilComponent {
       this.initialLoad = false;
     }
   }
+
