@@ -1005,6 +1005,139 @@ import { AlertService } from '../../alertas/alertas.service';
             </svg>
         </button>
         </nav>
+
+        <!-- ======= BOTTOM NAV (mobile) ======= -->
+        <div class="fixed bottom-4 inset-x-0 z-40 lg:hidden">
+          <nav class="mx-auto w-11/12 max-w-md bg-base-200 rounded-full shadow-lg p-2 flex justify-around">
+            <!-- GENERAL -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-general'); activeSnap = 'seccion-general'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-general',
+                'bg-base-content/20': activeSnap !== 'seccion-general'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección General'"
+              [attr.aria-current]="activeSnap === 'seccion-general' ? 'page' : null"
+              title="General"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-general'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10 2a1 1 0 00-.707.293l-8 8A1 1 0 002 12h2v6a1 1 0 001 1h4a1 1 0 001-1v-4h2v4a1 1 0 001 1h4a1 1 0 001-1v-6h2a1 1 0 00.707-1.707l-8-8A1 1 0 0010 2z"
+                />
+              </svg>
+            </button>
+
+            <!-- ZONAS -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-zonas'); activeSnap = 'seccion-zonas'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-zonas',
+                'bg-base-content/20': activeSnap !== 'seccion-zonas'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección Zonas'"
+              [attr.aria-current]="activeSnap === 'seccion-zonas' ? 'page' : null"
+              title="Zonas"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-zonas'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <!-- SENSORES -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-sensores'); activeSnap = 'seccion-sensores'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-sensores',
+                'bg-base-content/20': activeSnap !== 'seccion-sensores'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección Sensores'"
+              [attr.aria-current]="activeSnap === 'seccion-sensores' ? 'page' : null"
+              title="Sensores"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-sensores'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <!-- ALERTAS -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-alertas'); activeSnap = 'seccion-alertas'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-alertas',
+                'bg-base-content/20': activeSnap !== 'seccion-alertas'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección Alertas'"
+              [attr.aria-current]="activeSnap === 'seccion-alertas' ? 'page' : null"
+              title="Alertas"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-alertas'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z"
+                />
+              </svg>
+            </button>
+          </nav>
+        </div>
       </div>
       <ng-template #loadingTpl>
         <div class="p-8 text-center">
