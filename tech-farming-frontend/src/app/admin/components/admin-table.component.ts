@@ -31,7 +31,7 @@ interface Usuario {
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody *ngIf="!loading; else loadingRows">
           <tr *ngFor="let u of usuarios">
             <td>{{ u.nombre }}</td>
             <td>{{ u.apellido }}</td>
@@ -45,6 +45,13 @@ interface Usuario {
             </td>
           </tr>
         </tbody>
+        <ng-template #loadingRows>
+          <tr *ngFor="let _ of skeletonArray">
+            <td colspan="8">
+              <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+            </td>
+          </tr>
+        </ng-template>
       </table>
 
       <!-- Paginación -->
@@ -87,6 +94,8 @@ export class AdminTableComponent {
   @Input() paginaActual = 1;
   @Input() totalPaginas = 1;
   @Input() totalUsuarios = 0;
+  @Input() loading = false;
+  @Input() rowCount = 5;
   @Output() paginaCambiada = new EventEmitter<number>();
   @Output() editarUsuario = new EventEmitter<Usuario>();
 
@@ -111,5 +120,9 @@ export class AdminTableComponent {
     }
 
     return items;
+  }
+
+  get skeletonArray() {
+    return Array.from({ length: this.rowCount });
   }
 }

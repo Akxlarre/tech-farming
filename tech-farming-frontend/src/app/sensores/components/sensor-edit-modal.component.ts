@@ -9,16 +9,19 @@ import { SensoresService, EditarSensorPayload } from '../sensores.service';
 import { Sensor }             from '../models/sensor.model';
 import { TipoParametro }      from '../models/tipos_parametro.model';
 import { TipoParametroService } from '../tipos_parametro.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-sensor-edit-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
+    <div *ngIf="!loading; else loadingTpl">
     <div class="p-8 bg-base-100 rounded-lg shadow-lg max-w-2xl w-full space-y-5">
       <h2 class="text-2xl font-bold text-success">Editar Sensor</h2>
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <fieldset [disabled]="loading" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <!-- Nombre -->
         <div class="sm:col-span-2">
           <label class="label-base-content">Nombre</label>
@@ -103,8 +106,18 @@ import { TipoParametroService } from '../tipos_parametro.service';
             Guardar
           </button>
         </div>
+        </fieldset>
       </form>
     </div>
+    </div>
+    <ng-template #loadingTpl>
+      <div class="p-8 text-center">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+      </div>
+    </ng-template>
   `
 })
 export class SensorEditModalComponent implements OnInit {
@@ -118,6 +131,7 @@ export class SensorEditModalComponent implements OnInit {
   posiblesParametros: TipoParametro[] = [];
   parametrosSeleccionados: number[]   = [];
   parametrosTouched = false;
+  loading = false;
 
   constructor(
     private fb:   FormBuilder,
@@ -138,21 +152,36 @@ export class SensorEditModalComponent implements OnInit {
     });
 
     // 2) Carga selects
-    this.inv.getInvernaderos().subscribe(l => {
-      this.invernaderos = l;
-      if (this.sensor.invernadero?.id) {
-        this.loadZonas(this.sensor.invernadero.id);
-      }
-    });
-
-    this.ps.obtenerTiposParametro().subscribe(l => {
-      this.posiblesParametros = l;
-      this.parametrosSeleccionados = this.sensor.parametros.map(x => x.id);
+    this.loading = true;
+    forkJoin([
+      this.inv.getInvernaderos(),
+      this.ps.obtenerTiposParametro()
+    ]).subscribe({
+      next: ([invs, params]) => {
+        this.invernaderos = invs;
+        this.posiblesParametros = params;
+        this.parametrosSeleccionados = this.sensor.parametros.map(x => x.id);
+        if (this.sensor.invernadero?.id) {
+          this.loadZonas(this.sensor.invernadero.id);
+        } else {
+          this.loading = false;
+        }
+      },
+      error: () => (this.loading = false)
     });
   }
 
-  private loadZonas(invId: number) {
-    this.zs.getZonasByInvernadero(invId).subscribe(zs => this.zonas = zs);
+  private loadZonas(invId: number, endLoading = true) {
+    this.loading = true;
+    this.zs.getZonasByInvernadero(invId).subscribe({
+      next: zs => {
+        this.zonas = zs;
+        if (endLoading) this.loading = false;
+      },
+      error: () => {
+        if (endLoading) this.loading = false;
+      }
+    });
   }
 
   onInvernaderoChange() {
@@ -190,9 +219,16 @@ export class SensorEditModalComponent implements OnInit {
       zona_id:         this.form.value.zona_id,
       parametro_ids:   this.parametrosSeleccionados
     };
+    this.loading = true;
     this.svc.editarSensor(payload).subscribe({
-      next: updated => this.saved.emit(updated),
-      error: ()      => alert('❌ No se pudo guardar.')
+      next: updated => {
+        this.loading = false;
+        this.saved.emit(updated);
+      },
+      error: ()      => {
+        this.loading = false;
+        alert('❌ No se pudo guardar.');
+      }
     });
   }
 

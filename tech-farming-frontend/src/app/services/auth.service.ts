@@ -1,25 +1,47 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../services/supabase.service';
-import { SignUpWithPasswordCredentials } from '@supabase/supabase-js';
+import { Session, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private _supabaseClient = inject(SupabaseService).supabase;
 
-  session() {
-    return this._supabaseClient.auth.getSession();
+  private _currentSession: Session | null = null;
+
+  constructor() {
+    this._supabaseClient.auth.onAuthStateChange((_event, session) => {
+      this._currentSession = session;
+    });
+  }
+
+  get currentSession() {
+    return this._currentSession;
+  }
+
+  async restoreSession() {
+    const { data } = await this._supabaseClient.auth.getSession();
+    this._currentSession = data.session;
+  }
+
+  async session() {
+    const { data } = await this._supabaseClient.auth.getSession();
+    this._currentSession = data.session;
+    return { data };
   }
 
   getClient() {
     return this._supabaseClient;
   }
 
-  login(credentials: SignUpWithPasswordCredentials) {
-    return this._supabaseClient.auth.signInWithPassword(credentials);
+  async login(credentials: SignUpWithPasswordCredentials) {
+    const result = await this._supabaseClient.auth.signInWithPassword(credentials);
+    this._currentSession = result.data.session;
+    return result;
   }
 
-  logout() {
-    return this._supabaseClient.auth.signOut();
+  async logout() {
+    await this._supabaseClient.auth.signOut();
+    this._currentSession = null;
   }
 
   async resetPassword(email: string): Promise<{ error: any | null }> {

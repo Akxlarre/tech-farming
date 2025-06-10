@@ -21,6 +21,7 @@ import {
     standalone: true,
     imports: [CommonModule],
     template: `
+      <div *ngIf="!loading; else loadingTpl">
       <div
         class="p-6 bg-base-100 rounded-lg shadow-xl w-full
                max-w-md sm:max-w-3xl lg:max-w-4xl
@@ -102,7 +103,7 @@ import {
             </div>
   
           <!-- Spinner -->
-          <div *ngIf="loading"><progress class="progress w-full"></progress></div>
+          <!-- placeholder removed; spinner now handled globally -->
   
           <!-- GRÁFICOS -->
           <ng-container *ngIf="!loading && series.length">
@@ -127,6 +128,15 @@ import {
           </div>
         </section>
       </div>
+      </div>
+      <ng-template #loadingTpl>
+        <div class="p-8 text-center">
+          <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+        </div>
+      </ng-template>
     `
   })
   export class SensorViewModalComponent implements OnInit, OnDestroy {

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { AlertService, Alerta } from './alertas.service';
 import { UmbralModalService } from './umbral-modal.service';
 import { AlertsHeaderComponent } from './components/alertas-header.component';
@@ -30,6 +30,7 @@ import { UmbralListComponent } from './components/umbral-list.component';
     UmbralModalWrapperComponent
   ],
   template: `
+    <div *ngIf="!loading; else loadingTpl">
     <!-- Header -->
     <app-alertas-header
       (configurar)="abrirConfiguracionUmbrales()">
@@ -150,10 +151,20 @@ import { UmbralListComponent } from './components/umbral-list.component';
 
       <!-- Contenido de cada tab -->
       <div *ngIf="tabIndex === 0" class="mt-4">
-        <app-active-alerts [alertas]="alertasActivas" [resolviendoId]="resolviendoId" (resolver)="resolverAlerta($event)"></app-active-alerts>
+        <app-active-alerts
+          [alertas]="alertasActivas"
+          [resolviendoId]="resolviendoId"
+          [loading]="!isDataFullyLoaded"
+          [rowCount]="pageSize"
+          (resolver)="resolverAlerta($event)">
+        </app-active-alerts>
       </div>
       <div *ngIf="tabIndex === 1" class="mt-4">
-        <app-alerts-history [alertas]="alertasResueltas"></app-alerts-history>
+        <app-alerts-history
+          [alertas]="alertasResueltas"
+          [loading]="!isDataFullyLoaded"
+          [rowCount]="pageSize">
+        </app-alerts-history>
       </div>
 
       <!-- Modal de configuración de Umbrales -->
@@ -205,7 +216,20 @@ import { UmbralListComponent } from './components/umbral-list.component';
       <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">»</button>
     </div>
   </div>
-  
+  </div>
+  <ng-template #loadingTpl>
+    <div class="min-h-screen flex items-center justify-center bg-base-200">
+      <svg
+        class="animate-spin w-8 h-8 text-success mx-auto"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+      </svg>
+    </div>
+  </ng-template>
+
   `
 })
 export class AlertasComponent implements OnInit, OnDestroy {
@@ -231,6 +255,10 @@ export class AlertasComponent implements OnInit, OnDestroy {
   totalAlertas = 0;
   private invSub?: Subscription;
   private zonaSub?: Subscription;
+  loading = true;
+  isDataFullyLoaded = false;
+  private loadCount = 0;
+  private initialLoad = true;
 
   constructor(
     private alertService: AlertService,
@@ -295,19 +323,8 @@ export class AlertasComponent implements OnInit, OnDestroy {
   }
 
   aplicarFiltros() {
-    const f = this.filterForm.getRawValue();
-    const estado = this.tabIndex === 0 ? 'Activa' : 'Resuelta';
-
-    this.alertService.getAlertas(
-      estado,
-      f.nivel || undefined,
-      f.invernadero || undefined,
-      f.zona || undefined,
-      f.sensor || undefined
-    ).subscribe(resp => {
-      if (estado === 'Activa') this.alertasActivas = resp.data;
-      else this.alertasResueltas = resp.data;
-    });
+    this.currentPage = 1;
+    this.cargarAlertas();
   }
 
   limpiarFiltros() {
@@ -323,12 +340,8 @@ export class AlertasComponent implements OnInit, OnDestroy {
     this.filterForm.get('zona')!.disable({ emitEvent: false });
     this.filterForm.get('sensor')!.disable({ emitEvent: false });
 
-    const estado = this.tabIndex === 0 ? 'Activa' : 'Resuelta';
-    this.alertService.getAlertas(estado)
-      .subscribe(resp => {
-        if (estado === 'Activa') this.alertasActivas = resp.data;
-        else this.alertasResueltas = resp.data;
-      });
+    this.currentPage = 1;
+    this.cargarAlertas();
   }
 
   filtrosActivos(): Array<{ key: string; label: string }> {
@@ -370,6 +383,8 @@ export class AlertasComponent implements OnInit, OnDestroy {
   }
 
   cargarAlertas() {
+    this.startLoading();
+    this.isDataFullyLoaded = false;
     const estado = this.tabIndex === 0 ? 'Activa' : 'Resuelta';
     const f = this.filterForm.getRawValue();
 
@@ -379,6 +394,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
       f.invernadero || undefined,
       f.zona || undefined,
       f.sensor || undefined,
+      undefined,
       this.currentPage,
       this.pageSize
     ).subscribe(resp => {
@@ -390,39 +406,45 @@ export class AlertasComponent implements OnInit, OnDestroy {
 
       this.totalPages = resp.pagination.pages;
       this.totalAlertas = resp.pagination.total;
+      this.isDataFullyLoaded = true;
+      this.endLoading();
     });
   }
 
   cargarAmbasListas() {
+    this.startLoading();
+    this.isDataFullyLoaded = false;
     const f = this.filterForm.getRawValue();
 
-    this.alertService
-      .getAlertas(
+    forkJoin({
+      activas: this.alertService.getAlertas(
         'Activa',
         f.nivel,
         f.invernadero,
         f.zona,
         f.sensor,
+        undefined,
         this.currentPage,
         this.pageSize
-      )
-      .subscribe(resp => {
-        this.alertasActivas = resp.data;
-        this.totalPages = resp.pagination.pages;
-        this.totalAlertas = resp.pagination.total;
-      });
-
-    this.alertService
-      .getAlertas(
+      ),
+      resueltas: this.alertService.getAlertas(
         'Resuelta',
         f.nivel,
         f.invernadero,
         f.zona,
         f.sensor,
+        undefined,
         this.currentPage,
         this.pageSize
       )
-      .subscribe(resp => (this.alertasResueltas = resp.data));
+    }).subscribe(({ activas, resueltas }) => {
+      this.alertasActivas = activas.data;
+      this.alertasResueltas = resueltas.data;
+      this.totalPages = activas.pagination.pages;
+      this.totalAlertas = activas.pagination.total;
+      this.isDataFullyLoaded = true;
+      this.endLoading();
+    });
   }
 
   get paginationItems(): Array<number | string> {
@@ -467,6 +489,23 @@ export class AlertasComponent implements OnInit, OnDestroy {
   }
   abrirConfiguracionUmbrales() {
     this.modal.openModal('view');
+  }
+
+  private startLoading(): void {
+    if (!this.initialLoad) return;
+    this.loadCount++;
+    this.loading = true;
+  }
+
+  private endLoading(): void {
+    if (!this.initialLoad) return;
+    if (this.loadCount > 0) {
+      this.loadCount--;
+    }
+    if (this.loadCount === 0) {
+      this.loading = false;
+      this.initialLoad = false;
+    }
   }
 
   ngOnDestroy(): void {
