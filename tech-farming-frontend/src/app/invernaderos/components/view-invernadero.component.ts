@@ -365,7 +365,7 @@ import { AlertService } from '../../alertas/alertas.service';
                   </div>
                   <div
                     *ngIf="zonaExpandida === z.id"
-                    class="mt-2 bg-base-100 p-3 rounded-lg transition-max-height duration-200 ease-in-out"
+                    class="mt-2 bg-base-100 p-3 rounded-lg transition-max-height duration-200 ease-in-out max-h-[30vh] overflow-y-auto"
                   >
                     <p role="document"><strong>Descripción:</strong> {{ z.descripcion || '—' }}</p>
                     <p role="document"><strong>Sensores:</strong> {{ z.sensoresCount }}</p>
