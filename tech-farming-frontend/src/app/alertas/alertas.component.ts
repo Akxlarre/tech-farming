@@ -323,19 +323,8 @@ export class AlertasComponent implements OnInit, OnDestroy {
   }
 
   aplicarFiltros() {
-    const f = this.filterForm.getRawValue();
-    const estado = this.tabIndex === 0 ? 'Activa' : 'Resuelta';
-
-    this.alertService.getAlertas(
-      estado,
-      f.nivel || undefined,
-      f.invernadero || undefined,
-      f.zona || undefined,
-      f.sensor || undefined
-    ).subscribe(resp => {
-      if (estado === 'Activa') this.alertasActivas = resp.data;
-      else this.alertasResueltas = resp.data;
-    });
+    this.currentPage = 1;
+    this.cargarAlertas();
   }
 
   limpiarFiltros() {
@@ -351,12 +340,8 @@ export class AlertasComponent implements OnInit, OnDestroy {
     this.filterForm.get('zona')!.disable({ emitEvent: false });
     this.filterForm.get('sensor')!.disable({ emitEvent: false });
 
-    const estado = this.tabIndex === 0 ? 'Activa' : 'Resuelta';
-    this.alertService.getAlertas(estado)
-      .subscribe(resp => {
-        if (estado === 'Activa') this.alertasActivas = resp.data;
-        else this.alertasResueltas = resp.data;
-      });
+    this.currentPage = 1;
+    this.cargarAlertas();
   }
 
   filtrosActivos(): Array<{ key: string; label: string }> {
@@ -409,6 +394,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
       f.invernadero || undefined,
       f.zona || undefined,
       f.sensor || undefined,
+      undefined,
       this.currentPage,
       this.pageSize
     ).subscribe(resp => {
@@ -437,6 +423,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
         f.invernadero,
         f.zona,
         f.sensor,
+        undefined,
         this.currentPage,
         this.pageSize
       ),
@@ -446,6 +433,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
         f.invernadero,
         f.zona,
         f.sensor,
+        undefined,
         this.currentPage,
         this.pageSize
       )

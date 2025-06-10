@@ -64,6 +64,7 @@ export class DashboardService {
     nivel?: 'Advertencia' | 'Crítico';
     invernadero_id?: number;
     zona_id?: number;
+    sensor_id?: number;
     busqueda?: string;
     page?: number;
     perPage?: number;
@@ -73,6 +74,7 @@ export class DashboardService {
       filtros.nivel,
       filtros.invernadero_id,
       filtros.zona_id,
+      filtros.sensor_id,
       filtros.busqueda,
       filtros.page,
       filtros.perPage

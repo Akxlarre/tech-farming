@@ -52,3 +52,9 @@ La solución integra lectura de sensores que miden:
 - Predicción avanzada con LSTM o Random Forest.
 
 ---
+
+## 📒 Backend
+
+Algunas alertas históricas se generaron antes de contar con el campo
+`sensor_id`. Por compatibilidad, el listado verifica tanto `Alerta.sensor_id`
+como el sensor asociado al `sensor_parametro` cuando se filtra por sensor.

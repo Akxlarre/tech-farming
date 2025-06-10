@@ -301,7 +301,7 @@ export class PerfilComponent {
         this.mensajeError = 'Error al cambiar el correo. Intenta más tarde.';
         this.modalErrorVisible = true;
       } else {
-        this.mensajeExito = '📧 Correo pendiente de confirmación. Revisa la bandeja de entrada del correo nuevo. Tu sesión podría cerrarse automáticamente.';
+        this.mensajeExito = 'Correo pendiente de confirmación. Revisa la bandeja de entrada del correo nuevo. Tu sesión podría cerrarse automáticamente.';
         this.modalExitoVisible = true;
 
         setTimeout(() => {
@@ -358,4 +358,5 @@ export class PerfilComponent {
       this.initialLoad = false;
     }
   }
+
 }
