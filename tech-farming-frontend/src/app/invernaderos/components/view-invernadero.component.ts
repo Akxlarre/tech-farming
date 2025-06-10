@@ -80,11 +80,9 @@ import { AlertService } from '../../alertas/alertas.service';
       <div *ngIf="!isLoading; else loadingTpl">
       <section
         #snapContainer
-        class="w-full max-w-[70vw] max-h-[70vh] snap-container bg-base-100 text-base-content relative"
+        class="w-full h-[100dvh] overflow-y-auto snap-container lg:overflow-y-hidden max-w-full"
         role="region"
         aria-labelledby="titulo-invernadero"
-        (wheel)="$event.preventDefault()"
-        (touchmove)="$event.preventDefault()"
       >
         <!-- BOTÓN CERRAR -->
         <button
