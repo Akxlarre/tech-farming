@@ -394,6 +394,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
       f.invernadero || undefined,
       f.zona || undefined,
       f.sensor || undefined,
+      undefined,
       this.currentPage,
       this.pageSize
     ).subscribe(resp => {
@@ -422,6 +423,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
         f.invernadero,
         f.zona,
         f.sensor,
+        undefined,
         this.currentPage,
         this.pageSize
       ),
@@ -431,6 +433,7 @@ export class AlertasComponent implements OnInit, OnDestroy {
         f.invernadero,
         f.zona,
         f.sensor,
+        undefined,
         this.currentPage,
         this.pageSize
       )
