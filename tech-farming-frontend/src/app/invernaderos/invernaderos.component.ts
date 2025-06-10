@@ -78,6 +78,9 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
         [invernaderos]="invernaderos"
         [loading]="!isDataFullyLoaded"
         [rowCount]="pageSize"
+        (viewInvernadero)="open('view', $event)"
+        (editInvernadero)="open('edit', $event)"
+        (deleteInvernadero)="open('delete', $event)"
       ></app-invernadero-card-list>
 
       <!-- PAGINACION -->
