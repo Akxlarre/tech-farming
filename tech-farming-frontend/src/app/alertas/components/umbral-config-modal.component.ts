@@ -84,7 +84,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     </div>
 
     <!-- Modal Principal -->
-    <div class="w-full max-w-3xl p-6 bg-base-100 rounded-2xl shadow-xl space-y-6 border border-base-300">
+    <div class="w-full max-w-[95vw] sm:max-w-3xl p-6 bg-base-100 rounded-2xl shadow-xl space-y-6 border border-base-300">
       <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
         {{ isEdit ? 'Editar Umbral' : 'Crear Umbral' }}
          <button type="button"

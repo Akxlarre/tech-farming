@@ -8,6 +8,7 @@ import { AdminTableComponent } from './components/admin-table.component';
 import { AdminCreateModalComponent } from './components/admin-create-modal.component';
 import { AdminEditModalComponent } from './components/admin-edit-modal.component';
 import { AdminModalWrapperComponent } from './components/admin-modal-wrapper.component';
+import { AdminCardListComponent } from './components/admin-card-list.component';
 
 interface Usuario {
   id: number;
@@ -28,6 +29,7 @@ interface Usuario {
     AdminHeaderComponent,
     AdminFiltersComponent,
     AdminTableComponent,
+    AdminCardListComponent,
     AdminCreateModalComponent,
     AdminEditModalComponent,
     AdminModalWrapperComponent],
@@ -35,15 +37,25 @@ interface Usuario {
     <div *ngIf="!loading; else loadingTpl">
     <app-admin-header (create)="abrirModal()"></app-admin-header>
     <app-admin-filters (buscar)="filtrar($event)"></app-admin-filters>
-    <app-admin-table
+    <div class="hidden md:block">
+      <app-admin-table
+        [usuarios]="usuariosFiltrados"
+        [paginaActual]="paginaActual"
+        [totalPaginas]="totalPaginas"
+        [loading]="!isDataFullyLoaded"
+        [rowCount]="pageSize"
+        (paginaCambiada)="cambiarPagina($event)"
+        (editarUsuario)="editar($event)">
+      </app-admin-table>
+    </div>
+
+    <app-admin-card-list
+      class="md:hidden"
       [usuarios]="usuariosFiltrados"
-      [paginaActual]="paginaActual"
-      [totalPaginas]="totalPaginas"
       [loading]="!isDataFullyLoaded"
       [rowCount]="pageSize"
-      (paginaCambiada)="cambiarPagina($event)"
       (editarUsuario)="editar($event)">
-    </app-admin-table>
+    </app-admin-card-list>
 
     <app-admin-modal-wrapper *ngIf="modal.modalType$ | async as type">
       <ng-container [ngSwitch]="type">
