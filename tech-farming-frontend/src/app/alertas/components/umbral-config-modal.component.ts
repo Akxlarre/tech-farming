@@ -20,7 +20,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     <!-- Modal de Confirmación -->
     <div *ngIf="confirmacionVisible"
          class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[90vw] max-w-xs sm:max-w-sm space-y-2 border border-base-300">
         <h3 class="text-xl font-semibold text-success">
           ✅ ¡Éxito!
         </h3>
@@ -31,7 +31,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     <!-- Modal de Ayuda -->
     <div *ngIf="ayudaVisible"
         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-base-100 w-[600px] max-h-[50vh] p-6 rounded-2xl shadow-xl relative overflow-y-auto pr-2 border border-base-300">
+      <div class="bg-base-100 w-[95vw] sm:max-w-lg max-h-[65vh] p-6 rounded-2xl shadow-xl relative overflow-y-auto pr-2 border border-base-300">
 
         <div class="space-y-4">
           <h3 class="text-xl font-bold text-success">¿Cómo deben relacionarse los valores de advertencia y crítico?</h3>
