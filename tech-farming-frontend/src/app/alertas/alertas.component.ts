@@ -9,6 +9,7 @@ import { ActiveAlertsComponent } from './components/alertas-activas.component';
 import { AlertsHistoryComponent } from './components/alertas-historial.component';
 import { UmbralModalWrapperComponent } from './components/umbral-modal-wrapper.component';
 import { UmbralConfigModalComponent } from './components/umbral-config-modal.component';
+import { AlertCardListComponent } from './components/alert-card-list.component';
 import { HistorialService } from '../historial/historial.service';
 import { InvernaderoService } from '../invernaderos/invernaderos.service';
 import { ZonaService } from '../invernaderos/zona.service';
@@ -24,6 +25,7 @@ import { UmbralListComponent } from './components/umbral-list.component';
     ReactiveFormsModule,
     AlertsHeaderComponent,
     ActiveAlertsComponent,
+    AlertCardListComponent,
     AlertsHistoryComponent,
     UmbralConfigModalComponent,
     UmbralListComponent,
@@ -151,20 +153,39 @@ import { UmbralListComponent } from './components/umbral-list.component';
 
       <!-- Contenido de cada tab -->
       <div *ngIf="tabIndex === 0" class="mt-4">
-        <app-active-alerts
+        <div class="hidden md:block">
+          <app-active-alerts
+            [alertas]="alertasActivas"
+            [resolviendoId]="resolviendoId"
+            [loading]="!isDataFullyLoaded"
+            [rowCount]="pageSize"
+            (resolver)="resolverAlerta($event)">
+          </app-active-alerts>
+        </div>
+        <app-alert-card-list
+          class="md:hidden"
           [alertas]="alertasActivas"
           [resolviendoId]="resolviendoId"
           [loading]="!isDataFullyLoaded"
           [rowCount]="pageSize"
+          [showResolver]="true"
           (resolver)="resolverAlerta($event)">
-        </app-active-alerts>
+        </app-alert-card-list>
       </div>
       <div *ngIf="tabIndex === 1" class="mt-4">
-        <app-alerts-history
+        <div class="hidden md:block">
+          <app-alerts-history
+            [alertas]="alertasResueltas"
+            [loading]="!isDataFullyLoaded"
+            [rowCount]="pageSize">
+          </app-alerts-history>
+        </div>
+        <app-alert-card-list
+          class="md:hidden"
           [alertas]="alertasResueltas"
           [loading]="!isDataFullyLoaded"
           [rowCount]="pageSize">
-        </app-alerts-history>
+        </app-alert-card-list>
       </div>
 
       <!-- Modal de configuración de Umbrales -->

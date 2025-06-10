@@ -20,7 +20,7 @@ import { firstValueFrom } from 'rxjs';
       </div>
     </div>
 
-    <div class="bg-base-100 rounded-xl shadow-xl p-6 w-full max-w-2xl border border-base-300">
+    <div class="bg-base-100 rounded-xl shadow-xl p-6 w-full max-w-[90vw] sm:max-w-2xl border border-base-300">
       <h3 class="font-bold text-2xl mb-4">Editar permisos del usuario</h3>
 
       <form class="space-y-4" (ngSubmit)="guardarCambios()">
