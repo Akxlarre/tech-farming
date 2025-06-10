@@ -30,6 +30,7 @@ export class AlertService {
     nivel?: 'Advertencia' | 'Crítico',
     invernadero_id?: number,
     zona_id?: number,
+    sensor_id?: number,
     busqueda?: string,
     page: number = 1,
     perPage: number = 20
@@ -43,6 +44,7 @@ export class AlertService {
     if (nivel) params = params.set('nivel', nivel);
     if (invernadero_id) params = params.set('invernadero_id', invernadero_id.toString());
     if (zona_id) params = params.set('zona_id', zona_id.toString());
+    if (sensor_id) params = params.set('sensor_id', sensor_id.toString());
     if (busqueda) params = params.set('busqueda', busqueda);
     return this.http.get<{ data: Alerta[]; pagination: any }>(this.baseUrl, { params });
   }

@@ -15,6 +15,7 @@ def obtener_alertas():
             "nivel": request.args.get("nivel"),
             "invernadero_id": request.args.get("invernadero_id", type=int),
             "zona_id": request.args.get("zona_id", type=int),
+            "sensor_id": request.args.get("sensor_id", type=int),
             "busqueda": request.args.get("busqueda"),
             "page": request.args.get("page", default=1, type=int),
             "perPage": request.args.get("perPage", default=20, type=int)
