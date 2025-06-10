@@ -22,23 +22,22 @@ import { TipoSensor } from '../models/tipo-sensor.model';
 import { TipoParametro } from '../models/tipos_parametro.model';
 import { TipoSensorService } from '../tipos_sensor.service';
 import { TipoParametroService } from '../tipos_parametro.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-sensor-create-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
+    <div *ngIf="!loading; else loadingTpl">
     <ng-container *ngIf="!created; else instructions">
       <div class="p-8 space-y-5 bg-base-100 rounded-lg shadow-lg w-full max-w-2xl">
         <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
           Crear Nuevo Sensor
         </h2>
 
-        <form
-          [formGroup]="form"
-          (ngSubmit)="onSubmit()"
-          class="grid grid-cols-1 sm:grid-cols-2 gap-5"
-        >
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <fieldset [disabled]="loading" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <!-- Nombre -->
           <div class="sm:col-span-2">
             <label for="nombre" class="label-base-content">Nombre del sensor</label>
@@ -180,11 +179,21 @@ import { TipoParametroService } from '../tipos_parametro.service';
               [disabled]="form.invalid || parametrosSeleccionados.length === 0 || zonas.length === 0"
             >
               Crear Sensor
-            </button>
-          </div>
-        </form>
-      </div>
-    </ng-container>
+          </button>
+        </div>
+        </fieldset>
+      </form>
+    </div>
+  </ng-container>
+  </div>
+  <ng-template #loadingTpl>
+    <div class="p-8 text-center">
+      <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+    </div>
+  </ng-template>
 
     <!-- Paso 2: instrucciones -->
     <ng-template #instructions>
@@ -269,6 +278,7 @@ export class SensorCreateModalComponent implements OnInit {
   tiposSensores: TipoSensor[] = [];
   created!: CrearSensorResponse;
   apiUrl = 'http://localhost:5000/api';
+  loading = false;
 
   get jsonEjemplo() {
     return `{
@@ -298,9 +308,20 @@ export class SensorCreateModalComponent implements OnInit {
       zona_id:          [null, Validators.required]
     });
 
-    this.invSvc.getInvernaderos().subscribe(inv => (this.invernaderos = inv));
-    this.tiposSvc.obtenerTiposSensor().subscribe(ts => (this.tiposSensores = ts));
-    this.paramSvc.obtenerTiposParametro().subscribe(tp => (this.posiblesParametros = tp));
+    this.loading = true;
+    forkJoin([
+      this.invSvc.getInvernaderos(),
+      this.tiposSvc.obtenerTiposSensor(),
+      this.paramSvc.obtenerTiposParametro()
+    ]).subscribe({
+      next: ([invs, tipos, params]) => {
+        this.invernaderos = invs;
+        this.tiposSensores = tipos;
+        this.posiblesParametros = params;
+        this.loading = false;
+      },
+      error: () => (this.loading = false)
+    });
   }
 
   onInvernaderoChange() {
@@ -308,7 +329,14 @@ export class SensorCreateModalComponent implements OnInit {
     this.zonas = [];
     this.form.patchValue({ zona_id: null });
     if (invId) {
-      this.zonaSvc.getZonasByInvernadero(invId).subscribe(zs => (this.zonas = zs));
+      this.loading = true;
+      this.zonaSvc.getZonasByInvernadero(invId).subscribe({
+        next: zs => {
+          this.zonas = zs;
+          this.loading = false;
+        },
+        error: () => (this.loading = false)
+      });
     }
   }
 
@@ -349,12 +377,17 @@ export class SensorCreateModalComponent implements OnInit {
       parametro_ids:    this.parametrosSeleccionados
     };
 
+    this.loading = true;
     this.svc.crearSensor(payload).subscribe({
       next: res => {
         this.created = res;
+        this.loading = false;
         this.saved.emit(res);
       },
-      error: () => alert('❌ No se pudo crear el sensor.')
+      error: () => {
+        this.loading = false;
+        alert('❌ No se pudo crear el sensor.');
+      }
     });
   }
 
