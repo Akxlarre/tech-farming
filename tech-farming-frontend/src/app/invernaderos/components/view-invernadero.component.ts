@@ -307,7 +307,7 @@ import { AlertService } from '../../alertas/alertas.service';
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
-                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                        <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
                       </td>
                     </tr>
                   </tbody>
@@ -331,7 +331,7 @@ import { AlertService } from '../../alertas/alertas.service';
                 <li *ngFor="let z of zonasList; trackBy: trackByZona" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium">{{ z.nombre }}</p>
+                      <p class="font-medium text-xs">{{ z.nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ z.creado_en | date:'short':'':'es' }}
                       </p>
@@ -379,8 +379,8 @@ import { AlertService } from '../../alertas/alertas.service';
                 <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
-                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
-                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-40"></div>
                     </div>
                   </li>
                 </ul>
@@ -493,7 +493,7 @@ import { AlertService } from '../../alertas/alertas.service';
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
-                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                        <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
                       </td>
                     </tr>
                   </tbody>
@@ -517,7 +517,7 @@ import { AlertService } from '../../alertas/alertas.service';
                 <li *ngFor="let s of sensoresPage.data; trackBy: trackBySensor" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium">{{ s.nombre }}</p>
+                      <p class="font-medium text-xs">{{ s.nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ s.zona?.nombre || '—' }}
                       </p>
@@ -545,8 +545,8 @@ import { AlertService } from '../../alertas/alertas.service';
                 <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
-                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
-                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-40"></div>
                     </div>
                   </li>
                 </ul>
@@ -678,7 +678,7 @@ import { AlertService } from '../../alertas/alertas.service';
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
-                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                        <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
                       </td>
                     </tr>
                   </tbody>
@@ -702,7 +702,7 @@ import { AlertService } from '../../alertas/alertas.service';
                 <li *ngFor="let a of alertasPage.data; trackBy: trackByAlerta" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium">{{ a.sensor_nombre }}</p>
+                      <p class="font-medium text-xs">{{ a.sensor_nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ a.fecha_hora | date:'short':'':'es' }}
                       </p>
@@ -737,8 +737,8 @@ import { AlertService } from '../../alertas/alertas.service';
                 <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
-                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
-                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-40"></div>
                     </div>
                   </li>
                 </ul>
