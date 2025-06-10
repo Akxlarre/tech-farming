@@ -18,7 +18,7 @@ import { Sensor }                                 from '../models/sensor.model';
       </ng-container>
 
       <ng-template #eliminarForm>
-        <p>Escribe <strong>"Eliminar {{ sensor.nombre }}"</strong> para confirmar:</p>
+        <p>Escribe <strong>Eliminar {{ sensor.nombre }}</strong> para confirmar:</p>
         <input
           type="text"
           class="input input-bordered w-full"

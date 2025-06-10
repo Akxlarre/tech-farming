@@ -71,7 +71,7 @@ import { catchError } from 'rxjs/operators';
             sensores y alertas asociadas).
           </p>
           <p class="mt-4">
-            Escribe <strong>"Eliminar {{ invernadero?.nombre }}"</strong> para confirmar:
+            Escribe <strong>Eliminar {{ invernadero?.nombre }}</strong> para confirmar:
           </p>
           <input
             type="text"

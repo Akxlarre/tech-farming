@@ -23,12 +23,12 @@ import { FormsModule } from '@angular/forms';
 
         <ng-template #confirmarTexto>
           <p class="text-sm text-base-content/80">Esta acción eliminará el umbral de forma permanente.</p>
-          <p class="text-sm mt-2">Escribe <strong>"Eliminar"</strong> para confirmar:</p>
+          <p class="text-sm mt-2">Escribe <strong>Eliminar</strong> para confirmar:</p>
           <input
             type="text"
             class="input input-bordered w-full"
             [(ngModel)]="textoConfirmacion"
-            placeholder="Escribe aquí"
+            placeholder="Escribe aquí para confirmar"
           />
         </ng-template>
 
