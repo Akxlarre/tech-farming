@@ -107,7 +107,7 @@ import { AlertService } from '../../alertas/alertas.service';
           id="seccion-general"
           class="snap-section h-full flex flex-col justify-start items-center px-4 lg:px-20"
         >
-          <div class="max-w-4xl w-full bg-base-100 rounded-2xl p-8 space-y-6">
+          <div class="max-w-4xl w-full bg-base-100 rounded-2xl p-8 space-y-5 sm:space-y-3">
             <h2
               id="titulo-invernadero"
               class="text-3xl font-extrabold text-success text-center"
@@ -125,11 +125,11 @@ import { AlertService } from '../../alertas/alertas.service';
   
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
               <!-- CARD 1: Zonas -->
-              <div class="card bg-base-200 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center min-h-[120px]">
+              <div class="card bg-base-200 rounded-xl shadow p-6 lg:p-6 md:p-5 sm:p-4 flex flex-col items-center justify-center min-h-[110px] sm:min-h-[90px]">
                 <!-- Ícono “Pin” -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 text-info"
+                  class="w-7 h-7 sm:w-6 sm:h-6 text-info"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
@@ -140,21 +140,21 @@ import { AlertService } from '../../alertas/alertas.service';
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span class="mt-2 text-xl font-semibold">
+                <span class="mt-1 text-lg sm:text-base font-semibold">
                   {{ resumenDelete?.zonasCount }}
                   Zona{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
                 </span>
-                <span class="text-sm text-base-content/60">
+                <span class="text-xs sm:text-[11px] text-base-content/60">
                   Activa{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
                 </span>
               </div>
   
               <!-- CARD 2: Sensores -->
-              <div class="card bg-base-200 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center min-h-[120px]">
+              <div class="card bg-base-200 rounded-xl shadow p-6 lg:p-6 md:p-5 sm:p-4 flex flex-col items-center justify-center min-h-[110px] sm:min-h-[90px]">
                 <!-- Ícono “Termómetro” -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 text-accent"
+                  class="w-7 h-7 sm:w-6 sm:h-6 text-accent"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
@@ -165,21 +165,21 @@ import { AlertService } from '../../alertas/alertas.service';
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span class="mt-2 text-xl font-semibold">
+                <span class="mt-1 text-lg sm:text-base font-semibold">
                   {{ resumenDelete?.sensoresCount }}
                   Sensor{{ resumenDelete?.sensoresCount === 1 ? '' : 'es' }}
                 </span>
-                <span class="text-sm text-base-content/60">
+                <span class="text-xs sm:text-[11px] text-base-content/60">
                   Registrado{{ resumenDelete?.sensoresCount === 1 ? '' : 's' }}
                 </span>
               </div>
   
               <!-- CARD 3: Alertas -->
-              <div class="card bg-base-200 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center min-h-[120px]">
+              <div class="card bg-base-200 rounded-xl shadow p-6 lg:p-6 md:p-5 sm:p-4 flex flex-col items-center justify-center min-h-[110px] sm:min-h-[90px]">
                 <!-- Ícono “Campana” -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 text-error"
+                  class="w-7 h-7 sm:w-6 sm:h-6 text-error"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
@@ -188,11 +188,11 @@ import { AlertService } from '../../alertas/alertas.service';
                     d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z"
                   />
                 </svg>
-                <span class="mt-2 text-xl font-semibold">
+                <span class="mt-1 text-lg sm:text-base font-semibold">
                   {{ resumenDelete?.alertasActivasCount || 0 }}
                   Alerta{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
                 </span>
-                <span class="text-sm text-base-content/60">
+                <span class="text-xs sm:text-[11px] text-base-content/60">
                   Activa{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
                 </span>
               </div>
