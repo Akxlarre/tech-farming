@@ -149,7 +149,16 @@ def listar_alertas(filtros: dict):
             Alerta.sensor.has(Sensor.zona_id == filtros["zona_id"])
         ))
     if filtros.get("sensor_id"):
-        query = query.filter(Alerta.sensor_id == filtros["sensor_id"])
+        sid = filtros["sensor_id"]
+        query = query.filter(or_(
+            Alerta.sensor_id == sid,
+            and_(
+                Alerta.sensor_id.is_(None),
+                Alerta.sensor_parametro.has(
+                    SensorParametro.sensor_id == sid
+                )
+            )
+        ))
 
     paginated = query.order_by(Alerta.fecha_hora.desc()).paginate(page=page, per_page=per_page)
 
