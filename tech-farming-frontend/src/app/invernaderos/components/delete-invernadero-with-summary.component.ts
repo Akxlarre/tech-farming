@@ -1,16 +1,15 @@
-// src/app/invernaderos/components/delete-invernadero-with-summary.component.ts
-
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { InvernaderoService } from '../invernaderos.service';
 import { Invernadero, Zona } from '../models/invernadero.model';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'delete-invernadero-with-summary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="bg-base-100 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
       <h2 class="text-2xl font-bold text-error mb-4">Eliminar Invernadero</h2>
@@ -59,12 +58,30 @@ import { catchError } from 'rxjs/operators';
           </li>
         </ul>
 
-        <p class="mb-6 text-red-600">
-          Al confirmar, se eliminará este invernadero y todas sus zonas (y, por cascada,
-          sensores y alertas asociadas).
-        </p>
+        <ng-container *ngIf="!todasZonasInactivas; else eliminarForm">
+          <p class="text-red-600 mt-4">
+            Para eliminar este invernadero, todas sus zonas deben estar en estado <strong>Inactivo</strong>. Recuerda que al eliminar un invernadero, estarás eliminando todas sus zonas (y, por cascada, todos sus sensores y alertas asociadas).
+          </p>
+        </ng-container>
 
-        <div class="flex justify-end gap-3">
+        <!-- Confirmación textual -->
+        <ng-template #eliminarForm>
+          <p class=" text-red-600">
+            Al confirmar, se eliminará este invernadero y todas sus zonas (y, por cascada,
+            sensores y alertas asociadas).
+          </p>
+          <p class="mt-4">
+            Escribe <strong>"Eliminar {{ invernadero?.nombre }}"</strong> para confirmar:
+          </p>
+          <input
+            type="text"
+            class="input input-bordered w-full"
+            [(ngModel)]="confirmText"
+            placeholder="Escribe aquí para confirmar"
+          />
+        </ng-template>
+
+        <div class="flex justify-end gap-3 pt-4">
           <button
             class="btn btn-ghost"
             (click)="onCancelClicked()"
@@ -72,7 +89,9 @@ import { catchError } from 'rxjs/operators';
             Cancelar
           </button>
           <button
+            *ngIf="todasZonasInactivas"
             class="btn btn-error text-white"
+            [disabled]="!puedeEliminar"
             (click)="onConfirmClicked()"
           >
             Eliminar
@@ -95,6 +114,7 @@ export class DeleteInvernaderoWithSummaryComponent implements OnInit {
   invernadero: Invernadero | null = null;
   zonas: Array<{ nombre: string; activo: boolean; sensoresCount: number }> = [];
   isLoading = true;
+  confirmText = '';
 
   constructor(private svc: InvernaderoService) {}
 
@@ -131,6 +151,17 @@ export class DeleteInvernaderoWithSummaryComponent implements OnInit {
 
         this.isLoading = false;
       });
+  }
+
+  get todasZonasInactivas(): boolean {
+    return this.zonas.every(z => !z.activo);
+  }
+
+  get puedeEliminar(): boolean {
+    return (
+      this.todasZonasInactivas &&
+      this.confirmText.trim() === `Eliminar ${this.invernadero?.nombre}`
+    );
   }
 
   onConfirmClicked() {
