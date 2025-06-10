@@ -28,16 +28,13 @@ import { Sensor }                                 from '../models/sensor.model';
       </ng-template>
 
       <div class="flex justify-end space-x-2">
-        <button class="btn btn-ghost " (click)="close.emit()">Cancelar</button>
-
+        <button class="btn btn-ghost" (click)="close.emit()" [disabled]="loading">Cancelar</button>
         <button
           *ngIf="sensor.estado === 'Inactivo'"
           class="btn btn-error"
           [disabled]="!canDelete || loading"
           (click)="onDelete()"
-        >
-          {{ loading ? 'Eliminando…' : 'Eliminar' }}
-        </button>
+        >Eliminar</button>
       </div>
     </div>
   `
