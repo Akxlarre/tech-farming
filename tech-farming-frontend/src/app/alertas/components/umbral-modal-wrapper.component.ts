@@ -11,7 +11,7 @@ import { UmbralModalService } from '../umbral-modal.service';
 
       <div
         #modalContent
-        class="modal-box bg-base-100 rounded-2xl shadow-xl w-full max-w-3xl overflow-auto"
+        class="modal-box bg-base-100 rounded-2xl shadow-xl w-full max-w-4xl overflow-auto"
       >
         <ng-content></ng-content>
       </div>

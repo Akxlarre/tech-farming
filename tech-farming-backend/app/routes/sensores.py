@@ -300,6 +300,10 @@ def eliminar_sensor(sensor_id):
     """
     # 1) Busca o da 404
     sensor = SensorModel.query.get_or_404(sensor_id, description="Sensor no encontrado")
+
+    if sensor.estado != 'Inactivo':
+        abort(400, description="El sensor debe estar marcado como 'Inactivo' para poder eliminarlo.")
+        
     try:
         # 2) Borra y confirma
         db.session.delete(sensor)
