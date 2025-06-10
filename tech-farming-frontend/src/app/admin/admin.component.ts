@@ -32,12 +32,15 @@ interface Usuario {
     AdminEditModalComponent,
     AdminModalWrapperComponent],
   template: `
+    <div *ngIf="!loading; else loadingTpl">
     <app-admin-header (create)="abrirModal()"></app-admin-header>
     <app-admin-filters (buscar)="filtrar($event)"></app-admin-filters>
     <app-admin-table
       [usuarios]="usuariosFiltrados"
       [paginaActual]="paginaActual"
       [totalPaginas]="totalPaginas"
+      [loading]="!isDataFullyLoaded"
+      [rowCount]="pageSize"
       (paginaCambiada)="cambiarPagina($event)"
       (editarUsuario)="editar($event)">
     </app-admin-table>
@@ -65,6 +68,15 @@ interface Usuario {
       <!-- Otros tipos de modales (edit, delete) se agregarían aquí -->
       </ng-container>
     </app-admin-modal-wrapper>
+    </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+      </div>
+    </ng-template>
   `,
 })
 export class AdminComponent implements OnInit {
@@ -75,6 +87,10 @@ export class AdminComponent implements OnInit {
   totalPaginas = 1;
   pageSize = 5;
   totalUsuarios = 0;
+  loading = true;
+  isDataFullyLoaded = false;
+  private loadCount = 0;
+  private initialLoad = true;
 
   constructor(
     public modal: AdminModalService,
@@ -86,9 +102,16 @@ export class AdminComponent implements OnInit {
   }
 
   cargarUsuarios(): void {
-    this.adminService.getTrabajadores().subscribe(trabajadores => {
-      this.usuarios = trabajadores;
-      this.filtrar('');
+    this.startLoading();
+    this.isDataFullyLoaded = false;
+    this.adminService.getTrabajadores().subscribe({
+      next: trabajadores => {
+        this.usuarios = trabajadores;
+        this.filtrar('');
+        this.isDataFullyLoaded = true;
+        this.endLoading();
+      },
+      error: () => this.endLoading()
     });
   }
 
@@ -128,9 +151,26 @@ export class AdminComponent implements OnInit {
       permisos: {
         editar: usuario.puedeEditar,
         crear: usuario.puedeCrear,
-        eliminar: usuario.puedeEliminar
+      eliminar: usuario.puedeEliminar
       }
     };
     this.modal.openModal('edit');
+  }
+
+  private startLoading(): void {
+    if (!this.initialLoad) return;
+    this.loadCount++;
+    this.loading = true;
+  }
+
+  private endLoading(): void {
+    if (!this.initialLoad) return;
+    if (this.loadCount > 0) {
+      this.loadCount--;
+    }
+    if (this.loadCount === 0) {
+      this.loading = false;
+      this.initialLoad = false;
+    }
   }
 }

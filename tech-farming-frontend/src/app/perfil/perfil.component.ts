@@ -45,6 +45,7 @@ import { PerfilSharedService } from './perfil-shared.service';
       </div>
     </div>
 
+    <div *ngIf="!loading; else loadingTpl">
     <section class="min-h-[calc(100vh-5rem)] flex justify-center items-center p-6">
     <div class="card w-full max-w-md bg-base-100 shadow-xl p-6 space-y-6 min-h-[750px]">
     <h1 class="text-3xl font-bold text-center mb-3 text-success">Perfil</h1>
@@ -160,6 +161,15 @@ import { PerfilSharedService } from './perfil-shared.service';
     </section>
 
     <router-outlet></router-outlet>
+    </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+      </div>
+    </ng-template>
   `
 })
 export class PerfilComponent {
@@ -177,6 +187,10 @@ export class PerfilComponent {
   ];
   mostrarOpcionesAvatar = false;
   avatarCargando = true;
+  loading = true;
+  isDataFullyLoaded = false;
+  private loadCount = 0;
+  private initialLoad = true;
 
   userId: string | null = null;
   editando: 'nombre' | 'apellido' | 'correo' | 'telefono' | null = null;
@@ -194,11 +208,14 @@ export class PerfilComponent {
   private router = inject(Router);
 
   async ngOnInit() {
+    this.startLoading();
+    this.isDataFullyLoaded = false;
     const { user, error: authError } = await this.perfilService.getUsuarioAutenticado();
 
     if (authError || !user) {
       console.error('No se pudo obtener el usuario autenticado');
       this.router.navigateByUrl('/login');
+      this.endLoading();
       return;
     }
 
@@ -209,6 +226,7 @@ export class PerfilComponent {
 
     if (dbError || !usuario) {
       console.error('No se encontró el usuario en la tabla usuarios');
+      this.endLoading();
       return;
     }
 
@@ -222,6 +240,8 @@ export class PerfilComponent {
     img.onload = () => {
       this.avatarCargando = false;
     };
+    this.isDataFullyLoaded = true;
+    this.endLoading();
   }
 
   get telefonoCompleto(): string {
@@ -320,4 +340,21 @@ export class PerfilComponent {
   goToReset() {
     this.router.navigate(['perfil/reset-password'], { queryParams: { from: 'perfil' } });
 
+  }
+
+  private startLoading(): void {
+    if (!this.initialLoad) return;
+    this.loadCount++;
+    this.loading = true;
+  }
+
+  private endLoading(): void {
+    if (!this.initialLoad) return;
+    if (this.loadCount > 0) {
+      this.loadCount--;
+    }
+    if (this.loadCount === 0) {
+      this.loading = false;
+      this.initialLoad = false;
+    }
   }
