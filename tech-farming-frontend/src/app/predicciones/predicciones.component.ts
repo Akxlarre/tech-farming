@@ -58,6 +58,9 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
       </div>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
+        <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
+          ⚠️ No hay datos disponibles para esa selección.
+        </div>
         <!-- FILTROS -->
         <div class="grid gap-4"
              style="grid-template-columns: calc(100% * var(--inv-phi)) repeat(3, 1fr);">
@@ -158,7 +161,7 @@ export class PrediccionesComponent implements OnInit {
 
   data?:   PredicResult;
   uiTrend?: UITrend;
-
+  showNoDataMsg = false;
   constructor(private svc: PrediccionesService) {}
 
   ngOnInit() {
@@ -231,9 +234,10 @@ export class PrediccionesComponent implements OnInit {
         }
 
         // si no hay historial
-        if (!res.historical?.length) {
+        if (!res.historical || res.historical.length === 0) {
           this.data = undefined;
           this.uiTrend = undefined;
+          this.mostrarMensajeNoData();
           return;
         }
 
@@ -284,13 +288,20 @@ export class PrediccionesComponent implements OnInit {
         };
       },
       error: err => {
-        console.error('Error al obtener predicciones:', err);
+        console.warn('No se pudieron obtener predicciones:', err);
         this.data = undefined;
         this.uiTrend = undefined;
+        this.mostrarMensajeNoData();
       }
     });
   }
-
+   /** Activa showNoDataMsg por 5 segundos */
+  private mostrarMensajeNoData() {
+    this.showNoDataMsg = true;
+    setTimeout(() => {
+      this.showNoDataMsg = false;
+    }, 5000);
+  }
   private mapTrend(api: APITrend): UITrend {
     let type: UITrend['type'] = 'stable';
     if (api.icon === 'arrow-up')   type = 'up';
