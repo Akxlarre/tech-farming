@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.auth_supabase import admin_requerido
+from gotrue.errors import AuthApiError
 from app import db
 from app.models.usuario import Usuario
 from app.models.usuario_permiso import UsuarioPermiso
@@ -65,9 +66,13 @@ def invitar_usuario():
     redirect_url = f"http://localhost:4200/set-password?invitacion=true"
 
     # Invitar usuario con Supabase Admin API
-    response = supabase.auth.admin.invite_user_by_email(email, {
-        "redirect_to": redirect_url
-    })
+    try:
+        response = supabase.auth.admin.invite_user_by_email(
+            email,
+            {"redirect_to": redirect_url},
+        )
+    except AuthApiError as e:
+        return jsonify({"error": str(e)}), 400
 
     if response.user is None:
         return jsonify({"error": "Error al invitar usuario con Supabase"}), 400

@@ -32,7 +32,6 @@ export class HeaderComponent {
     { label: 'Historial',     path: '/historial'    },
     { label: 'Alertas',       path: '/alertas'      },
     { label: 'Predicciones',  path: '/predicciones' },
-    { label: 'Usuarios',      path: '/admin'         },
   ];
 
   isReady = false;
@@ -53,10 +52,8 @@ export class HeaderComponent {
         .eq('supabase_uid', user.id)
         .single();
 
-      const esAdmin = usuarioDB?.rol_id === 1;
-
-      if (!esAdmin) {
-        this.navItems = this.navItems.filter(item => item.path !== '/admin');
+      if (usuarioDB?.rol_id === 1) {
+        this.navItems.push({ label: 'Usuarios', path: '/admin' });
       }
     }
     this.isReady = true;
