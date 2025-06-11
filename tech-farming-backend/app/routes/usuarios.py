@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from app.utils.auth_supabase import admin_requerido
 from app import db
 from app.models.usuario import Usuario
 from app.models.usuario_permiso import UsuarioPermiso
@@ -48,6 +49,7 @@ def crear_usuario_desde_supabase():
     return jsonify({"mensaje": "Usuario y permisos creados correctamente"}), 201
 
 @router.route('/trabajadores', methods=['POST'])
+@admin_requerido
 def invitar_usuario():
     data = request.get_json()
 
@@ -96,6 +98,7 @@ def invitar_usuario():
     return jsonify({"mensaje": "Usuario invitado y registrado correctamente"}), 201
 
 @router.route('/trabajadores', methods=['GET'])
+@admin_requerido
 def listar_trabajadores():
     trabajadores = Usuario.query.join(Rol).filter(Rol.nombre == 'Trabajador').all()
     resultado = []
@@ -114,6 +117,7 @@ def listar_trabajadores():
     return jsonify(resultado), 200
 
 @router.route('/trabajadores/<int:usuario_id>', methods=['PATCH'])
+@admin_requerido
 def actualizar_permisos(usuario_id):
     data = request.get_json()
     permisos = UsuarioPermiso.query.filter_by(usuario_id=usuario_id).first()
