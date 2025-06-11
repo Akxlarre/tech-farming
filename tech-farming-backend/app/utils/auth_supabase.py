@@ -45,3 +45,19 @@ def usuario_autenticado_requerido(f):
             return jsonify({"error": str(e)}), 401
 
     return decorated_function
+
+
+def admin_requerido(f):
+    """Decorator que garantiza que el usuario es administrador."""
+
+    @usuario_autenticado_requerido
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if getattr(g.usuario, "rol_id", None) != 1:
+            return (
+                jsonify({"error": "Usuario sin privilegios de administrador"}),
+                403,
+            )
+        return f(*args, **kwargs)
+
+    return decorated_function
