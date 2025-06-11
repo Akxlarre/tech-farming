@@ -17,9 +17,6 @@ import { NotificationService } from '../../shared/services/notification.service'
         <!-- Paso 1 -->
         <ng-container *ngIf="step === 1">
           <h3 class="text-lg font-semibold">Paso 1: Copia el token de tu sensor</h3>
-          <div class="h-32 bg-base-200 rounded-lg flex items-center justify-center mb-2">
-            <span class="text-base-content/50">Imagen aquí</span>
-          </div>
           <div class="flex items-center gap-2">
             <input class="input input-bordered w-full" [value]="createdToken" readonly />
             <button class="btn btn-outline" (click)="copyToken()">Copiar</button>
@@ -29,44 +26,52 @@ import { NotificationService } from '../../shared/services/notification.service'
         <!-- Paso 2 -->
         <ng-container *ngIf="step === 2">
           <h3 class="text-lg font-semibold">Paso 2: Conecta físicamente el sensor</h3>
-          <div class="h-32 bg-base-200 rounded-lg flex items-center justify-center mb-2">
-            <span class="text-base-content/50">Imagen aquí</span>
-          </div>
           <ul class="list-disc list-inside space-y-1 text-sm">
             <li>Ubica los pines 5V, GND y de datos de la Raspberry Pi.</li>
-            <li>Conecta el DHT22 al pin GPIO4 o sigue el esquema para tu sensor NPK.</li>
+            <li>Conecta tu sensor al pin GPIO4 o al esquema que tu ocupes.</li>
             <li>Verifica conexiones firmes y sin cortocircuitos.</li>
           </ul>
         </ng-container>
 
         <!-- Paso 3 -->
         <ng-container *ngIf="step === 3">
-          <h3 class="text-lg font-semibold">Paso 3: Ejecuta setup.py</h3>
-          <div class="h-32 bg-base-200 rounded-lg flex items-center justify-center mb-2">
-            <span class="text-base-content/50">Imagen aquí</span>
-          </div>
-          <p class="text-sm">Crea un entorno virtual e instala dependencias:</p>
-          <pre class="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap"><code>python3 -m venv venv
-source venv/bin/activate
-python3 setup.py</code></pre>
+          <h3 class="text-lg font-semibold">Paso 3: Configura el sensor en la Raspberry Pi</h3>
+
+          <p class="text-sm mb-2">
+            Abre una terminal en tu Raspberry Pi y crea un entorno virtual para instalar las dependencias necesarias. Asegúrate de tener Python 3 y pip instalados, luego ejecuta el archivo de configuración del sensor:
+          </p>
+
+          <pre class="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap mb-3"><code>python3 -m venv venv
+            source venv/bin/activate
+            pip install -r requirements.txt
+            python3 setup.py</code></pre>
+
+          <p class="text-sm text-base-content/70">
+            El programa <code>setup.py</code> te guiará para:
+          </p>
+
+          <ul class="list-disc list-inside text-sm space-y-1 mt-2">
+            <li>Elegir el tipo de sensor (DHT22 o NPK).</li>
+            <li>Seleccionar el pin físico al que está conectado.</li>
+            <li>Ingresar el token único generado en esta plataforma.</li>
+            <li>Guardar esta configuración localmente.</li>
+          </ul>
+
+          <p class="text-sm text-base-content/70 mt-2">
+            Si todo es correcto, se generará el archivo <code>config/sensors.json</code> y el sensor quedará listo para usarse.
+          </p>
         </ng-container>
 
         <!-- Paso 4 -->
         <ng-container *ngIf="step === 4">
           <h3 class="text-lg font-semibold">Paso 4: Inicia el envío de datos</h3>
-          <div class="h-32 bg-base-200 rounded-lg flex items-center justify-center mb-2">
-            <span class="text-base-content/50">Imagen aquí</span>
-          </div>
           <p class="text-sm">Con el entorno virtual activo ejecuta:</p>
-          <pre class="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap"><code>python3 main.py {{ createdToken }}</code></pre>
+          <pre class="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap"><code>python3 main.py</code></pre>
         </ng-container>
 
         <!-- Paso 5 -->
         <ng-container *ngIf="step === 5">
           <h3 class="text-lg font-semibold">Paso 5: Verifica desde el panel web</h3>
-          <div class="h-32 bg-base-200 rounded-lg flex items-center justify-center mb-2">
-            <span class="text-base-content/50">Imagen aquí</span>
-          </div>
           <p class="text-sm">Ingresa a Tech Farming y confirma que el sensor esté enviando lecturas.</p>
         </ng-container>
       </div>
