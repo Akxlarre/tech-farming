@@ -20,6 +20,15 @@ import { SupabaseService } from '../../services/supabase.service';
       </div>
     </div>
 
+    <!-- Modal de Error -->
+    <div *ngIf="errorVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-error">❌ Error</h3>
+        <p>{{ mensajeError }}</p>
+        <button class="btn btn-sm btn-outline mt-3" (click)="errorVisible = false">Cerrar</button>
+      </div>
+    </div>
+
     <div class="bg-base-100 rounded-xl shadow-xl p-6 w-full max-w-[90vw] sm:max-w-2xl border border-base-300">
       <h3 class="font-bold text-2xl mb-4">Agregar nuevo usuario trabajador</h3>
 
@@ -93,7 +102,8 @@ export class AdminCreateModalComponent {
   adminService = inject(AdminService);
   supabaseService = inject(SupabaseService);
   loading = false;
-  error = '';
+  errorVisible = false;
+  mensajeError = '';
   confirmacionVisible = false;
   mensajeConfirmacion = '';
 
@@ -111,7 +121,8 @@ export class AdminCreateModalComponent {
 
   async crearUsuario() {
     this.loading = true;
-    this.error = '';
+    this.mensajeError = '';
+    this.errorVisible = false;
 
     try {
       const response = await this.adminService.crearTrabajador({
@@ -130,10 +141,12 @@ export class AdminCreateModalComponent {
           this.saved.emit();
         }, 2500);
       } else {
-        this.error = response.error || 'Error al crear usuario.';
+        this.mensajeError = response.error || 'Error al crear usuario.';
+        this.errorVisible = true;
       }
     } catch (err: any) {
-      this.error = err.message || 'Error inesperado';
+      this.mensajeError = err.message || 'Error inesperado';
+      this.errorVisible = true;
     }
 
     this.loading = false;
