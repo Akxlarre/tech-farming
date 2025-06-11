@@ -53,34 +53,58 @@ import { FormsModule } from '@angular/forms';
         </button>
       </div>
 
-      <!-- Tabla -->
-      <table class="table w-full">
-        <thead>
-          <tr>
-            <th>Parámetro</th>
-            <th *ngIf="scopes[scopeIndex] === 'invernadero'">Invernadero</th>
-            <th *ngIf="scopes[scopeIndex] === 'sensor'">Invernadero</th>
-            <th *ngIf="scopes[scopeIndex] === 'sensor'">Sensor</th>
-            <th>Advertencia</th>
-            <th>Crítico</th>
-            <th class="text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let u of umbrales">
-            <td>{{ u.tipo_parametro_nombre }} ({{ u.tipo_parametro_unidad }})</td>
-            <td *ngIf="scopes[scopeIndex] === 'invernadero'">{{ u.invernadero_nombre }}</td>
-            <td *ngIf="scopes[scopeIndex] === 'sensor'">{{ u.sensor_invernadero_nombre }}</td>
-            <td *ngIf="scopes[scopeIndex] === 'sensor'">{{ u.sensor_nombre }}</td>
-            <td>{{ u.advertencia_min }} – {{ u.advertencia_max }}</td>
-            <td>{{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</td>
-            <td class="text-right">
-              <button *ngIf="puedeEditar" class="btn btn-sm btn-outline mr-2" (click)="editar(u); $event.stopPropagation()">✏️</button>
-              <button *ngIf="puedeEliminar" class="btn btn-sm btn-error" (click)="eliminar(u)">🗑️</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Tabla (escritorio) -->
+      <div class="overflow-x-auto hidden md:block">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Parámetro</th>
+              <th *ngIf="scopes[scopeIndex] === 'invernadero'">Invernadero</th>
+              <th *ngIf="scopes[scopeIndex] === 'sensor'">Invernadero</th>
+              <th *ngIf="scopes[scopeIndex] === 'sensor'">Sensor</th>
+              <th>Advertencia</th>
+              <th>Crítico</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of umbrales">
+              <td>{{ u.tipo_parametro_nombre }} ({{ u.tipo_parametro_unidad }})</td>
+              <td *ngIf="scopes[scopeIndex] === 'invernadero'">{{ u.invernadero_nombre }}</td>
+              <td *ngIf="scopes[scopeIndex] === 'sensor'">{{ u.sensor_invernadero_nombre }}</td>
+              <td *ngIf="scopes[scopeIndex] === 'sensor'">{{ u.sensor_nombre }}</td>
+              <td>{{ u.advertencia_min }} – {{ u.advertencia_max }}</td>
+              <td>{{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</td>
+              <td class="text-right">
+                <button *ngIf="puedeEditar" class="btn btn-sm btn-outline mr-2" (click)="editar(u); $event.stopPropagation()">✏️</button>
+                <button *ngIf="puedeEliminar" class="btn btn-sm btn-error" (click)="eliminar(u)">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tarjetas (móvil) -->
+      <div class="grid gap-4 md:hidden">
+        <div *ngFor="let u of umbrales" class="card bg-base-100 shadow p-4 space-y-1">
+          <h3 class="font-semibold">
+            {{ u.tipo_parametro_nombre }} ({{ u.tipo_parametro_unidad }})
+          </h3>
+          <div *ngIf="scopes[scopeIndex] === 'invernadero'" class="text-sm">
+            <strong>Invernadero:</strong> {{ u.invernadero_nombre }}
+          </div>
+          <div *ngIf="scopes[scopeIndex] === 'sensor'" class="text-sm space-y-1">
+            <div><strong>Invernadero:</strong> {{ u.sensor_invernadero_nombre }}</div>
+            <div><strong>Sensor:</strong> {{ u.sensor_nombre }}</div>
+          </div>
+          <div class="text-sm"><strong>Advertencia:</strong> {{ u.advertencia_min }} – {{ u.advertencia_max }}</div>
+          <div class="text-sm"><strong>Crítico:</strong> {{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button *ngIf="puedeEditar" class="btn btn-sm btn-outline" (click)="editar(u); $event.stopPropagation()">✏️</button>
+            <button *ngIf="puedeEliminar" class="btn btn-sm btn-error" (click)="eliminar(u)">🗑️</button>
+          </div>
+        </div>
+      </div>
 
       <!-- Paginación -->
       <div class="flex items-center justify-between p-6 bg-base-200 rounded-lg mt-6" *ngIf="totalPages >= 0">
