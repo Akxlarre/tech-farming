@@ -10,26 +10,22 @@ export const privateGuard: CanActivateFn = async () => {
   const router = routerInjection();
 
   const { data } = await authService().session();
-  const session = data.session;
 
-  if (!session) {
+  if (!data.session) {
     router.navigateByUrl('/login');
-    return false;
   }
 
-  return true;
+  return !!data.session;
 };
 
 export const publicGuard: CanActivateFn = async () => {
   const router = routerInjection();
 
   const { data } = await authService().session();
-  const session = data.session;
 
-  if (session) {
+  if (data.session) {
     router.navigateByUrl('/');
-    return false;
   }
 
-  return true;
+  return !data.session;
 };

@@ -44,7 +44,7 @@ export class SetPasswordComponent {
 }
 
   async submit() {
-    if (this.setForm.invalid) return;
+    this.setForm.markAllAsTouched();
 
     const password = this.setForm.get('password')?.value ?? '';
     const confirmPassword = this.setForm.get('confirmPassword')?.value ?? '';
@@ -56,6 +56,8 @@ export class SetPasswordComponent {
       this.passwordsDoNotMatch = false;
     }
 
+    if (this.setForm.invalid) return;
+    
     try {
       const { error } = await this._authService.updatePassword(password);
 
