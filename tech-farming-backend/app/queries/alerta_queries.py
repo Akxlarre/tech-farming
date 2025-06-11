@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 from sqlalchemy import and_, not_, or_
 from app import db, influx_client as client
 from app.models.alerta import Alerta
@@ -5,8 +6,7 @@ from app.models.sensor_parametro import SensorParametro
 from app.models.sensor import Sensor
 from app.models.zona import Zona
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
-from flask import current_app
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy.orm import joinedload
 
@@ -25,8 +25,10 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     from app.models.sensor_parametro import SensorParametro
     from app.models.configuracion_umbral import ConfiguracionUmbral
     from app.models.tipo_parametro import TipoParametro
+    from app.models.usuario import Usuario
+    from app.utils.whatsapp_notifier import enviar_whatsapp
 
-    timestamp = timestamp or datetime.utcnow()
+    timestamp = timestamp or datetime.now(ZoneInfo("America/Santiago"))
 
     sensor_param = SensorParametro.query.get(sensor_parametro_id)
     if not sensor_param:
@@ -36,6 +38,7 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     sensor = sensor_param.sensor
     zona = sensor.zona if sensor else None
     invernadero_id = zona.invernadero_id if zona else None
+    invernadero_nombre = zona.invernadero.nombre if zona and zona.invernadero else None
 
     # Buscar el umbral más específico disponible (prioridad descendente)
     umbral = ConfiguracionUmbral.query.filter_by(
@@ -80,7 +83,6 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
         nivel=nivel_alerta,
         estado="Activa"
     ).first()
-
     if ya_alertada:
         return  # Ya hay una alerta activa, no duplicar
 
@@ -98,9 +100,31 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
         nivel=nivel_alerta,
         estado="Activa"
     )
-
     db.session.add(alerta)
     db.session.commit()
+
+    # Mensaje para WhatsApp
+    hora_lectura = timestamp.strftime("%d/%m/%Y %H:%M:%S")
+    sensor_nombre = sensor.nombre if sensor else "Desconocido"
+    zona_nombre = zona.nombre if zona else "Zona desconocida"
+    invernadero = invernadero_nombre or "Invernadero desconocido"
+
+    mensaje_whatsapp = (
+        f"🚨 *ALERTA {nivel_alerta.upper()}*\n"
+        f"{mensaje}\n\n"
+        f"📍 Sensor: {sensor_nombre}\n"
+        f"📦 Zona: {zona_nombre}\n"
+        f"🏡 Invernadero: {invernadero}\n"
+        f"⏰ Fecha y hora: {hora_lectura}"
+    )
+
+    usuarios_a_notificar = Usuario.query.filter(Usuario.telefono.isnot(None)).all()
+    for u in usuarios_a_notificar:
+        try:
+            telefono = u.telefono.strip()
+            enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
+        except Exception as e:
+            print(f"[WHATSAPP] Error enviando mensaje a {u.nombre}: {e}")
 
 
 def listar_alertas(filtros: dict):
@@ -179,7 +203,11 @@ def listar_alertas(filtros: dict):
                 "tipo": a.tipo,
                 "mensaje": a.mensaje,
                 "valor_detectado": float(a.valor_detectado) if a.valor_detectado is not None else None,
-                "fecha_hora": a.fecha_hora.isoformat(),
+                "fecha_hora": (
+                    a.fecha_hora.replace(tzinfo=timezone.utc)
+                    .astimezone(ZoneInfo("America/Santiago"))
+                    .isoformat()
+        ),
                 "estado": a.estado,
                 "resuelta_por": f"{a.usuario_resolutor.nombre} {a.usuario_resolutor.apellido}" if a.usuario_resolutor else None
             } for a in paginated.items

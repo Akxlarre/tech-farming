@@ -1,5 +1,6 @@
-from datetime import datetime
 import traceback
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from uuid import uuid4
 from flask import Blueprint, g, request, jsonify, abort, current_app
 from sqlalchemy.orm import joinedload
@@ -454,26 +455,38 @@ def recibir_datos():
             abort(401, description="Token de sensor inválido")
 
         write_api = client.write_api()
-        for m in mediciones:
+
+        for idx, m in enumerate(mediciones):
             parametro = m.get("parametro")
             valor     = m.get("valor")
-            timestamp = m.get("timestamp") or datetime.utcnow().timestamp()
-
+            timestamp = m.get("timestamp")
+        
             if parametro is None or valor is None:
                 continue
+
+            if isinstance(timestamp, str):
+                tiempo = datetime.fromisoformat(timestamp)
+            elif timestamp is not None:
+                tiempo = datetime.fromtimestamp(timestamp, tz=ZoneInfo("America/Santiago"))
+            else:
+                tiempo = datetime.now(ZoneInfo("America/Santiago"))
+
+            # Añadir microsegundos para evitar colisiones en InfluxDB
+            tiempo += timedelta(microseconds=idx)
+
             point = (
                 Point("lecturas_sensores")
-                .tag("sensor_id",    str(sensor.id))
-                .field("valor",      float(valor))
-                .field("parametro",  parametro)
-                .time(datetime.fromtimestamp(timestamp))
+                .tag("sensor_id", str(sensor.id))
+                .field("valor", float(valor))
+                .field("parametro", parametro)
+                .time(tiempo)
             )
             write_api.write(bucket="temporalSeries_v3", record=point)
 
             # Evaluar umbral y generar alerta si corresponde
             tipo_parametro = TipoParametroModel.query.filter_by(nombre=parametro).first()
             if not tipo_parametro:
-                continue  # Si no se encuentra el parámetro, no se puede continuar
+                continue
 
             sensor_param = SensorParametroModel.query.filter_by(
                 sensor_id=sensor.id,
@@ -484,7 +497,7 @@ def recibir_datos():
                 evaluar_y_generar_alerta(
                     sensor_parametro_id=sensor_param.id,
                     valor=float(valor),
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(ZoneInfo("America/Santiago")) 
                 )
 
         return jsonify({
