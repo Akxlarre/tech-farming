@@ -42,7 +42,8 @@ export class PrediccionesService {
   getPredicciones(params: PredicParams): Observable<PredicResult> {
     let httpParams = new HttpParams()
       .set('invernaderoId', params.invernaderoId.toString())
-      .set('horas',         params.horas.toString());
+      .set('horas',         params.horas.toString())
+      .set('parametro',     params.parametro);
 
     if (params.zonaId != null) {
       httpParams = httpParams.set('zonaId', params.zonaId.toString());

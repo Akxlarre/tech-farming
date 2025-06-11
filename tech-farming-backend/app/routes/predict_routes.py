@@ -7,82 +7,60 @@ from flask import Blueprint, request, jsonify
 from datetime import timedelta, datetime
 
 from app.config import Config
-from app.queries.historial_queries import obtener_historial as helper_historial
+from app.queries.prediction_queries import obtener_serie_prediccion
 
 predict_bp = Blueprint('predict', __name__, url_prefix='/api')
 
 # ---------------------------------------------------
-# 1) Carga del modelo RandomForest multitarea para temperatura
+# 1) Carga de los tres modelos RF
 # ---------------------------------------------------
-BASE_DIR         = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_TEMP_PATH  = os.path.join(BASE_DIR, 'modelo_rf_temp.pkl')
+BASE_DIR        = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+MODEL_TEMP_PATH = os.path.join(BASE_DIR, 'modelo_rf_temp.pkl')
+MODEL_HUM_PATH  = os.path.join(BASE_DIR, 'modelo_rf_hum.pkl')
+MODEL_NUT_PATH  = os.path.join(BASE_DIR, 'modelo_rf_nut.pkl')
 
-try:
-    rf_temp = joblib.load(MODEL_TEMP_PATH)
-except FileNotFoundError:
-    raise FileNotFoundError(f"No se encontró el modelo en {MODEL_TEMP_PATH!r}")
+rf_temp = joblib.load(MODEL_TEMP_PATH)
+rf_hum  = joblib.load(MODEL_HUM_PATH)
+rf_nut  = joblib.load(MODEL_NUT_PATH)
 
 
 # ---------------------------------------------------
-# 2) Función para generar las 16 features desde un DataFrame de 6 filas
+# 2) Generar features a partir de df con columnas:
+#    date, tempreature, humidity, N, P, K
 # ---------------------------------------------------
-def generar_features_desde_df(df_hist: pd.DataFrame):
-    """
-    - df_hist: DataFrame con al menos 6 filas (columnas: date (datetime), tempreature, humidity, N, P, K)
-    - Devuelve un array 1×16 con las columnas en el orden correcto para el RF.
-    """
-    df = df_hist.copy().sort_values('date').reset_index(drop=True)
-
-    # 1) Lags de temperatura (1h–6h)
-    for lag in range(1, 7):
+def generar_features_desde_df(df: pd.DataFrame) -> pd.DataFrame:
+    # df must have 'date','tempreature','humidity','N','P','K'
+    df = df.sort_values('date').reset_index(drop=True)
+    # 1) Lags temperatura
+    for lag in range(1,7):
         df[f'tempreature_lag_{lag}h'] = df['tempreature'].shift(lag)
-
-    # 2) Lags de humedad (1h–3h)
-    for lag in range(1, 4):
+    # 2) Lags humedad
+    for lag in range(1,4):
         df[f'humidity_lag_{lag}h'] = df['humidity'].shift(lag)
-
-    # 3) Lags de nutrientes (N, P, K a 1h)
+    # 3) Lags nutrientes
     df['N_lag_1h'] = df['N'].shift(1)
     df['P_lag_1h'] = df['P'].shift(1)
     df['K_lag_1h'] = df['K'].shift(1)
-
     # 4) Deltas 1h
     df['temp_diff_1h'] = df['tempreature'] - df['tempreature'].shift(1)
     df['hum_diff_1h']  = df['humidity']  - df['humidity'].shift(1)
-
     # 5) Hour / Weekday
     df['hour']    = df['date'].dt.hour
     df['weekday'] = df['date'].dt.weekday
 
-    # 6) Tomamos solo la última fila
+    # Tomar última fila
     df_feat = df.iloc[-1:].copy()
-
-    # 7) Columnas en el orden que espera el modelo
-    feature_cols = [
-        'tempreature_lag_1h',
-        'tempreature_lag_2h',
-        'tempreature_lag_3h',
-        'tempreature_lag_4h',
-        'tempreature_lag_5h',
-        'tempreature_lag_6h',
-        'humidity_lag_1h',
-        'humidity_lag_2h',
-        'humidity_lag_3h',
-        'N_lag_1h',
-        'P_lag_1h',
-        'K_lag_1h',
-        'temp_diff_1h',
-        'hum_diff_1h',
-        'hour',
-        'weekday'
+    cols = [
+        'tempreature_lag_1h','tempreature_lag_2h','tempreature_lag_3h',
+        'tempreature_lag_4h','tempreature_lag_5h','tempreature_lag_6h',
+        'humidity_lag_1h','humidity_lag_2h','humidity_lag_3h',
+        'N_lag_1h','P_lag_1h','K_lag_1h',
+        'temp_diff_1h','hum_diff_1h','hour','weekday'
     ]
-
-    faltantes = [c for c in feature_cols if c not in df_feat.columns]
-    if faltantes:
-        raise ValueError(f"Faltan columnas para features: {faltantes}")
-
-    X_row = df_feat[feature_cols].values.reshape(1, -1)
-    return X_row
+    missing = [c for c in cols if c not in df_feat.columns]
+    if missing:
+        raise ValueError(f"Faltan columnas para features: {missing}")
+    return df_feat[cols]
 
 
 # ---------------------------------------------------
@@ -90,162 +68,124 @@ def generar_features_desde_df(df_hist: pd.DataFrame):
 # ---------------------------------------------------
 @predict_bp.route('/predict_influx', methods=['GET'])
 def predict_from_influx():
-    """
-    - Parámetros esperados en query-string:
-        invernaderoId (int, obligatorio),
-        zonaId       (int, opcional),
-        horas        (6, 12 o 24)
-    - Recupera las últimas 24 horas (ventana horaria) de datos de Temperatura y Humedad
-      en Influx, con window_every="1h", usando tu helper_historial.
-    - Fusiona ambas series (temp + hum), rellena N,P,K=0.0, toma las últimas 6 filas,
-      genera las 16 features y lanza el modelo RF multitarea para [6h,12h,24h].
-    - Devuelve JSON con { historical, future, summary, trend }.
-    """
+    args = request.args.to_dict()
+    print("← predict_influx args:", args)
 
-    # 3.1) Leer y validar invernaderoId
+    # Validación de invernaderoId
     try:
-        invernadero_id = int(request.args.get('invernaderoId'))
-    except (TypeError, ValueError):
+        inv_id = int(request.args.get('invernaderoId'))
+    except:
         return jsonify({"error": "invernaderoId inválido"}), 400
 
-    # 3.2) Leer y validar zonaId (opcional)
-    zona_id = request.args.get('zonaId')
+    # Validación de zonaId
+    z = request.args.get('zonaId')
     try:
-        zona_id = int(zona_id) if zona_id not in (None, '') else None
-    except ValueError:
+        zona_id = int(z) if z not in (None, '') else None
+    except:
         return jsonify({"error": "zonaId inválido"}), 400
 
-    # 3.3) Leer y validar horas
+    # Validación de horas
     try:
         horas = int(request.args.get('horas'))
-        if horas not in (6, 12, 24):
+        if horas not in (6,12,24):
             raise ValueError
-    except (TypeError, ValueError):
+    except:
         return jsonify({"error": "horas debe ser 6, 12 o 24"}), 400
 
-    # 3.4) Construir el rango de consulta: desde = ahora - 24h, hasta = ahora
-    ahora_dt = datetime.utcnow()
-    desde_dt = ahora_dt - timedelta(hours=24)
+    # Validación de parámetro
+    parametro = request.args.get('parametro')
+    validos = ("Temperatura","Humedad","N","P","K")
+    if parametro not in validos:
+        return jsonify({"error": f"parametro inválido (elegir uno de {validos})"}), 400
 
-    # *Importante:* para que Flux lo compile bien, lo pasamos a formato RFC3339 con 'Z':
-    #   p. ej. "2025-06-06T05:31:33Z"
-    desde_iso = desde_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-    hasta_iso = ahora_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Rango de consulta: últimas 24h
+    now = datetime.utcnow()
+    desde = (now - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    hasta =  now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    # 3.5) Asegurarnos de que la conexión a InfluxDB existe
+    # Conexión Influx
     if not Config.client:
-        return jsonify({"error": "No hay conexión a InfluxDB"}), 500
-    query_api = Config.client.query_api()
+        return jsonify({"error":"No hay conexión a InfluxDB"}),500
+    api = Config.client.query_api()
 
-    # 3.6) Traer HISTORIAL de Temperatura
-    try:
-        hist_temp = helper_historial(
-            query_api=query_api,
-            bucket=Config.INFLUXDB_BUCKET,
-            org=Config.INFLUXDB_ORG,
-            invernadero_id=invernadero_id,
-            tipo_parametro="Temperatura",
-            desde=desde_iso,
-            hasta=hasta_iso,
-            zona_id=zona_id,
-            sensor_id=None,
-            window_every="1h"
-        )
-    except Exception as e:
-        # Si Flux da “Bad Request” u otro error, devolvemos mensaje legible
-        return jsonify({"error": f"Error al consultar Temperatura en InfluxDB: {e}"}), 500
-
-    series_temp = hist_temp.get("series", [])
-    if len(series_temp) < 6:
-        return jsonify({"error": "No hay suficientes datos de temperatura (menos de 6 puntos horarios)."}), 400
-
-    # 3.7) Traer HISTORIAL de Humedad
-    try:
-        hist_hum = helper_historial(
-            query_api=query_api,
-            bucket=Config.INFLUXDB_BUCKET,
-            org=Config.INFLUXDB_ORG,
-            invernadero_id=invernadero_id,
-            tipo_parametro="Humedad",
-            desde=desde_iso,
-            hasta=hasta_iso,
-            zona_id=zona_id,
-            sensor_id=None,
-            window_every="1h"
-        )
-    except Exception as e:
-        return jsonify({"error": f"Error al consultar Humedad en InfluxDB: {e}"}), 500
-
-    series_hum = hist_hum.get("series", [])
-    if len(series_hum) < 6:
-        return jsonify({"error": "No hay suficientes datos de humedad (menos de 6 puntos horarios)."}), 400
-
-    # 3.8) Convertir ambas series a DataFrames de pandas y renombrar
-    df_temp = (
-        pd.DataFrame(series_temp)
-          .rename(columns={"timestamp": "date", "value": "tempreature"})
+    # Serie para el gráfico (el parámetro elegido)
+    hist_param = obtener_serie_prediccion(
+        api, Config.INFLUXDB_BUCKET, Config.INFLUXDB_ORG,
+        inv_id, parametro, desde, hasta,
+        zona_id, None, window_every="1h"
     )
+    series_param = hist_param["series"]
+    if len(series_param) < 6:
+        return jsonify({"error":f"Menos de 6 puntos de {parametro.lower()}"}),400
+
+    # Series separadas para features: temperatura + humedad
+    hist_temp = obtener_serie_prediccion(
+        api, Config.INFLUXDB_BUCKET, Config.INFLUXDB_ORG,
+        inv_id, "Temperatura", desde, hasta,
+        zona_id, None, window_every="1h"
+    )
+    hist_hum  = obtener_serie_prediccion(
+        api, Config.INFLUXDB_BUCKET, Config.INFLUXDB_ORG,
+        inv_id, "Humedad", desde, hasta,
+        zona_id, None, window_every="1h"
+    )
+
+    # DataFrames de temp y hum
+    df_temp = pd.DataFrame(hist_temp["series"])\
+                .rename(columns={"timestamp":"date","value":"tempreature"})
     df_temp['date'] = pd.to_datetime(df_temp['date'])
-
-    df_hum = (
-        pd.DataFrame(series_hum)
-          .rename(columns={"timestamp": "date", "value": "humidity"})
-    )
+    df_hum  = pd.DataFrame(hist_hum["series"])\
+                .rename(columns={"timestamp":"date","value":"humidity"})
     df_hum['date'] = pd.to_datetime(df_hum['date'])
 
-    # 3.9) Hacer merge inner por “date” para quedarnos solo con horas donde hay temp+hum
-    df_hist = pd.merge(df_temp, df_hum, on='date', how='inner')
+    # Merge y añadir N,P,K=0
+    df = pd.merge(df_temp, df_hum, on='date', how='inner')
+    df[['N','P','K']] = 0.0
 
-    # 3.10) Rellenar N, P, K con 0.0 (para que existan las columnas)
-    df_hist['N'] = 0.0
-    df_hist['P'] = 0.0
-    df_hist['K'] = 0.0
+    # Últimas 6 filas para features
+    df6 = df.sort_values('date').iloc[-6:].reset_index(drop=True)
 
-    # 3.11) Verificar que tras el merge tenemos al menos 6 filas
-    if len(df_hist) < 6:
-        return jsonify({"error": "Tras combinar temp+hum faltan filas, menos de 6."}), 400
+    # Selección de modelo
+    if parametro == "Temperatura":
+        model = rf_temp; mname="modelo_rf_temp.pkl"
+    elif parametro == "Humedad":
+        model = rf_hum;  mname="modelo_rf_hum.pkl"
+    else:
+        model = rf_nut;  mname="modelo_rf_nut.pkl"
+    print(f"🐞 Usando {mname} para {parametro}")
 
-    # 3.12) Tomar las 6 últimas filas (cronológicamente)
-    df_last6 = df_hist.sort_values('date').iloc[-6:].reset_index(drop=True)
+    # Generar features y predecir
+    X = generar_features_desde_df(df6)
+    y = model.predict(X)[0]  # [6h,12h,24h]
 
-    # 3.13) Generar las 16 features y predecir con rf_temp
-    try:
-        X_row = generar_features_desde_df(df_last6)
-    except Exception as e:
-        return jsonify({"error": f"Error al generar features: {e}"}), 500
-
-    y_temp_pred = rf_temp.predict(X_row)[0]  # [pred_6h, pred_12h, pred_24h]
-
-    # 3.14) Construir “historical” (sólo temperatura) con las 6 filas usadas
+    # Construir historical completa y future
     historical = [
-        {"timestamp": row['date'].isoformat(), "value": float(row['tempreature'])}
-        for _, row in df_last6.iterrows()
+        {"timestamp": p["timestamp"], "value": p["value"]}
+        for p in series_param
     ]
-
-    # 3.15) Construir “future” a partir de la última fecha +6h, +12h, +24h
-    ultima_fecha = df_last6.iloc[-1]['date']
+    last_date = df6.iloc[-1]['date']
     future = [
-        {"timestamp": (ultima_fecha + timedelta(hours=6)).isoformat(),  "value": float(y_temp_pred[0])},
-        {"timestamp": (ultima_fecha + timedelta(hours=12)).isoformat(), "value": float(y_temp_pred[1])},
-        {"timestamp": (ultima_fecha + timedelta(hours=24)).isoformat(), "value": float(y_temp_pred[2])}
+        {"timestamp": (last_date + timedelta(hours=6 )).isoformat(),  "value": float(y[0])},
+        {"timestamp": (last_date + timedelta(hours=12)).isoformat(), "value": float(y[1])},
+        {"timestamp": (last_date + timedelta(hours=24)).isoformat(), "value": float(y[2])}
     ]
 
-    # 3.16) Armar summary y trend
+    # Summary & trend
+    avg_hist = sum(p["value"] for p in historical) / len(historical)
+    avg_fut  = sum(p["value"] for p in future)     / len(future)
+    diff_pct = ((avg_fut-avg_hist)/avg_hist)*100
     summary = {
         "updated": datetime.utcnow().isoformat(),
-        "text":    f"Predicción de {horas} horas para invernadero {invernadero_id}"
+        "text":    f"Predicción de {horas}h de {parametro} en inv.{inv_id}",
+        "model":   mname
     }
-    avg_hist = sum(p["value"] for p in historical) / len(historical)
-    avg_fut  = sum(p["value"] for p in future) / len(future)
-    diff_pct = ((avg_fut - avg_hist) / avg_hist) * 100
     trend = {
-        "text":       "Tendencia al alza" if diff_pct >= 0 else "Tendencia a la baja",
+        "text":       "Tendencia al alza" if diff_pct>=0 else "Tendencia a la baja",
         "comparison": f"{abs(diff_pct):.1f}%",
-        "icon":       "arrow-up" if diff_pct >= 0 else "arrow-down",
-        "color":      "success" if diff_pct >= 0 else "warning"
+        "icon":       "arrow-up" if diff_pct>=0 else "arrow-down",
+        "color":      "success" if diff_pct>=0 else "warning"
     }
 
-    # 3.17) Devolver el JSON final
     return jsonify({
         "historical": historical,
         "future":     future,
@@ -253,10 +193,6 @@ def predict_from_influx():
         "trend":      trend
     }), 200
 
-
-# ---------------------------------------------------
-# 4) Endpoint /api/test_predict → redirige a predict_influx
-# ---------------------------------------------------
 @predict_bp.route('/test_predict', methods=['GET'])
 def test_predict():
     return predict_from_influx()

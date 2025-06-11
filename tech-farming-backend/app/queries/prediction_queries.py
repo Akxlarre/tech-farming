@@ -1,4 +1,4 @@
-# app/queries/historial_queries.py
+# app/queries/prediction_queries.py
 
 from typing import Optional, Dict, Any
 from influxdb_client import QueryApi
@@ -6,25 +6,25 @@ from app.models.sensor import Sensor as SensorModel
 from app.models.zona   import Zona   as ZonaModel
 import dateutil.parser
 
-def obtener_historial(
-    query_api:     QueryApi,
-    bucket:        str,
-    org:           str,
+def obtener_serie_prediccion(
+    query_api: QueryApi,
+    bucket: str,
+    org: str,
     invernadero_id: int,
     tipo_parametro: str,
-    desde:          str,
-    hasta:          str,
-    zona_id:        Optional[int] = None,
-    sensor_id:      Optional[int] = None,
-    window_every:   str = "5s"
+    desde: str,
+    hasta: str,
+    zona_id: Optional[int] = None,
+    sensor_id: Optional[int] = None,
+    window_every: str = "1h"
 ) -> Dict[str, Any]:
     """
-    1) Obtiene sólo los IDs de sensores según invernadero/zona/sensor.
-    2) Filtra en Flux por esos sensor_id, parametro y rango de tiempo.
-    3) Devuelve series y stats.
+    Recupera la serie horaria promedio de todos los sensores que midan
+    `tipo_parametro`, filtrando por invernadero, zona o sensor, y
+    usando pivot → aggregateWindow → group para un único punto por hora.
+    Incluye logs de depuración.
     """
-
-    # 1) Prioridad de filtros: sensor > zona > invernadero
+    # 1) IDs de sensores: sensor > zona > invernadero
     if sensor_id is not None:
         ids = [sensor_id]
     else:
@@ -34,16 +34,15 @@ def obtener_historial(
         else:
             q = q.join(ZonaModel).filter(ZonaModel.invernadero_id == invernadero_id)
         ids = [row[0] for row in q.with_entities(SensorModel.id).all()]
-        print(f"🔥 Sensores usados para invernadero {invernadero_id} zona {zona_id}: {ids}")
 
+    # Debug: lista de sensores usada
+    print(f"🐞 [pred] IDs sensores (invernadero_id={invernadero_id}, zona_id={zona_id}): {ids}")
 
     if not ids:
-        return { "series": [], "stats": {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0} }
+        return {"series": [], "stats": {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}}
 
-    # 2) Construcción del script Flux
-    sensor_ids = [str(id_) for id_ in ids]
-    lista      = ",".join(f'"{sid}"' for sid in sensor_ids)
-
+    # 2) Construir script Flux
+    lista = ",".join(f'"{sid}"' for sid in ids)
     flux = f'''
 from(bucket: "{bucket}")
   |> range(start: {desde}, stop: {hasta})
@@ -59,14 +58,21 @@ from(bucket: "{bucket}")
        valueColumn: "_value"
      )
 
-  |> filter(fn: (r) => contains(value: r.sensor_id, set: [{lista}]) and
-                      r.parametro == "{tipo_parametro}")
+  |> filter(fn: (r) =>
+       contains(value: r.sensor_id, set: [{lista}]) and
+       r.parametro == "{tipo_parametro}"
+     )
 
   |> aggregateWindow(every: {window_every}, fn: mean, column: "valor")
+
+  |> group(columns: ["_time"])
   |> yield(name: "serie")
 '''
+    # Debug: muestra el Flux que se enviará
+    print("🐞 [pred] Flux query:")
+    print(flux)
 
-    # 3) Ejecutar Flux y compilar resultados
+    # 3) Ejecutar consulta Flux y parsear resultados
     tables = query_api.query(flux, org=org)
     series = []
     for table in tables:
@@ -76,10 +82,13 @@ from(bucket: "{bucket}")
                 continue
             series.append({
                 "timestamp": rec.get_time().isoformat(),
-                "value":     val
+                "value":     float(val)
             })
 
-    # 4) Estadísticas
+    # Debug: cuántos puntos devolvió InfluxDB y muestra la lista
+    print(f"🐞 [pred] Series obtenidas ({len(series)} puntos): {series}")
+
+    # 4) Calcular estadísticas básicas sobre la serie
     if series:
         vals  = [p["value"] for p in series]
         times = [dateutil.parser.isoparse(p["timestamp"]) for p in series]
@@ -98,4 +107,4 @@ from(bucket: "{bucket}")
     else:
         stats = {"promedio": 0, "minimo": None, "maximo": None, "desviacion": 0}
 
-    return { "series": series, "stats": stats }
+    return {"series": series, "stats": stats}
