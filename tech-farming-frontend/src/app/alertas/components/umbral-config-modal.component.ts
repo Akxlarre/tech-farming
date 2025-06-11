@@ -28,6 +28,15 @@ import { Sensor } from '../../sensores/models/sensor.model';
       </div>
     </div>
 
+    <!-- Modal de Error -->
+    <div *ngIf="errorVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[90vw] max-w-xs sm:max-w-sm space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-error">❌ Error</h3>
+        <p>{{ mensajeError }}</p>
+        <button class="btn btn-sm btn-outline mt-3" (click)="errorVisible = false">Cerrar</button>
+      </div>
+    </div>
+
     <!-- Modal de Ayuda -->
     <div *ngIf="ayudaVisible"
         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -224,6 +233,8 @@ export class UmbralConfigModalComponent implements OnInit, OnDestroy {
   ayudaVisible = false;
   confirmacionVisible = false;
   mensajeConfirmacion = '';
+  errorVisible = false;
+  mensajeError = '';
 
   private formSub?: Subscription;
   private ambitoSub?: Subscription;
@@ -486,8 +497,10 @@ export class UmbralConfigModalComponent implements OnInit, OnDestroy {
           this.modal.closeWithAnimation();
         }, 2500);
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
+        this.mensajeError = err?.error?.error || 'No se pudo crear el umbral.';
+        this.errorVisible = true;
       }
     });
   }
