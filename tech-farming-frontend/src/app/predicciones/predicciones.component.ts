@@ -250,10 +250,26 @@ export class PrediccionesComponent implements OnInit {
         const diff       = prediction - lastValue;
 
         let action: string|undefined;
-        if (diff <= -2) {
-          action = '⚠️ Temperatura bajará: revisar calefacción';
-        } else if (diff >= 2) {
-          action = '⚠️ Temperatura subirá: verificar ventilación';
+        switch (this.selectedParametro) {
+          case 'Temperatura':
+            if (diff <= -2) {
+              action = '⚠️ Temperatura bajará: revisar calefacción';
+            } else if (diff >= 2) {
+              action = '⚠️ Temperatura subirá: verificar ventilación';
+            }
+            break;
+
+          case 'Humedad':
+            // umbral de 5 puntos como ejemplo; ajústalo a lo que necesites
+            if (diff <= -5) {
+              action = '⚠️ Humedad bajará: revisar sistema de riego';
+            } else if (diff >= 5) {
+              action = '⚠️ Humedad subirá: verificar ventilación';
+            }
+            break;
+
+          default:
+            action = undefined;  // para N/P/K no mostramos acción
         }
 
         this.data.summary = {
