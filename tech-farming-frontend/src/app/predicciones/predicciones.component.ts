@@ -22,7 +22,7 @@ import {
 
 import { FiltroSelectComponent }    from '../historial/components/filtro-select.component';
 import { PredictionChartComponent } from './components/prediction-chart.component';
-import { SummaryCardComponent } from './components/summary-card.component';
+import { SummaryCardComponent }     from './components/summary-card.component';
 import { Trend as UITrend, TrendCardComponent } from './components/trend-card.component';
 
 @Component({
@@ -36,7 +36,6 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
-
     FiltroSelectComponent,
     PredictionChartComponent,
     SummaryCardComponent,
@@ -60,7 +59,10 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
         <!-- FILTROS -->
-        <div class="grid gap-4" style="grid-template-columns: calc(100% * var(--inv-phi)) 1fr minmax(auto, 20rem);">
+        <div class="grid gap-4"
+             style="grid-template-columns: calc(100% * var(--inv-phi)) repeat(3, 1fr);">
+          
+          <!-- Invernadero -->
           <app-filtro-select
             label="Invernadero"
             [options]="optInvernadero"
@@ -68,6 +70,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
             (selectionChange)="onInvernaderoChange($event)"
           ></app-filtro-select>
 
+          <!-- Zona -->
           <app-filtro-select
             label="Zona"
             [options]="optZona"
@@ -75,6 +78,16 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
             (selectionChange)="onZonaChange($event)"
           ></app-filtro-select>
 
+          <!-- Parámetro -->
+          <app-filtro-select
+            label="Parámetro"
+            [options]="optParametros"
+            [selectedId]="selectedParametro"
+            (selectionChange)="onParametroChange($event)"
+            [allowUndefined]="false"
+          ></app-filtro-select>
+
+          <!-- Proyección -->
           <app-filtro-select
             label="Proyección"
             [options]="optProjection"
@@ -84,7 +97,8 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
         </div>
 
         <!-- GRÁFICO -->
-        <mat-card class="bg-base-100 p-6 shadow-xl animate-fade-in-down relative" style="min-height: 320px;">
+        <mat-card class="bg-base-100 p-6 shadow-xl animate-fade-in-down relative"
+                  style="min-height: 320px;">
           <div class="w-full" style="height: min(max(300px, 40vh), 55vh);">
             <app-prediction-chart
               [historical]="data?.historical ?? []"
@@ -114,12 +128,13 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
       --header-height: 3rem;
     }
   `]
+  
 })
 export class PrediccionesComponent implements OnInit {
   invernaderos:    Invernadero[] = [];
   zonas:            Zona[]         = [];
-  optInvernadero:  {id:number;label:string}[] = [];
-  optZona:         {id:number;label:string}[] = [];
+  optInvernadero:  { id: number; label: string }[] = [];
+  optZona:         { id: number; label: string }[] = [];
 
   optProjection = [
     { id: 6,  label: '6 horas'  },
@@ -127,11 +142,21 @@ export class PrediccionesComponent implements OnInit {
     { id: 24, label: '24 horas' }
   ];
 
+  // — Nuevo filtro "Parámetro" —
+  optParametros = [
+    { id: 'Temperatura', label: 'Temperatura' },
+    { id: 'Humedad',     label: 'Humedad'     },
+    { id: 'N',           label: 'Nitrógeno'   },
+    { id: 'P',           label: 'Fósforo'     },
+    { id: 'K',           label: 'Potasio'     }
+  ];
+
   selectedInvernadero?: number;
   selectedZona?:         number;
   selectedProjection = 6;
+  selectedParametro  = 'Temperatura';
 
-  data?: PredicResult;
+  data?:   PredicResult;
   uiTrend?: UITrend;
 
   constructor(private svc: PrediccionesService) {}
@@ -147,25 +172,38 @@ export class PrediccionesComponent implements OnInit {
     return this.optProjection.find(p => p.id === this.selectedProjection)?.label ?? '';
   }
 
-  onInvernaderoChange(id: number | undefined) {
-    if (id == null) {
-      this.selectedZona = undefined;
-      this.zonas = [];
+  onInvernaderoChange(id: string|number|undefined) {
+    const idNum = id == null ? undefined : (typeof id === 'string' ? +id : id);
+    if (idNum == null) {
+      this.selectedInvernadero = undefined;
+      this.selectedZona       = undefined;
+      this.zonas               = [];
       return;
     }
-    this.selectedInvernadero = id;
-    this.svc.getZonasByInvernadero(id).subscribe(list => {
+    this.selectedInvernadero = idNum;
+    this.svc.getZonasByInvernadero(idNum).subscribe(list => {
       this.zonas   = list;
       this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
     });
   }
 
-  onZonaChange(id: number | undefined) {
-    this.selectedZona = id ?? undefined;
+  onZonaChange(id: string|number|undefined) {
+    const idNum = id == null ? undefined : (typeof id === 'string' ? +id : id);
+    this.selectedZona = idNum;
   }
 
-  onProjectionChange(h: number | undefined) {
-    if (h != null) this.selectedProjection = h as 6|12|24;
+  onParametroChange(param: string|number|undefined) {
+    // forzamos a string, ignoramos valores no-string
+    if (typeof param === 'string') {
+      this.selectedParametro = param;
+    }
+  }
+
+  onProjectionChange(h: string|number|undefined) {
+    const hNum = h == null ? undefined : (typeof h === 'string' ? +h : h);
+    if (hNum != null) {
+      this.selectedProjection = hNum as 6|12|24;
+    }
   }
 
   reload() {
@@ -174,7 +212,8 @@ export class PrediccionesComponent implements OnInit {
     const params: PredicParams = {
       invernaderoId: this.selectedInvernadero!,
       zonaId:        this.selectedZona,
-      horas:         this.selectedProjection as 6|12|24
+      horas:         this.selectedProjection as 6|12|24,
+      parametro:     this.selectedParametro
     };
     console.log('→ Llamando a predict con params:', params);
     this.svc.getPredicciones(params).subscribe({
@@ -227,7 +266,6 @@ export class PrediccionesComponent implements OnInit {
           diff,
           action
         };
-
       },
       error: err => {
         console.error('Error al obtener predicciones:', err);
