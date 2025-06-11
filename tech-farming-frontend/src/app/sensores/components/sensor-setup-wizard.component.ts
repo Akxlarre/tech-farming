@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from '../../shared/services/notification.service';
 
 @Component({
   selector: 'app-sensor-setup-wizard',
@@ -86,6 +87,8 @@ export class SensorSetupWizardComponent {
   @Output() finalizado = new EventEmitter<void>();
   @Output() saltado = new EventEmitter<void>();
 
+  constructor(private notify: NotificationService) {}
+
   step = 1;
   totalSteps = 5;
 
@@ -94,7 +97,10 @@ export class SensorSetupWizardComponent {
   }
 
   copyToken() {
-    navigator.clipboard.writeText(this.createdToken);
+    navigator.clipboard.writeText(this.createdToken).then(
+      () => this.notify.success('Token copiado al portapapeles.'),
+      () => this.notify.error('No se pudo copiar el token.')
+    );
   }
 
   next() {
