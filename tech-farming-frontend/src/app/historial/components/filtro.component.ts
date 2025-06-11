@@ -184,10 +184,10 @@ import { Subscription } from 'rxjs';
         <div></div>
 
         <!-- Botón “Aplicar filtros” alineado a derecha -->
-        <div class="text-right">
+        <div class="flex justify-end sm:justify-start">
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-outline btn-sm h-10 w-full sm:w-auto border-success text-base-content hover:bg-success hover:text-base-content transition-colors duration-200"
             (click)="aplicarFiltros()"
             [disabled]="form.invalid"
           >
