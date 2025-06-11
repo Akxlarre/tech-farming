@@ -2,6 +2,8 @@ from app import db
 from app.models.configuracion_umbral import ConfiguracionUmbral
 from app.models.zona import Zona
 from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import UniqueViolation
 
 def listar_umbrales(filtros):
     from app.models.tipo_parametro import TipoParametro
@@ -127,10 +129,16 @@ def crear_umbral(data):
             "id": nuevo_umbral.id,
             "mensaje": "Umbral creado exitosamente"
         }
+    except IntegrityError as e:
+        db.session.rollback()
+        if isinstance(e.orig, UniqueViolation):
+            return {"error": "Ya existe un umbral para ese alcance"}
+        print(f"[ERROR] al crear umbral: {e}")
+        return {"error": "Error de integridad al crear umbral"}
     except Exception as e:
         db.session.rollback()
         print(f"[ERROR] al crear umbral: {e}")
-        return {"error": str(e)}
+        return {"error": "Error al crear umbral"}
     
 def actualizar_umbral(umbral_id, data):
     try:
