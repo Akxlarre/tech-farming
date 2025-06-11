@@ -91,6 +91,7 @@ import { FormsModule } from '@angular/forms';
 
       <!-- Tarjetas (móvil) -->
       <div class="flex flex-col space-y-4 md:hidden">
+
         <div *ngFor="let u of umbrales" class="card bg-base-100 shadow p-4 space-y-1">
           <h3 class="font-semibold">
             {{ u.tipo_parametro_nombre }} ({{ u.tipo_parametro_unidad }})
