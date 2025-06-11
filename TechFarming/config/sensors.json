@@ -1,0 +1,9 @@
+[
+  {
+    "id": "sensor_1",
+    "tipo": "DHT22",
+    "gpio": 4,
+    "alias": "Sensor DHT Real Test",
+    "token": "862a98e14c7c4e75b12352e4b17d4ace"
+  }
+]

@@ -1,0 +1,5 @@
+adafruit-circuitpython-dht
+adafruit-blinka
+pyserial
+RPi.GPIO
+requests
