@@ -23,11 +23,12 @@ import { TipoParametro } from '../models/tipos_parametro.model';
 import { TipoSensorService } from '../tipos_sensor.service';
 import { TipoParametroService } from '../tipos_parametro.service';
 import { forkJoin } from 'rxjs';
+import { SensorSetupWizardComponent } from './sensor-setup-wizard.component';
 
 @Component({
   selector: 'app-sensor-create-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SensorSetupWizardComponent],
   template: `
     <div *ngIf="!loading; else loadingTpl">
     <ng-container *ngIf="!created; else instructions">
@@ -197,71 +198,11 @@ import { forkJoin } from 'rxjs';
 
     <!-- Paso 2: instrucciones -->
     <ng-template #instructions>
-      <div class="p-4 sm:p-8 bg-base-100 rounded-lg shadow-lg w-full max-w-[90vw] sm:max-w-2xl">
-        <h2 class="text-2xl font-bold text-success flex items-center gap-2">
-          Sensor creado con éxito
-        </h2>
-
-        <section>
-          <h3 class="font-semibold mb-2">1. Token de Conexión</h3>
-          <div class="form-control">
-            <div class="flex gap-2 items-center">
-              <input
-                type="text"
-                [value]="created.token"
-                readonly
-                class="input input-bordered w-full"
-              />
-              <button
-                type="button"
-                class="btn btn-outline relative w-10 h-10 p-0 flex items-center justify-center group"
-                (click)="animateCopyIcon()"
-                aria-label="Copiar token"
-              >
-                <svg viewBox="0 0 24 24" class="w-6 h-6 text-base-content transition-opacity duration-300 group-[.copied]:opacity-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                <svg viewBox="0 0 24 24" class="w-6 h-6 text-success absolute opacity-0 transition-opacity duration-300 group-[.copied]:opacity-100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 6L9 17l-5-5"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section class="space-y-1">
-          <h3 class="font-semibold text-base sm:text-lg">2. Enviar datos a la API</h3>
-          <pre class="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap break-all overflow-auto">
-POST {{ apiUrl }}/sensores/datos
-          </pre>
-        </section>
-
-        <section>
-          <h3 class="font-semibold mt-6 mb-2">3. Ejemplo de JSON</h3>
-          <pre class="bg-base-200 p-3 rounded overflow-auto text-sm whitespace-pre-wrap">
-<code>{{ jsonEjemplo }}</code>
-          </pre>
-        </section>
-
-        <section>
-          <h3 class="font-semibold mt-6 mb-2">4. Parámetros válidos</h3>
-          <ul class="list-disc list-inside">
-            <li>Temperatura</li>
-            <li>Humedad</li>
-            <li>Potasio</li>
-            <li>Fósforo</li>
-            <li>Nitrógeno</li>
-          </ul>
-          <p class="text-sm text-base-content/70 mt-1">
-            * Deben escribirse exactamente como se muestra, respetando mayúsculas.
-          </p>
-        </section>
-
-        <div class="flex justify-end pt-4">
-          <button class="btn btn-primary" (click)="onClose()">Cerrar</button>
-        </div>
-      </div>
+      <app-sensor-setup-wizard
+        [createdToken]="created.token"
+        (finalizado)="onClose()"
+        (saltado)="onClose()"
+      ></app-sensor-setup-wizard>
     </ng-template>
   `
 })
@@ -388,14 +329,6 @@ export class SensorCreateModalComponent implements OnInit {
         this.loading = false;
         alert('❌ No se pudo crear el sensor.');
       }
-    });
-  }
-
-  animateCopyIcon() {
-    navigator.clipboard.writeText(this.created.token).then(() => {
-      const btn = document.activeElement as HTMLElement;
-      btn?.classList.add('copied');
-      setTimeout(() => btn?.classList.remove('copied'), 1200);
     });
   }
 
