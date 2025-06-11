@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Alerta } from '../models/index';
+import { Alerta } from '../../models/index';
 
 @Component({
   selector: 'app-alert-card-list',

@@ -80,7 +80,7 @@ import { AlertService } from '../../alertas/alertas.service';
       <div *ngIf="!isLoading; else loadingTpl">
       <section
         #snapContainer
-        class="w-full h-auto overflow-y-auto snap-container lg:max-h-[80vh] lg:max-w-[70vw] lg:rounded-2xl lg:shadow-lg"
+        class="w-full h-auto overflow-y-auto snap-container lg:max-h-[80vh] lg:max-w-[70vw] lg:rounded-2xl lg:shadow-lg overflow-y-auto sm:overflow-y-hidden"
         role="region"
         aria-labelledby="titulo-invernadero"
       >
@@ -105,16 +105,13 @@ import { AlertService } from '../../alertas/alertas.service';
         <!-- ============== SECCIÓN 1: GENERAL ============== -->
         <section
           id="seccion-general"
-          class="snap-section h-full flex flex-col justify-start items-center px-4 lg:px-20"
+          class="snap-section w-full max-w-4xl space-y-6 justify-center items-center px-4 lg:px-20 py-12"
         >
           <div class="max-w-4xl w-full bg-base-100 rounded-2xl p-8 space-y-5 sm:space-y-3">
-            <h2
-              id="titulo-invernadero"
-              class="text-3xl font-extrabold text-success text-center"
-            >
+            <h2 id="titulo-invernadero" class="text-3xl font-extrabold text-success text-center">
               {{ invernaderoDetalle?.nombre || 'Invernadero' }}
             </h2>
-            <p class="text-center text-base-content/80">
+            <p class="text-center text-base-content/80 hidden sm:block">
               {{ invernaderoDetalle?.descripcion || 'Sin descripción' }}
               <span *ngIf="invernaderoDetalle?.creado_en">
                 • Creado en
@@ -123,96 +120,86 @@ import { AlertService } from '../../alertas/alertas.service';
               </span>
             </p>
   
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+            <div class="flex flex-col sm:grid sm:grid-cols-3 gap-4 mt-6 sm:flex-none sm:gap-4 justify-center items-center">
               <!-- CARD 1: Zonas -->
-              <div class="card bg-base-200 rounded-xl shadow p-6 lg:p-6 md:p-5 sm:p-4 flex flex-col items-center justify-center min-h-[110px] sm:min-h-[90px]">
-                <!-- Ícono “Pin” -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 sm:w-6 sm:h-6 text-info"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z"
-                    clip-rule="evenodd"
-                  />
+              <div class="hidden sm:flex card bg-base-200 rounded-xl shadow p-4 flex-col items-center justify-center min-h-[110px] max-w-[12rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-info" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" clip-rule="evenodd" />
                 </svg>
-                <span class="mt-1 text-lg sm:text-base font-semibold">
-                  {{ resumenDelete?.zonasCount }}
-                  Zona{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
+                <span class="mt-1 text-lg font-semibold">
+                  {{ resumenDelete?.zonasCount }} Zona{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
                 </span>
-                <span class="text-xs sm:text-[11px] text-base-content/60">
+                <span class="text-xs text-base-content/60">
                   Activa{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
                 </span>
               </div>
-  
               <!-- CARD 2: Sensores -->
-              <div class="card bg-base-200 rounded-xl shadow p-6 lg:p-6 md:p-5 sm:p-4 flex flex-col items-center justify-center min-h-[110px] sm:min-h-[90px]">
-                <!-- Ícono “Termómetro” -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 sm:w-6 sm:h-6 text-accent"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z"
-                    clip-rule="evenodd"
-                  />
+              <div class="hidden sm:flex card bg-base-200 rounded-xl shadow p-4 flex-col items-center justify-center min-h-[110px] max-w-[12rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z" clip-rule="evenodd" />
                 </svg>
-                <span class="mt-1 text-lg sm:text-base font-semibold">
-                  {{ resumenDelete?.sensoresCount }}
-                  Sensor{{ resumenDelete?.sensoresCount === 1 ? '' : 'es' }}
+                <span class="mt-1 text-lg font-semibold">
+                  {{ resumenDelete?.sensoresCount }} Sensor{{ resumenDelete?.sensoresCount === 1 ? '' : 'es' }}
                 </span>
-                <span class="text-xs sm:text-[11px] text-base-content/60">
+                <span class="text-xs text-base-content/60">
                   Registrado{{ resumenDelete?.sensoresCount === 1 ? '' : 's' }}
                 </span>
               </div>
-  
               <!-- CARD 3: Alertas -->
-              <div class="card bg-base-200 rounded-xl shadow p-6 lg:p-6 md:p-5 sm:p-4 flex flex-col items-center justify-center min-h-[110px] sm:min-h-[90px]">
-                <!-- Ícono “Campana” -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 sm:w-6 sm:h-6 text-error"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z"
-                  />
+              <div class="hidden sm:flex card bg-base-200 rounded-xl shadow p-4 flex-col items-center justify-center min-h-[110px] max-w-[12rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-error" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z" />
                 </svg>
-                <span class="mt-1 text-lg sm:text-base font-semibold">
-                  {{ resumenDelete?.alertasActivasCount || 0 }}
-                  Alerta{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
+                <span class="mt-1 text-lg font-semibold">
+                  {{ resumenDelete?.alertasActivasCount || 0 }} Alerta{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
                 </span>
-                <span class="text-xs sm:text-[11px] text-base-content/60">
+                <span class="text-xs text-base-content/60">
                   Activa{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
                 </span>
               </div>
+
+              <!-- Lista alternativa para móviles -->
+              <ul class="sm:hidden space-y-2 w-full">
+                <li class="flex items-center gap-3 bg-base-200 p-3 rounded-lg shadow">
+                  <svg class="w-5 h-5 text-info" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" clip-rule="evenodd" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">{{ resumenDelete?.zonasCount }} Zonas</p>
+                    <p class="text-xs text-base-content/60">Activas</p>
+                  </div>
+                </li>
+                <li class="flex items-center gap-3 bg-base-200 p-3 rounded-lg shadow">
+                  <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z" clip-rule="evenodd" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">{{ resumenDelete?.sensoresCount }} Sensores</p>
+                    <p class="text-xs text-base-content/60">Registrados</p>
+                  </div>
+                </li>
+                <li class="flex items-center gap-3 bg-base-200 p-3 rounded-lg shadow">
+                  <svg class="w-5 h-5 text-error" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">{{ resumenDelete?.alertasActivasCount || 0 }} Alertas</p>
+                    <p class="text-xs text-base-content/60">Activas</p>
+                  </div>
+                </li>
+              </ul>
             </div>
+
   
-            <div class="bg-base-200 rounded-lg p-4 mb-6">
+            <div class="bg-base-200 rounded-lg p-4 mb-6 w-full">
               <h3 class="text-2xl font-bold mb-4">Detalles del Invernadero</h3>
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+              <!-- Vista Escritorio -->
+              <div class="hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <ul class="space-y-2">
-                  <li>
-                    <span class="font-semibold">ID:</span> {{ invernaderoDetalle?.id ?? '—' }}
-                  </li>
-                  <li>
-                    <span class="font-semibold">Nombre:</span>
-                    {{ invernaderoDetalle?.nombre || '—' }}
-                  </li>
-                  <li>
-                    <span class="font-semibold">Descripción:</span>
-                    {{ invernaderoDetalle?.descripcion || '—' }}
-                  </li>
+                  <li><span class="font-semibold">ID:</span> {{ invernaderoDetalle?.id ?? '—' }}</li>
+                  <li><span class="font-semibold">Nombre:</span> {{ invernaderoDetalle?.nombre || '—' }}</li>
+                  <li><span class="font-semibold">Descripción:</span> {{ invernaderoDetalle?.descripcion || '—' }}</li>
                 </ul>
                 <ul class="space-y-2">
                   <li *ngIf="invernaderoDetalle?.creado_en">
@@ -220,15 +207,30 @@ import { AlertService } from '../../alertas/alertas.service';
                     {{ invernaderoDetalle?.creado_en | date:'mediumDate':'':'es' }},
                     {{ invernaderoDetalle?.creado_en | date:'shortTime':'':'es' }}
                   </li>
-                  <li>
-                    <span class="font-semibold">Zonas activas:</span>
-                    {{ getZonasActivasCount() }}
-                  </li>
-                  <li>
-                    <span class="font-semibold">Sensores activos:</span>
-                    {{ getSensoresActivosCount() }}
-                  </li>
+                  <li><span class="font-semibold">Zonas activas:</span> {{ getZonasActivasCount() }}</li>
+                  <li><span class="font-semibold">Sensores activos:</span> {{ getSensoresActivosCount() }}</li>
                 </ul>
+              </div>
+
+              <!-- Vista Mobile -->
+              <div class="sm:hidden grid grid-cols-1 gap-2">
+                <div class="text-sm">
+                  <span class="font-semibold">ID:</span> {{ invernaderoDetalle?.id ?? '—' }}
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Nombre:</span> {{ invernaderoDetalle?.nombre || '—' }}
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Zonas activas:</span> {{ getZonasActivasCount() }}
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Sensores activos:</span> {{ getSensoresActivosCount() }}
+                </div>
+                <div class="text-sm" *ngIf="invernaderoDetalle?.creado_en">
+                  <span class="font-semibold">Creado en:</span>
+                  {{ invernaderoDetalle?.creado_en | date:'mediumDate':'':'es' }},
+                  {{ invernaderoDetalle?.creado_en | date:'shortTime':'':'es' }}
+                </div>
               </div>
             </div>
   
@@ -797,77 +799,6 @@ import { AlertService } from '../../alertas/alertas.service';
           </div>
         </div>
       </section>
-  
-      <!-- ======= BOTÓN FLOTANTE (FAB) “Acciones Rápidas” ======= -->
-      <button
-        type="button"
-        class="fab btn btn-primary btn-circle shadow-lg"
-        (click)="toggleBottomSheet()"
-        [attr.aria-label]="'Acciones rápidas'"
-        [attr.title]="'Acciones rápidas'"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M3 5a1 1 0 100 2h14a1 1 0 100-2H3zm0 4a1 1 0 100 2h14a1 1 0 100-2H3zm0 4a1 1 0 100 2h14a1 1 0 100-2H3z" />
-        </svg>
-      </button>
-  
-      <!-- ======= BOTTOM SHEET ======= -->
-      <div
-        *ngIf="isBottomSheetOpen"
-        class="bottom-sheet-backdrop"
-        (click)="toggleBottomSheet()"
-      >
-        <div class="bottom-sheet bottom-sheet-open" (click)="$event.stopPropagation()">
-          <!-- Handle visual -->
-          <div class="w-12 h-1 bg-base-content/30 rounded-full mx-auto mb-4"></div>
-          <h4 class="text-lg font-semibold mb-4">Acciones Rápidas</h4>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-2"
-            (click)="recargarZonas(); toggleBottomSheet()"
-            [attr.aria-label]="'Recargar Zonas'"
-            [attr.title]="'Recargar Zonas'"
-          >
-            ↻ Recargar Zonas
-          </button>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-2"
-            (click)="recargarSensores(); toggleBottomSheet()"
-            [attr.aria-label]="'Recargar Sensores'"
-            [attr.title]="'Recargar Sensores'"
-          >
-            ↻ Recargar Sensores
-          </button>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-2"
-            (click)="recargarAlertas(); toggleBottomSheet()"
-            [attr.aria-label]="'Recargar Alertas'"
-            [attr.title]="'Recargar Alertas'"
-          >
-            ↻ Recargar Alertas
-          </button>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-4"
-            (click)="resolverTodasAlertas(); toggleBottomSheet()"
-            [attr.aria-label]="'Marcar todas alertas resueltas'"
-            [attr.title]="'Marcar todas alertas resueltas'"
-          >
-            ✓ Marcar todas alertas resueltas
-          </button>
-          <button
-            type="button"
-            class="btn btn-outline btn-sm w-full"
-            (click)="toggleBottomSheet()"
-            [attr.aria-label]="'Cerrar acciones rápidas'"
-            [attr.title]="'Cerrar acciones rápidas'"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
   
       <!-- ======= NAVEGACIÓN LATERAL (desktop) ======= -->
       <nav class="side-nav" aria-label="Navegación de secciones" role="navigation">
