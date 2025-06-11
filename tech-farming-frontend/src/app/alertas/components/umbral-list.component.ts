@@ -37,16 +37,21 @@ import { FormsModule } from '@angular/forms';
         <button class="btn btn-ghost" (click)="modal.closeModal()">✕</button>
       </div>
 
-      <!-- Tabs -->
-      <div class="flex justify-between items-center mb-4">
-        <div class="tabs">
-          <a *ngFor="let t of scopes; let i = index" class="tab tab-lg" [class.tab-active]="scopeIndex === i" (click)="switchScope(i)">
+      <!-- Tabs + CTA -->
+      <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div class="tabs tabs-boxed overflow-x-auto whitespace-nowrap">
+          <a
+            *ngFor="let t of scopes; let i = index"
+            class="tab tab-sm md:tab-lg"
+            [class.tab-active]="scopeIndex === i"
+            (click)="switchScope(i)"
+          >
             {{ t | titlecase }}
           </a>
         </div>
         <button
           *ngIf="puedeCrear"
-          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content"
+          class="btn btn-success md:btn-outline w-full md:w-auto"
           (click)="nuevoUmbral(); $event.stopPropagation()"
         >
           + Nuevo Umbral
@@ -85,7 +90,8 @@ import { FormsModule } from '@angular/forms';
       </div>
 
       <!-- Tarjetas (móvil) -->
-      <div class="grid gap-4 md:hidden">
+      <div class="flex flex-col space-y-4 md:hidden">
+
         <div *ngFor="let u of umbrales" class="card bg-base-100 shadow p-4 space-y-1">
           <h3 class="font-semibold">
             {{ u.tipo_parametro_nombre }} ({{ u.tipo_parametro_unidad }})
@@ -107,19 +113,19 @@ import { FormsModule } from '@angular/forms';
       </div>
 
       <!-- Paginación -->
-      <div class="flex items-center justify-between p-6 bg-base-200 rounded-lg mt-6" *ngIf="totalPages >= 0">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 bg-base-200 rounded-lg mt-6" *ngIf="totalPages >= 0">
         <div class="text-sm text-base-content/70">
           Página {{ totalPages === 0 ? 0 : currentPage }} de {{ totalPages }} · {{ totalUmbrales }} umbral{{ totalUmbrales !== 1 ? 'es' : '' }}
         </div>
 
-        <div class="flex items-center gap-2" *ngIf="totalPages > 1">
-          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(1)" [disabled]="currentPage === 1">«</button>
-          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+        <div class="flex items-center gap-2 overflow-x-auto whitespace-nowrap md:overflow-visible" *ngIf="totalPages > 1">
+          <button class="btn btn-xs md:btn-sm btn-outline rounded-full" (click)="goToPage(1)" [disabled]="currentPage === 1">«</button>
+          <button class="btn btn-xs md:btn-sm btn-outline rounded-full" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
 
           <ng-container *ngFor="let item of paginationItems()">
             <ng-container *ngIf="item !== '…'; else dots">
               <button
-                class="btn btn-sm rounded-full"
+                class="btn btn-xs md:btn-sm rounded-full"
                 [ngClass]="{
                   'btn-success text-base-content border-success cursor-default': item === currentPage,
                   'btn-outline': item !== currentPage
@@ -133,8 +139,8 @@ import { FormsModule } from '@angular/forms';
             </ng-template>
           </ng-container>
 
-          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
-          <button class="btn btn-sm btn-outline rounded-full" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">»</button>
+          <button class="btn btn-xs md:btn-sm btn-outline rounded-full" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+          <button class="btn btn-xs md:btn-sm btn-outline rounded-full" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">»</button>
         </div>
       </div>
     </div>
@@ -167,6 +173,9 @@ export class UmbralListComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
+    if (window.innerWidth < 768) {
+      this.pageSize = 2;
+    }
     // Obtener sesión activa
     const session = await this.supaSvc.supabase.auth.getSession();
     const user = session.data?.session?.user;
