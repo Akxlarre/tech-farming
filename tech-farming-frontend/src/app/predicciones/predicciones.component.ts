@@ -53,7 +53,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
           </div>
 
           <!-- FILTROS -->
-          <div class="grid gap-4" style="grid-template-columns: calc(100% * var(--inv-phi)) repeat(3, 1fr);">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
 
             <!-- Invernadero -->
             <app-filtro-select
@@ -135,8 +135,6 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
   styles: [`
     :host { display: block; position: relative; }
     :root {
-      --phi: 1.618;
-      --inv-phi: 0.618;
       --header-height: 3rem;
     }
   `]
