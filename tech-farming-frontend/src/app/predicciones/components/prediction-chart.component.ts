@@ -164,3 +164,4 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
     return v || fallback;
   }
 }
+
