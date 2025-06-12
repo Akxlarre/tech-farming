@@ -42,6 +42,7 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
 
     isBrowser: boolean;
     private chart!: Chart;
+    private themeObserver?: MutationObserver;
 
     constructor(@Inject(PLATFORM_ID) private platformId: any) {
       this.isBrowser = isPlatformBrowser(this.platformId);
@@ -50,6 +51,13 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
     ngAfterViewInit() {
       if (this.isBrowser) {
         this.initChart();
+        this.themeObserver = new MutationObserver(() => {
+          this.applyThemeColors();
+        });
+        this.themeObserver.observe(
+          document.documentElement,
+          { attributes: true, attributeFilter: ['data-theme'] }
+        );
       }
     }
 
@@ -66,6 +74,7 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
       if (this.isBrowser && this.chart) {
         this.chart.destroy();
       }
+      this.themeObserver?.disconnect();
     }
 
   private initChart() {
@@ -142,7 +151,8 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
     };
 
     this.chart = new Chart(ctx, cfg);
-    }
+    this.applyThemeColors();
+  }
 
   private updateData() {
     const hist   = this.historical.map(p => p.value);
@@ -155,6 +165,33 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
       this.chart.data.labels           = labels;
       this.chart.data.datasets[0].data = hist;
     this.chart.data.datasets[1].data = Array(hist.length).fill(null).concat(fut);
+    this.chart.update();
+  }
+
+  private applyThemeColors() {
+    if (!this.chart) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const histColor = this.getCSSVar('--color-success', '#22c55e');
+    const futColor  = this.getCSSVar('--color-info', '#0ea5e9');
+    const baseColor = this.getCSSVar('--color-base-content', isDark ? '#f9fafb' : '#374151');
+
+    this.chart.data.datasets[0].borderColor = histColor;
+    (this.chart.data.datasets[0] as any).backgroundColor = histColor + '33';
+    this.chart.data.datasets[1].borderColor = futColor;
+    (this.chart.data.datasets[1] as any).backgroundColor = futColor;
+
+    const scales = this.chart.options.scales!;
+    (scales['x'] as any).title.color = baseColor;
+    (scales['y'] as any).title.color = baseColor;
+    (scales['x'] as any).ticks.color = baseColor;
+    (scales['y'] as any).ticks.color = baseColor;
+    (scales['x'] as any).grid.color  = baseColor + '20';
+    (scales['y'] as any).grid.color  = baseColor + '20';
+
+    if (this.chart.options.plugins?.legend?.labels) {
+      (this.chart.options.plugins.legend.labels as any).color = baseColor;
+    }
+
     this.chart.update();
   }
 
