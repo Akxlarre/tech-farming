@@ -188,6 +188,10 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
     (scales['x'] as any).grid.color  = baseColor + '20';
     (scales['y'] as any).grid.color  = baseColor + '20';
 
+    if (this.chart.options.plugins?.legend?.labels) {
+      (this.chart.options.plugins.legend.labels as any).color = baseColor;
+    }
+
     this.chart.update();
   }
 
