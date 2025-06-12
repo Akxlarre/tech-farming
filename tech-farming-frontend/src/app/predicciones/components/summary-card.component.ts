@@ -9,6 +9,43 @@ import { Summary }           from '../../models';
   standalone: true,
   imports: [CommonModule],
   template: `
+<<<<<<< 57tl12-codex/investigar-diseño-moderno-para-cards-de-predicción
+    <ng-container *ngIf="summary; else noSummaryTpl">
+      <div class="stats bg-base-100 shadow-lg rounded-lg p-4">
+        <div class="stat">
+          <div class="stat-title text-lg font-medium">Última medida</div>
+          <div class="stat-value text-xl font-bold">
+            {{ summary.lastValue != null ? summary.lastValue.toFixed(2) : '—' }} °C
+          </div>
+        </div>
+        <div class="stat">
+          <div class="stat-title text-lg font-medium">Predicción ({{ projectionLabel }})</div>
+          <div class="stat-value text-xl font-bold">
+            {{ summary.prediction != null ? summary.prediction.toFixed(2) : '—' }} °C
+          </div>
+        </div>
+        <div class="stat">
+          <div class="stat-title text-lg font-medium">Rango histórico</div>
+          <div class="stat-value">
+            [{{ summary.histMin != null ? summary.histMin.toFixed(1) : '—' }} – {{ summary.histMax != null ? summary.histMax.toFixed(1) : '—' }}]
+          </div>
+        </div>
+        <div class="stat">
+          <div class="stat-title text-lg font-medium">Variación</div>
+          <div class="stat-value text-xl font-bold" [ngClass]="{'text-error': summary.diff != null && summary.diff < 0}">
+            {{ summary.diff != null ? summary.diff.toFixed(2) : '—' }}
+          </div>
+          <div class="stat-desc text-sm" *ngIf="summary.action">{{ summary.action }}</div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noSummaryTpl>
+      <div class="text-gray-400 italic p-4 text-center">
+        No hay un resumen disponible.
+      </div>
+    </ng-template>
+=======
     <div
       class="summary-card card relative overflow-hidden h-full bg-base-100 p-6 rounded-xl shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 transition"
     >
@@ -56,11 +93,10 @@ import { Summary }           from '../../models';
         </div>
       </ng-template>
     </div>
+>>>>>>> predicciones-ui
   `,
   styles: [`
     :host { display: block; height: 100%; }
-    .summary-card { border: 1px solid var(--p-base-200); }
-    .text-primary { color: var(--p-primary); }
   `]
 })
 export class SummaryCardComponent {

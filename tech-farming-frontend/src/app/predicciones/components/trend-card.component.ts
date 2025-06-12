@@ -20,6 +20,17 @@ export interface Trend {
   imports: [CommonModule, TrendGaugeComponent],
   template: `
     <div
+<<<<<<< 57tl12-codex/investigar-diseño-moderno-para-cards-de-predicción
+      class="card w-48 bg-base-100 shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow focus:ring-2 focus:ring-primary"
+    >
+      <app-trend-gauge [pct]="pct" [size]="40"></app-trend-gauge>
+      <h4 class="text-lg font-medium">Tendencia</h4>
+      <p class="text-xl font-bold flex items-center gap-1" [ngClass]="riskMsgClass">
+        <i [class]="trendIcon"></i>
+        {{ pct | number:'1.0-1' }}%
+      </p>
+      <p *ngIf="action" class="text-sm text-gray-500/75 text-center">{{ action }}</p>
+=======
       class="trend-card card relative overflow-hidden h-full bg-base-100 p-6 rounded-xl shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 transition"
     >
       <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 pointer-events-none"></div>
@@ -43,13 +54,12 @@ export interface Trend {
           {{ action }}
         </p>
       </div>
+>>>>>>> predicciones-ui
     </div>
   `,
   styles: [`
-    :host { display: block; height: 100%; }
-    .trend-card { border: 1px solid var(--p-base-200); }
+    :host { display: block; }
 
-    /* Color del texto según nivel de riesgo */
     .msg-success { color: var(--p-success); }
     .msg-warning { color: var(--p-warning); }
     .msg-error   { color: var(--p-error); }
