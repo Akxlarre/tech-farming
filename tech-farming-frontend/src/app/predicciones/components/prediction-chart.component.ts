@@ -42,6 +42,31 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
 
     isBrowser: boolean;
     private chart!: Chart;
+    private bridgePlugin = {
+      id: 'bridgeLine',
+      afterDatasetsDraw: (chart: Chart) => {
+        const metaHist = chart.getDatasetMeta(0);
+        const metaPred = chart.getDatasetMeta(1);
+        if (!metaHist.data.length || !metaPred.data.length) return;
+
+        const start = metaHist.data[metaHist.data.length - 1];
+        const firstPredIdx = metaPred.data.findIndex(p => !isNaN((p as any).parsed.y as number));
+        if (firstPredIdx < 0) return;
+        const end = metaPred.data[firstPredIdx];
+
+        const dsPred: any = chart.data.datasets[1];
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.strokeStyle = dsPred.borderColor || '#000';
+        ctx.setLineDash(dsPred.borderDash || []);
+        ctx.lineWidth = dsPred.borderWidth || 3;
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    };
     private themeObserver?: MutationObserver;
 
     constructor(@Inject(PLATFORM_ID) private platformId: any) {
@@ -147,7 +172,8 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
             }
           }
         }
-      }
+      },
+      plugins: [this.bridgePlugin]
     };
 
     this.chart = new Chart(ctx, cfg);
