@@ -19,24 +19,34 @@ export interface Trend {
   standalone: true,
   imports: [CommonModule, TrendGaugeComponent],
   template: `
-    <div
-      class="card w-full bg-base-100 shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow focus:ring-2 focus:ring-primary"
-    >
-      <app-trend-gauge [pct]="pct" [size]="40"></app-trend-gauge>
-      <h4 class="text-lg font-medium">Tendencia</h4>
-      <p class="text-xl font-bold flex items-center gap-1" [ngClass]="riskMsgClass">
-        <i [class]="trendIcon"></i>
-        {{ pct | number:'1.0-1' }}%
-      </p>
-      <p *ngIf="action" class="text-sm text-gray-500/75 text-center">{{ action }}</p>
-    </div>
+    <!-- sólo renderiza si hay datos de tendencia -->
+    <ng-container *ngIf="trend">
+      <div
+        class="card w-full max-w-xs bg-base-100 shadow-lg rounded-lg p-4
+               flex flex-col items-center gap-2
+               hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow
+               focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        <app-trend-gauge [pct]="pct" [size]="48"></app-trend-gauge>
+        <h4 class="text-lg font-medium">{{ trend.title }}</h4>
+        <p
+          class="text-xl font-bold flex items-center gap-1"
+          [ngClass]="riskMsgClass"
+        >
+          <i [class]="trendIcon"></i>
+          {{ pct | number:'1.0-1' }}%
+        </p>
+        <p *ngIf="action" class="text-sm text-gray-500 text-center">
+          {{ action }}
+        </p>
+      </div>
+    </ng-container>
   `,
   styles: [`
     :host { display: block; }
-
-    .msg-success { color: var(--p-success); }
-    .msg-warning { color: var(--p-warning); }
-    .msg-error   { color: var(--p-error); }
+    .msg-success { color: var(--pf-success); }
+    .msg-warning { color: var(--pf-warning); }
+    .msg-error   { color: var(--pf-error); }
   `]
 })
 export class TrendCardComponent {
@@ -48,26 +58,28 @@ export class TrendCardComponent {
   get pct(): number {
     if (!this.trend) return 0;
     const num = parseFloat(this.trend.message.replace('%',''));
-    return isNaN(num) ? 0 : num;
+    return isNaN(num) ? 0 : Math.abs(num);
   }
 
   /** Clase de color del texto según el % */
   get riskMsgClass(): string {
-    const p = Math.abs(this.pct);
-    if (p >= 10) return 'msg-error';
-    if (p >= 5)  return 'msg-warning';
-    return 'msg-success';
+    const p = this.pct;
+    return p >= 10
+      ? 'msg-error'
+      : p >= 5
+        ? 'msg-warning'
+        : 'msg-success';
   }
 
   /** Icono según la tendencia */
   get trendIcon(): string {
     switch (this.trend?.type) {
       case 'up':
-        return 'fas fa-arrow-up text-success';
+        return 'fas fa-arrow-up';
       case 'down':
-        return 'fas fa-arrow-down text-error';
+        return 'fas fa-arrow-down';
       default:
-        return 'fas fa-minus text-warning';
+        return 'fas fa-minus';
     }
   }
 }

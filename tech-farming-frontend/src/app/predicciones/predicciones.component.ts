@@ -112,15 +112,15 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
               </div>
 
               <!-- Resumen y Tendencia -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
-                <div class="col-span-1 sm:col-span-1 lg:col-span-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 justify-center">
+                <div class="col-span-12 sm:col-span-1 lg:col-span-6">
                   <app-summary-card
                     [summary]="data?.summary"
                     [projectionLabel]="selectedProjectionLabel"
                   ></app-summary-card>
                 </div>
                 <div
-                  class="col-span-1 sm:col-span-1 lg:col-span-6 flex sm:justify-center lg:justify-start"
+                  class="col-span-12 sm:col-span-1 lg:col-span-6 flex sm:justify-center lg:justify-start"
                   *ngIf="uiTrend"
                 >
                   <app-trend-card [trend]="uiTrend"></app-trend-card>

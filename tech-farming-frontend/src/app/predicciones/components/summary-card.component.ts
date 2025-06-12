@@ -9,33 +9,51 @@ import { Summary }           from '../../models';
   standalone: true,
   imports: [CommonModule],
   template: `
-
     <ng-container *ngIf="summary; else noSummaryTpl">
-      <div class="stats stats-vertical sm:stats-horizontal bg-base-100 shadow-lg rounded-lg p-4">
-        <div class="stat">
-          <div class="stat-title text-lg font-medium">Última medida</div>
-          <div class="stat-value text-xl font-bold">
-            {{ summary.lastValue != null ? summary.lastValue.toFixed(2) : '—' }} °C
+      <div
+        class="card w-full bg-base-100 shadow-lg rounded-lg p-4
+               hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow
+               focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Última medida -->
+          <div class="flex flex-col">
+            <span class="text-lg font-medium">Última medida</span>
+            <span class="text-2xl font-bold whitespace-nowrap">
+              {{ summary.lastValue != null ? (summary.lastValue | number:'1.2-2') : '—' }} °C
+            </span>
           </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title text-lg font-medium">Predicción ({{ projectionLabel }})</div>
-          <div class="stat-value text-xl font-bold">
-            {{ summary.prediction != null ? summary.prediction.toFixed(2) : '—' }} °C
+          <!-- Predicción -->
+          <div class="flex flex-col">
+            <span class="text-lg font-medium">Predicción ({{ projectionLabel }})</span>
+            <span class="text-2xl font-bold whitespace-nowrap">
+              {{ summary.prediction != null ? (summary.prediction | number:'1.2-2') : '—' }} °C
+            </span>
           </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title text-lg font-medium">Rango histórico</div>
-          <div class="stat-value">
-            [{{ summary.histMin != null ? summary.histMin.toFixed(1) : '—' }} – {{ summary.histMax != null ? summary.histMax.toFixed(1) : '—' }}]
+          <!-- Rango histórico -->
+          <div class="flex flex-col">
+            <span class="text-lg font-medium">Rango histórico</span>
+            <span class="text-2xl font-bold whitespace-nowrap">
+              [{{ summary.histMin != null ? (summary.histMin | number:'1.1-1') : '—' }}
+               – {{ summary.histMax != null ? (summary.histMax | number:'1.1-1') : '—' }}]
+            </span>
           </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title text-lg font-medium">Variación</div>
-          <div class="stat-value text-xl font-bold" [ngClass]="{'text-error': summary.diff != null && summary.diff < 0}">
-            {{ summary.diff != null ? summary.diff.toFixed(2) : '—' }}
+          <!-- Variación -->
+          <div class="flex flex-col">
+            <span class="text-lg font-medium">Variación</span>
+            <span
+              class="text-2xl font-bold whitespace-nowrap"
+              [ngClass]="{
+                'text-success': summary.diff != null && summary.diff > 0,
+                'text-error':   summary.diff != null && summary.diff < 0
+              }"
+            >
+              {{ summary.diff != null ? (summary.diff | number:'1.2-2') : '—' }}
+            </span>
+            <span *ngIf="summary.action" class="text-sm text-gray-500">
+              {{ summary.action }}
+            </span>
           </div>
-          <div class="stat-desc text-sm" *ngIf="summary.action">{{ summary.action }}</div>
         </div>
       </div>
     </ng-container>
