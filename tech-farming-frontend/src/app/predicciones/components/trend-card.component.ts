@@ -20,7 +20,6 @@ export interface Trend {
   imports: [CommonModule, TrendGaugeComponent],
   template: `
     <div
-<<<<<<< 57tl12-codex/investigar-diseño-moderno-para-cards-de-predicción
       class="card w-48 bg-base-100 shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow focus:ring-2 focus:ring-primary"
     >
       <app-trend-gauge [pct]="pct" [size]="40"></app-trend-gauge>
@@ -30,31 +29,6 @@ export interface Trend {
         {{ pct | number:'1.0-1' }}%
       </p>
       <p *ngIf="action" class="text-sm text-gray-500/75 text-center">{{ action }}</p>
-=======
-      class="trend-card card relative overflow-hidden h-full bg-base-100 p-6 rounded-xl shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 transition"
-    >
-      <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 pointer-events-none"></div>
-
-      <!-- HEADER -->
-      <div class="relative z-10 flex items-center mb-4">
-        <app-trend-gauge [pct]="pct" [size]="48" class="mr-3"></app-trend-gauge>
-        <i [class]="trendIcon + ' text-2xl mr-2'"></i>
-        <h2 class="text-xl font-semibold">Tendencia</h2>
-      </div>
-
-      <!-- CUERPO -->
-      <div class="relative z-10 flex-1">
-        <!-- Título + porcentaje -->
-        <p class="text-lg font-medium mb-2" [ngClass]="riskMsgClass">
-          {{ trend?.title }} ({{ trend?.message }})
-        </p>
-
-        <!-- Mensaje específico de acción -->
-        <p *ngIf="action" class="text-sm font-medium mt-2">
-          {{ action }}
-        </p>
-      </div>
->>>>>>> predicciones-ui
     </div>
   `,
   styles: [`

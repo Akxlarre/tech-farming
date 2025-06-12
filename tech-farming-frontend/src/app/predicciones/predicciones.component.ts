@@ -100,30 +100,28 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
             </div>
           </ng-container>
           <ng-template #dataTpl>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+            <div class="space-y-4">
               <!-- Chart -->
-              <div class="col-span-12 sm:col-span-1 lg:col-span-8 order-1">
-                <div class="relative w-full h-96 bg-base-100 rounded-lg overflow-hidden shadow-xl p-6 animate-fade-in-down">
-                  <app-prediction-chart
-                    class="w-full h-full"
-                    [historical]="data?.historical ?? []"
-                    [future]    ="data?.future     ?? []"
-                    [label]     ="selectedProjectionLabel"
-                  ></app-prediction-chart>
+              <div class="relative w-full h-96 bg-base-100 rounded-lg overflow-hidden shadow-xl p-6 animate-fade-in-down">
+                <app-prediction-chart
+                  class="w-full h-full"
+                  [historical]="data?.historical ?? []"
+                  [future]    ="data?.future     ?? []"
+                  [label]     ="selectedProjectionLabel"
+                ></app-prediction-chart>
+              </div>
+
+              <!-- Resumen y Tendencia -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+                <div class="col-span-12 sm:col-span-1 lg:col-span-6">
+                  <app-summary-card
+                    [summary]="data?.summary"
+                    [projectionLabel]="selectedProjectionLabel"
+                  ></app-summary-card>
                 </div>
-              </div>
-
-              <!-- Resumen Predictivo -->
-              <div class="col-span-12 sm:col-span-2 lg:col-span-3 order-2 sm:order-3 lg:order-2">
-                <app-summary-card
-                  [summary]="data?.summary"
-                  [projectionLabel]="selectedProjectionLabel"
-                ></app-summary-card>
-              </div>
-
-              <!-- Card Tendencia -->
-              <div class="col-span-12 sm:col-span-1 lg:col-span-1 order-3 sm:order-2 lg:order-3">
-                <app-trend-card [trend]="uiTrend"></app-trend-card>
+                <div class="col-span-12 sm:col-span-1 lg:col-span-6 flex sm:justify-center lg:justify-start">
+                  <app-trend-card [trend]="uiTrend"></app-trend-card>
+                </div>
               </div>
             </div>
           </ng-template>
