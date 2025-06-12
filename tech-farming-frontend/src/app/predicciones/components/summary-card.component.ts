@@ -11,7 +11,7 @@ import { Summary }           from '../../models';
   template: `
 
     <ng-container *ngIf="summary; else noSummaryTpl">
-      <div class="stats bg-base-100 shadow-lg rounded-lg p-4">
+      <div class="stats stats-vertical sm:stats-horizontal bg-base-100 shadow-lg rounded-lg p-4">
         <div class="stat">
           <div class="stat-title text-lg font-medium">Última medida</div>
           <div class="stat-value text-xl font-bold">
