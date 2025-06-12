@@ -12,39 +12,124 @@
         <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">Correo</label>
-            <input type="email" formControlName="email" class="input input-bordered w-full" placeholder="usuario@campo.cl">
-            <p *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-error text-sm mt-1">
+            <input
+              type="email"
+              formControlName="email"
+              class="input input-bordered w-full"
+              placeholder="usuario@campo.cl"
+              data-cy="login-email"
+            />
+            <p
+              *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+              class="text-error text-sm mt-1"
+              data-cy="login-email-error"
+            >
               Correo electrónico inválido.
             </p>
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Contraseña</label>
-            <input type="password" formControlName="password" class="input input-bordered w-full" placeholder="••••••••">
-            <p *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="text-error text-sm mt-1">
+            <input
+              type="password"
+              formControlName="password"
+              class="input input-bordered w-full"
+              placeholder="••••••••"
+              data-cy="login-password"
+            />
+            <p
+              *ngIf="form.get('password')?.invalid && form.get('password')?.touched"
+              class="text-error text-sm mt-1"
+              data-cy="login-password-error"
+            >
               Contraseña requerida.
             </p>
           </div>
-          <p *ngIf="loginErrorMessage()" class="text-error text-sm">{{ loginErrorMessage() }}</p>
+          <p
+            *ngIf="loginErrorMessage()"
+            class="text-error text-sm"
+            data-cy="login-error"
+          >
+            {{ loginErrorMessage() }}
+          </p>
           <div class="flex justify-between text-sm">
-            <a href="#" (click)="openResetPasswordModal($event)" class="link">¿Olvidaste tu contraseña?</a>
+            <a
+              href="#"
+              (click)="openResetPasswordModal($event)"
+              class="link"
+              data-cy="login-forgot-password"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
           </div>
           <!-- Reset Password Modal -->
-          <div *ngIf="showResetPasswordModal()" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div class="relative w-full max-w-md bg-base-100 rounded-xl shadow-lg p-6 space-y-4 border border-base-300">
-              <h3 class="text-lg font-bold">Recuperar Contraseña</h3>
-              <p class="text-sm opacity-70">Ingresa tu correo electrónico y te enviaremos un enlace para recuperar tu contraseña.</p>
+          <div
+            *ngIf="showResetPasswordModal()"
+            class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm"
+            data-cy="reset-password-modal"
+          >
+            <div
+              class="relative w-full max-w-md bg-base-100 rounded-xl shadow-lg p-6 space-y-4 border border-base-300"
+            >
+              <h3 class="text-lg font-bold" data-cy="reset-password-title">
+                Recuperar Contraseña
+              </h3>
+              <p class="text-sm opacity-70">
+                Ingresa tu correo electrónico y te enviaremos un enlace para
+                recuperar tu contraseña.
+              </p>
               <div [formGroup]="resetForm">
-                <input type="email" formControlName="email" class="input input-bordered w-full" placeholder="usuario@campo.cl">
-                <p *ngIf="resetErrorMessage()" class="text-error text-sm mt-1">{{ resetErrorMessage() }}</p>
+                <input
+                  type="email"
+                  formControlName="email"
+                  class="input input-bordered w-full"
+                  placeholder="usuario@campo.cl"
+                  data-cy="reset-email"
+                />
+                <p
+                  *ngIf="resetErrorMessage()"
+                  class="text-error text-sm mt-1"
+                  data-cy="reset-password-error"
+                >
+                  {{ resetErrorMessage() }}
+                </p>
               </div>
               <div class="flex justify-end gap-2 mt-4">
-                <button class="btn btn-outline" (click)="closeResetPasswordModal()">Cancelar</button>
-                <button class="btn btn-success text-base-content flex items-center gap-2" [disabled]="cargandoResetPassword()" (click)="sendResetPasswordEmail()">
-                  <span *ngIf="!cargandoResetPassword(); else spinner">Enviar</span>
+                <button
+                  class="btn btn-outline"
+                  (click)="closeResetPasswordModal()"
+                  data-cy="reset-password-cancel"
+                >
+                  Cancelar
+                </button>
+                <button
+                  class="btn btn-success text-base-content flex items-center gap-2"
+                  [disabled]="cargandoResetPassword()"
+                  (click)="sendResetPasswordEmail()"
+                  data-cy="reset-password-send"
+                >
+                  <span *ngIf="!cargandoResetPassword(); else spinner">
+                    Enviar
+                  </span>
                   <ng-template #spinner>
-                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    <svg
+                      class="animate-spin h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      />
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      />
                     </svg>
                   </ng-template>
                 </button>
@@ -52,28 +137,71 @@
             </div>
           </div>
           <!-- Success Modal -->
-          <div *ngIf="showSuccessModal()" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div class="relative w-full max-w-md bg-base-100 rounded-xl shadow-lg p-6 space-y-4 border border-base-300">
-              <h3 class="text-lg font-bold text-success flex items-center gap-2">¡Correo Enviado!</h3>
-              <p class="text-sm opacity-70">Hemos enviado un enlace de recuperación a tu correo.</p>
+          <div
+            *ngIf="showSuccessModal()"
+            class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm"
+            data-cy="reset-password-success-modal"
+          >
+            <div
+              class="relative w-full max-w-md bg-base-100 rounded-xl shadow-lg p-6 space-y-4 border border-base-300"
+            >
+              <h3
+                class="text-lg font-bold text-success flex items-center gap-2"
+                data-cy="reset-password-success-title"
+              >
+                ¡Correo Enviado!
+              </h3>
+              <p class="text-sm opacity-70">
+                Hemos enviado un enlace de recuperación a tu correo.
+              </p>
               <div class="flex justify-end mt-4">
-                <button class="btn btn-success text-base-content" (click)="showSuccessModal.set(false)">Cerrar</button>
+                <button
+                  class="btn btn-success text-base-content"
+                  (click)="showSuccessModal.set(false)"
+                  data-cy="reset-password-success-close"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>
           <div class="relative w-full">
-            <button type="submit" class="btn btn-success text-base-content w-full font-semibold shadow-lg flex items-center justify-center gap-2 transition-all duration-200">
+            <button
+              type="submit"
+              class="btn btn-success text-base-content w-full font-semibold shadow-lg flex items-center justify-center gap-2 transition-all duration-200"
+              data-cy="login-submit"
+            >
               <span *ngIf="!cargando(); else loadingText">Acceder</span>
               <ng-template #loadingText>
                 <div class="flex items-center justify-center">
-                  <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  <svg
+                    class="animate-spin h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
                   </svg>
                 </div>
               </ng-template>
             </button>
-            <div *ngIf="cargando()" class="absolute inset-0 bg-success opacity-60 flex items-center justify-center pointer-events-none rounded-lg"></div>
+            <div
+              *ngIf="cargando()"
+              class="absolute inset-0 bg-success opacity-60 flex items-center justify-center pointer-events-none rounded-lg"
+              data-cy="login-loading-overlay"
+            ></div>
           </div>
         </form>
       </div>
