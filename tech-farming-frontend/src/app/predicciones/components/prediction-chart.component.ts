@@ -12,13 +12,13 @@ import {
     PLATFORM_ID
   } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
-  
+import Chart, { ChartConfiguration } from 'chart.js/auto';
+
   export interface SeriesPoint {
     timestamp: string;
     value: number;
   }
-  
+
   @Component({
     selector: 'app-prediction-chart',
     standalone: true,
@@ -33,26 +33,26 @@ import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
   })
   export class PredictionChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     @ViewChild('canvas', { static: false }) canvas!: ElementRef<HTMLCanvasElement>;
-  
+
     /** Datos históricos y futuros */
     @Input() historical: SeriesPoint[] = [];
     @Input() future:     SeriesPoint[] = [];
     /** Etiqueta fija para eje Y */
     @Input() label = '';
-  
+
     isBrowser: boolean;
     private chart!: Chart;
-  
+
     constructor(@Inject(PLATFORM_ID) private platformId: any) {
       this.isBrowser = isPlatformBrowser(this.platformId);
     }
-  
+
     ngAfterViewInit() {
       if (this.isBrowser) {
         this.initChart();
       }
     }
-  
+
     ngOnChanges(chg: SimpleChanges) {
       // Sólo refresca datos, no toca opciones
       if (!this.chart || !this.isBrowser) return;
@@ -61,13 +61,13 @@ import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
         this.updateData();
       }
     }
-  
+
     ngOnDestroy() {
       if (this.isBrowser && this.chart) {
         this.chart.destroy();
       }
     }
-  
+
   private initChart() {
     const ctx = this.canvas.nativeElement.getContext('2d')!;
 
@@ -143,7 +143,7 @@ import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
 
     this.chart = new Chart(ctx, cfg);
     }
-  
+
   private updateData() {
     const hist   = this.historical.map(p => p.value);
     const fut    = this.future.map(p => p.value);
@@ -151,7 +151,7 @@ import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
         ...this.historical.map(p => new Date(p.timestamp).toLocaleString()),
         ...this.future.map(p => new Date(p.timestamp).toLocaleString())
       ];
-  
+
       this.chart.data.labels           = labels;
       this.chart.data.datasets[0].data = hist;
     this.chart.data.datasets[1].data = Array(hist.length).fill(null).concat(fut);
@@ -164,4 +164,3 @@ import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
     return v || fallback;
   }
 }
-  
