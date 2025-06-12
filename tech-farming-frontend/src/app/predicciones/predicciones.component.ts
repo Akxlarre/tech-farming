@@ -5,9 +5,6 @@ import { CommonModule }      from '@angular/common';
 import { FormsModule }       from '@angular/forms';
 import { HttpClientModule }  from '@angular/common/http';
 
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule }    from '@angular/material/select';
-import { MatButtonModule }    from '@angular/material/button';
 
 import { PrediccionesService } from './predicciones.service';
 import {
@@ -23,6 +20,7 @@ import { FiltroSelectComponent }    from '../historial/components/filtro-select.
 import { PredictionChartComponent } from './components/prediction-chart.component';
 import { SummaryCardComponent }     from './components/summary-card.component';
 import { Trend as UITrend, TrendCardComponent } from './components/trend-card.component';
+import { PrediccionesHeaderComponent } from './components/predicciones-header.component';
 
 @Component({
   selector: 'app-predicciones',
@@ -31,29 +29,16 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     CommonModule,
     FormsModule,
     HttpClientModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
+    PrediccionesHeaderComponent,
     FiltroSelectComponent,
     PredictionChartComponent,
     SummaryCardComponent,
     TrendCardComponent
   ],
   template: `
-    <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
+    <div *ngIf="!loading; else loadingTpl" class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
-      <div class="flex items-center justify-between px-6 py-4 bg-base-200 border-b border-base-300">
-        <h1 class="text-3xl font-bold text-base-content">Predicciones</h1>
-        <button
-          mat-stroked-button
-          color="primary"
-          (click)="reload()"
-          [disabled]="!selectedInvernadero"
-          class="btn btn-sm btn-outline"
-        >
-          <i class="fas fa-sync-alt mr-2"></i> Actualizar
-        </button>
-      </div>
+      <app-predicciones-header></app-predicciones-header>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
         <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
@@ -69,6 +54,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
             [options]="optInvernadero"
             [selectedId]="selectedInvernadero"
             (selectionChange)="onInvernaderoChange($event)"
+            [allowUndefined]="false"
           ></app-filtro-select>
 
           <!-- Zona -->
@@ -94,6 +80,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
             [options]="optProjection"
             [selectedId]="selectedProjection"
             (selectionChange)="onProjectionChange($event)"
+            [allowUndefined]="false"
           ></app-filtro-select>
         </div>
 
@@ -118,6 +105,14 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
         </div>
       </div>
     </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+      </div>
+    </ng-template>
   `,
   styles: [`
     :host { display: block; position: relative; }
@@ -158,12 +153,35 @@ export class PrediccionesComponent implements OnInit {
   data?:   PredicResult;
   uiTrend?: UITrend;
   showNoDataMsg = false;
+  loading = true;
   constructor(private svc: PrediccionesService) {}
 
   ngOnInit() {
-    this.svc.getInvernaderos().subscribe(list => {
-      this.invernaderos   = list;
-      this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
+    this.svc.getInvernaderos().subscribe({
+      next: list => {
+        this.invernaderos   = list;
+        this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
+        if (list.length > 0) {
+          const firstId = list[0].id;
+          this.selectedInvernadero = firstId;
+          this.loading = true;
+          this.svc.getZonasByInvernadero(firstId).subscribe({
+            next: zonas => {
+              this.zonas   = zonas;
+              this.optZona = zonas.map(z => ({ id: z.id, label: z.nombre }));
+              this.reload();
+            },
+            error: () => {
+              this.loading = false;
+            }
+          });
+        } else {
+          this.loading = false;
+        }
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -180,21 +198,30 @@ export class PrediccionesComponent implements OnInit {
       return;
     }
     this.selectedInvernadero = idNum;
-    this.svc.getZonasByInvernadero(idNum).subscribe(list => {
-      this.zonas   = list;
-      this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+    this.loading = true;
+    this.svc.getZonasByInvernadero(idNum).subscribe({
+      next: list => {
+        this.zonas   = list;
+        this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+        this.reload();
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
   onZonaChange(id: string|number|undefined) {
     const idNum = id == null ? undefined : (typeof id === 'string' ? +id : id);
     this.selectedZona = idNum;
+    this.reload();
   }
 
   onParametroChange(param: string|number|undefined) {
     // forzamos a string, ignoramos valores no-string
     if (typeof param === 'string') {
       this.selectedParametro = param;
+      this.reload();
     }
   }
 
@@ -202,11 +229,17 @@ export class PrediccionesComponent implements OnInit {
     const hNum = h == null ? undefined : (typeof h === 'string' ? +h : h);
     if (hNum != null) {
       this.selectedProjection = hNum as 6|12|24;
+      this.reload();
     }
   }
 
   reload() {
-    if (!this.selectedInvernadero) return;
+    if (!this.selectedInvernadero) {
+      this.loading = false;
+      return;
+    }
+
+    this.loading = true;
 
     const params: PredicParams = {
       invernaderoId: this.selectedInvernadero!,
@@ -237,7 +270,12 @@ export class PrediccionesComponent implements OnInit {
           return;
         }
 
-        this.data = res;
+        // filtrar predicciones según la proyección solicitada
+        let sliceUntil = 1;
+        if (this.selectedProjection === 12) sliceUntil = 2;
+        if (this.selectedProjection === 24) sliceUntil = 3;
+
+        this.data = { ...res, future: res.future.slice(0, sliceUntil) };
         this.uiTrend = this.mapTrend(res.trend);
 
         // construir summary enriquecido
@@ -288,6 +326,10 @@ export class PrediccionesComponent implements OnInit {
         this.data = undefined;
         this.uiTrend = undefined;
         this.mostrarMensajeNoData();
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
