@@ -9,6 +9,7 @@ import { Summary }           from '../../models';
   standalone: true,
   imports: [CommonModule],
   template: `
+
     <ng-container *ngIf="summary; else noSummaryTpl">
       <div class="stats bg-base-100 shadow-lg rounded-lg p-4">
         <div class="stat">
