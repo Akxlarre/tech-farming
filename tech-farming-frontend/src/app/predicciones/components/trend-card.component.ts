@@ -2,7 +2,6 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule }      from '@angular/common';
-import { MatCardModule }     from '@angular/material/card';
 
 import { TrendGaugeComponent } from './trend-gauge.component';
 
@@ -18,21 +17,22 @@ export interface Trend {
 @Component({
   selector: 'app-trend-card',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    TrendGaugeComponent
-  ],
+  imports: [CommonModule, TrendGaugeComponent],
   template: `
-    <mat-card class="trend-card h-full bg-base-100 p-6 rounded-lg shadow-sm flex flex-col">
+    <div
+      class="trend-card card relative overflow-hidden h-full bg-base-100 p-6 rounded-xl shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 transition"
+    >
+      <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 pointer-events-none"></div>
+
       <!-- HEADER -->
-      <div class="flex items-center mb-4">
+      <div class="relative z-10 flex items-center mb-4">
         <app-trend-gauge [pct]="pct" [size]="48" class="mr-3"></app-trend-gauge>
+        <i [class]="trendIcon + ' text-2xl mr-2'"></i>
         <h2 class="text-xl font-semibold">Tendencia</h2>
       </div>
 
       <!-- CUERPO -->
-      <div class="flex-1">
+      <div class="relative z-10 flex-1">
         <!-- Título + porcentaje -->
         <p class="text-lg font-medium mb-2" [ngClass]="riskMsgClass">
           {{ trend?.title }} ({{ trend?.message }})
@@ -43,7 +43,7 @@ export interface Trend {
           {{ action }}
         </p>
       </div>
-    </mat-card>
+    </div>
   `,
   styles: [`
     :host { display: block; height: 100%; }
@@ -73,5 +73,17 @@ export class TrendCardComponent {
     if (p >= 10) return 'msg-error';
     if (p >= 5)  return 'msg-warning';
     return 'msg-success';
+  }
+
+  /** Icono según la tendencia */
+  get trendIcon(): string {
+    switch (this.trend?.type) {
+      case 'up':
+        return 'fas fa-arrow-up text-success';
+      case 'down':
+        return 'fas fa-arrow-down text-error';
+      default:
+        return 'fas fa-minus text-warning';
+    }
   }
 }
