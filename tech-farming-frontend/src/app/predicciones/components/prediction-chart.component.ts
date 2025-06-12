@@ -65,6 +65,7 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
         ctx.lineTo((firstPred as any).x, (firstPred as any).y);
+
         ctx.stroke();
         ctx.restore();
       }
