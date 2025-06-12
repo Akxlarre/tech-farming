@@ -36,7 +36,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
     TrendCardComponent
   ],
   template: `
-    <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
+    <div *ngIf="!loading; else loadingTpl" class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
       <app-predicciones-header></app-predicciones-header>
 
@@ -105,6 +105,14 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
         </div>
       </div>
     </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+      </div>
+    </ng-template>
   `,
   styles: [`
     :host { display: block; position: relative; }
@@ -145,12 +153,35 @@ export class PrediccionesComponent implements OnInit {
   data?:   PredicResult;
   uiTrend?: UITrend;
   showNoDataMsg = false;
+  loading = true;
   constructor(private svc: PrediccionesService) {}
 
   ngOnInit() {
-    this.svc.getInvernaderos().subscribe(list => {
-      this.invernaderos   = list;
-      this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
+    this.svc.getInvernaderos().subscribe({
+      next: list => {
+        this.invernaderos   = list;
+        this.optInvernadero = list.map(x => ({ id: x.id, label: x.nombre }));
+        if (list.length > 0) {
+          const firstId = list[0].id;
+          this.selectedInvernadero = firstId;
+          this.loading = true;
+          this.svc.getZonasByInvernadero(firstId).subscribe({
+            next: zonas => {
+              this.zonas   = zonas;
+              this.optZona = zonas.map(z => ({ id: z.id, label: z.nombre }));
+              this.reload();
+            },
+            error: () => {
+              this.loading = false;
+            }
+          });
+        } else {
+          this.loading = false;
+        }
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -167,10 +198,16 @@ export class PrediccionesComponent implements OnInit {
       return;
     }
     this.selectedInvernadero = idNum;
-    this.svc.getZonasByInvernadero(idNum).subscribe(list => {
-      this.zonas   = list;
-      this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
-      this.reload();
+    this.loading = true;
+    this.svc.getZonasByInvernadero(idNum).subscribe({
+      next: list => {
+        this.zonas   = list;
+        this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+        this.reload();
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -197,7 +234,12 @@ export class PrediccionesComponent implements OnInit {
   }
 
   reload() {
-    if (!this.selectedInvernadero) return;
+    if (!this.selectedInvernadero) {
+      this.loading = false;
+      return;
+    }
+
+    this.loading = true;
 
     const params: PredicParams = {
       invernaderoId: this.selectedInvernadero!,
@@ -284,6 +326,10 @@ export class PrediccionesComponent implements OnInit {
         this.data = undefined;
         this.uiTrend = undefined;
         this.mostrarMensajeNoData();
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
