@@ -8,7 +8,6 @@ import { HttpClientModule }  from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule }    from '@angular/material/select';
 import { MatButtonModule }    from '@angular/material/button';
-import { MatCardModule }      from '@angular/material/card';
 
 import { PrediccionesService } from './predicciones.service';
 import {
@@ -35,7 +34,6 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
-    MatCardModule,
     FiltroSelectComponent,
     PredictionChartComponent,
     SummaryCardComponent,
@@ -100,16 +98,14 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
         </div>
 
         <!-- GRÁFICO -->
-        <mat-card class="bg-base-100 p-6 shadow-xl animate-fade-in-down relative"
-                  style="min-height: 320px;">
-          <div class="w-full" style="height: min(max(300px, 40vh), 55vh);">
-            <app-prediction-chart
-              [historical]="data?.historical ?? []"
-              [future]    ="data?.future     ?? []"
-              [label]     ="selectedProjectionLabel"
-            ></app-prediction-chart>
-          </div>
-        </mat-card>
+        <div class="relative w-full h-96 bg-base-100 rounded-lg overflow-hidden shadow-xl animate-fade-in-down">
+          <app-prediction-chart
+            class="w-full h-full"
+            [historical]="data?.historical ?? []"
+            [future]    ="data?.future     ?? []"
+            [label]     ="selectedProjectionLabel"
+          ></app-prediction-chart>
+        </div>
 
         <!-- RESUMEN & TENDENCIA -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
