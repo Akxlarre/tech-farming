@@ -1,4 +1,3 @@
-from zoneinfo import ZoneInfo
 from sqlalchemy import and_, not_, or_
 from app import db, influx_client as client
 from app.models.alerta import Alerta
@@ -9,6 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy.orm import joinedload
+from zoneinfo import ZoneInfo
 
 def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: Optional[datetime] = None):
     """
@@ -74,17 +74,7 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
         nivel_alerta = "Advertencia"
 
     if not nivel_alerta:
-        return
-    
-    # Verificar si ya hay una alerta activa del mismo tipo y nivel
-    ya_alertada = Alerta.query.filter_by(
-        sensor_parametro_id=sensor_parametro_id,
-        tipo="Umbral",
-        nivel=nivel_alerta,
-        estado="Activa"
-    ).first()
-    if ya_alertada:
-        return  # Ya hay una alerta activa, no duplicar
+        return    
 
     # Crear la alerta
     parametro = TipoParametro.query.get(tipo_parametro_id)
@@ -120,12 +110,36 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
 
     usuarios_a_notificar = Usuario.query.filter(Usuario.telefono.isnot(None)).all()
     for u in usuarios_a_notificar:
-        try:
-            telefono = u.telefono.strip()
-            enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
-        except Exception as e:
-            print(f"[WHATSAPP] Error enviando mensaje a {u.nombre}: {e}")
+        if not u.recibe_notificaciones:
+            continue
 
+        # Verificar última alerta resuelta
+        alerta_antigua = (
+            Alerta.query
+            .filter_by(sensor_parametro_id=sensor_parametro_id, tipo="Umbral")
+            .order_by(Alerta.fecha_hora.desc())
+            .first()
+        )
+
+        enviar = True
+
+        if alerta_antigua:
+            if alerta_antigua.estado == "Resuelta":
+                if alerta_antigua.fecha_resolucion:
+                    delta = (timestamp - alerta_antigua.fecha_resolucion).total_seconds() / 60
+                    if delta < u.cooldown_post_resolucion:
+                        enviar = False
+            else:
+                delta = (timestamp - alerta_antigua.fecha_hora).total_seconds() / 60
+                if delta < u.alertas_cada_minutos:
+                    enviar = False
+
+        if enviar:
+            try:
+                telefono = u.telefono.strip()
+                enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
+            except Exception as e:
+                print(f"[WHATSAPP] Error enviando mensaje a {u.nombre}: {e}")
 
 def listar_alertas(filtros: dict):
     page     = filtros.get("page", 1)

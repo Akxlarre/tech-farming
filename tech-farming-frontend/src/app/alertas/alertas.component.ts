@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Subscription, forkJoin } from 'rxjs';
 import { AlertService, Alerta } from './alertas.service';
+import { AlertasModalService } from './alertas-modal.service';
 import { UmbralModalService } from './umbral-modal.service';
 import { AlertsHeaderComponent } from './components/alertas-header.component';
 import { ActiveAlertsComponent } from './components/alertas-activas.component';
 import { AlertsHistoryComponent } from './components/alertas-historial.component';
+import { AlertasModalWrapperComponent } from './components/alertas-modal-wrapper.component';
 import { UmbralModalWrapperComponent } from './components/umbral-modal-wrapper.component';
 import { UmbralConfigModalComponent } from './components/umbral-config-modal.component';
 import { AlertCardListComponent } from './components/alert-card-list.component';
@@ -27,6 +29,7 @@ import { UmbralListComponent } from './components/umbral-list.component';
     ActiveAlertsComponent,
     AlertCardListComponent,
     AlertsHistoryComponent,
+    AlertasModalWrapperComponent,
     UmbralConfigModalComponent,
     UmbralListComponent,
     UmbralModalWrapperComponent
@@ -35,6 +38,7 @@ import { UmbralListComponent } from './components/umbral-list.component';
     <div *ngIf="!loading; else loadingTpl">
     <!-- Header -->
     <app-alertas-header
+      (configurarNotificaciones)="abrirConfiguracionNotificaciones()"
       (configurar)="abrirConfiguracionUmbrales()">
     </app-alertas-header>
 
@@ -188,6 +192,8 @@ import { UmbralListComponent } from './components/umbral-list.component';
         </app-alert-card-list>
       </div>
 
+      <app-alertas-modal-wrapper *ngIf="alertasModal.modalVisible$ | async"></app-alertas-modal-wrapper>
+
       <!-- Modal de configuración de Umbrales -->
       <app-umbral-modal-wrapper *ngIf="modal.modalType$ | async as tipo">
         <app-umbral-list *ngIf="tipo === 'view'"></app-umbral-list>
@@ -287,7 +293,8 @@ export class AlertasComponent implements OnInit, OnDestroy {
     private histSvc: HistorialService,
     private invSvc: InvernaderoService,
     private zonaSvc: ZonaService,
-    public modal: UmbralModalService
+    public modal: UmbralModalService,
+    public alertasModal: AlertasModalService
   ) { }
 
   ngOnInit() {
@@ -508,6 +515,11 @@ export class AlertasComponent implements OnInit, OnDestroy {
       this.resolviendoId = null;
     });
   }
+
+  abrirConfiguracionNotificaciones() {
+    this.alertasModal.openModal();
+  }
+
   abrirConfiguracionUmbrales() {
     this.modal.openModal('view');
   }

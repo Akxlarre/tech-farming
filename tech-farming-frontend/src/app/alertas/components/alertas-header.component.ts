@@ -12,8 +12,17 @@ import { CommonModule } from '@angular/common';
         Gestión de Alertas
       </h1>
 
-      <!-- Botón Configurar Umbrales -->
+      <!-- Botón Configurar Notificaciones -->
       <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content mx-3"
+          (click)="configurarNotificaciones.emit()"
+          aria-label="Abrir configuración de notificaciones"
+        >
+          <span>Configurar Notificaciones</span>
+        </button>
+
+        <!-- Botón Configurar Umbrales -->
         <button
           class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content"
           (click)="configurar.emit()"
@@ -27,4 +36,5 @@ import { CommonModule } from '@angular/common';
 })
 export class AlertsHeaderComponent {
   @Output() configurar = new EventEmitter<void>();
+  @Output() configurarNotificaciones = new EventEmitter<void>();
 }

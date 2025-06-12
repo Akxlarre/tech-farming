@@ -29,6 +29,9 @@ def crear_usuario_desde_supabase():
     nuevo_usuario = Usuario(
         supabase_uid=supabase_uid,
         email=email,
+        recibe_alertas=True,
+        alertas_cada_minutos=10,
+        cooldown_post_resolucion=120,
         rol_id=1,
         fecha_creacion=datetime.utcnow()
     )
@@ -77,6 +80,9 @@ def invitar_usuario():
         apellido=apellido,
         email=email,
         telefono=telefono,
+        recibe_alertas=True,
+        alertas_cada_minutos=10,
+        cooldown_post_resolucion=120,
         rol_id=2,
         supabase_uid=supabase_uid,
         fecha_creacion=datetime.utcnow()

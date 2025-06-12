@@ -22,9 +22,9 @@ export class PerfilService {
 
   async actualizarUsuario(uid: string, cambios: Partial<{
     nombre: string;
-    apellido: string; 
+    apellido: string;
     telefono: string;
-    avatar_url: string 
+    avatar_url: string
   }>) {
     const { error } = await this._supabaseClient
       .from('usuarios')
@@ -42,6 +42,19 @@ export class PerfilService {
     }
 
     return { error: null };
+  }
+
+  async actualizarNotificaciones(uid: string, cambios: {
+    recibe_notificaciones: boolean;
+    alertas_cada_minutos: number;
+    cooldown_post_resolucion: number;
+  }) {
+    const { error } = await this._supabaseClient
+      .from('usuarios')
+      .update(cambios)
+      .eq('supabase_uid', uid);
+
+    return { error };
   }
 }
 
