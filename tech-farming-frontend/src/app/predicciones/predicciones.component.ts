@@ -29,10 +29,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
     CommonModule,
     FormsModule,
     HttpClientModule,
-<<<<<<< 0af2qk-codex/mejorar-diseño-del-header-de-predicciones
     PrediccionesHeaderComponent,
-=======
->>>>>>> predicciones-ui
     FiltroSelectComponent,
     PredictionChartComponent,
     SummaryCardComponent,
@@ -41,27 +38,11 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
   template: `
     <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
-<<<<<<< 0af2qk-codex/mejorar-diseño-del-header-de-predicciones
       <app-predicciones-header
         (reload)="reload()"
         [disabled]="!selectedInvernadero"
       ></app-predicciones-header>
-=======
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 my-5 mx-6">
-        <h1 class="text-4xl font-bold text-success tracking-tight">Predicciones</h1>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <button
-            class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content flex items-center gap-2"
-            (click)="reload()"
-            [disabled]="!selectedInvernadero"
-            aria-label="Actualizar predicciones"
-          >
-            <i class="fas fa-sync-alt"></i>
-            <span>Actualizar</span>
-          </button>
-        </div>
-      </div>
->>>>>>> predicciones-ui
+
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
         <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
