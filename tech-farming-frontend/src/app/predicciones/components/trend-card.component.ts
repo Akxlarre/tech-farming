@@ -20,7 +20,7 @@ export interface Trend {
   imports: [CommonModule, TrendGaugeComponent],
   template: `
     <div
-      class="card w-48 bg-base-100 shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow focus:ring-2 focus:ring-primary"
+      class="card w-full sm:w-48 bg-base-100 shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow focus:ring-2 focus:ring-primary"
     >
       <app-trend-gauge [pct]="pct" [size]="40"></app-trend-gauge>
       <h4 class="text-lg font-medium">Tendencia</h4>
