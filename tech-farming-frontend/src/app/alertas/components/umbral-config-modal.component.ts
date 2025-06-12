@@ -20,7 +20,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     <!-- Modal de Confirmación -->
     <div *ngIf="confirmacionVisible"
          class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-2 border border-base-300">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[90vw] max-w-xs sm:max-w-sm space-y-2 border border-base-300">
         <h3 class="text-xl font-semibold text-success">
           ✅ ¡Éxito!
         </h3>
@@ -28,10 +28,19 @@ import { Sensor } from '../../sensores/models/sensor.model';
       </div>
     </div>
 
+    <!-- Modal de Error -->
+    <div *ngIf="errorVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[90vw] max-w-xs sm:max-w-sm space-y-2 border border-base-300">
+        <h3 class="text-xl font-semibold text-error">❌ Error</h3>
+        <p>{{ mensajeError }}</p>
+        <button class="btn btn-sm btn-outline mt-3" (click)="errorVisible = false">Cerrar</button>
+      </div>
+    </div>
+
     <!-- Modal de Ayuda -->
     <div *ngIf="ayudaVisible"
         class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div class="bg-base-100 w-[600px] max-h-[50vh] p-6 rounded-2xl shadow-xl relative overflow-y-auto pr-2 border border-base-300">
+      <div class="bg-base-100 w-[95vw] sm:max-w-lg max-h-[65vh] p-6 rounded-2xl shadow-xl relative overflow-y-auto pr-2 border border-base-300">
 
         <div class="space-y-4">
           <h3 class="text-xl font-bold text-success">¿Cómo deben relacionarse los valores de advertencia y crítico?</h3>
@@ -84,7 +93,7 @@ import { Sensor } from '../../sensores/models/sensor.model';
     </div>
 
     <!-- Modal Principal -->
-    <div class="w-full max-w-3xl p-6 bg-base-100 rounded-2xl shadow-xl space-y-6 border border-base-300">
+    <div class="w-full max-w-[95vw] sm:max-w-3xl p-4 sm:p-6 bg-base-100 rounded-2xl shadow-xl space-y-6 border border-base-300">
       <h2 class="text-[1.625rem] font-bold text-success flex items-center gap-2">
         {{ isEdit ? 'Editar Umbral' : 'Crear Umbral' }}
          <button type="button"
@@ -232,6 +241,8 @@ export class UmbralConfigModalComponent implements OnInit, OnDestroy {
   ayudaVisible = false;
   confirmacionVisible = false;
   mensajeConfirmacion = '';
+  errorVisible = false;
+  mensajeError = '';
 
   private formSub?: Subscription;
   private ambitoSub?: Subscription;
@@ -494,8 +505,10 @@ export class UmbralConfigModalComponent implements OnInit, OnDestroy {
           this.modal.closeWithAnimation();
         }, 2500);
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
+        this.mensajeError = err?.error?.error || 'No se pudo crear el umbral.';
+        this.errorVisible = true;
       }
     });
   }

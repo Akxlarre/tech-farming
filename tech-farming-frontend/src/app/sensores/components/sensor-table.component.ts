@@ -113,7 +113,7 @@ import { SensorModalType } from '../sensor-modal.service';
         <ng-template #loadingRows>
           <tr *ngFor="let _ of skeletonArray" class="hover">
             <td colspan="9">
-              <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+              <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
             </td>
           </tr>
         </ng-template>

@@ -21,7 +21,7 @@ import { AdminModalService } from '../admin-modal.service';
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         #modalContent
-        class="bg-base-100 rounded-lg shadow-2xl overflow-hidden transition-all w-full max-w-xl"
+        class="bg-base-100 rounded-lg shadow-2xl overflow-hidden transition-all w-full max-w-[95vw] sm:max-w-xl"
         [ngClass]="{ 'animate-fadeInZoom': !closing, 'animate-fadeOutZoom': closing }"
       >
         <ng-content></ng-content>

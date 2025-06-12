@@ -27,7 +27,7 @@ import { SensorModalType } from '../sensor-modal.service';
           </span>
         </ng-container>
         <ng-template #loadingEstado>
-          <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+          <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-40"></div>
         </ng-template>
       </div>
 
@@ -44,7 +44,7 @@ import { SensorModalType } from '../sensor-modal.service';
             <ng-template #noData><strong>Última:</strong> — sin datos —</ng-template>
           </ng-container>
           <ng-template #loadingLectura>
-            <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-60"></div>
+          <div class="skeleton h-4 w-24 rounded bg-base-300 animate-pulse opacity-40"></div>
           </ng-template>
         </li>
       </ul>
@@ -63,7 +63,7 @@ import { SensorModalType } from '../sensor-modal.service';
 
       <ng-template #loadingValores>
         <div class="space-y-1 mb-4">
-          <div class="skeleton h-4 w-32 rounded bg-base-300 animate-pulse opacity-60"></div>
+          <div class="skeleton h-4 w-32 rounded bg-base-300 animate-pulse opacity-40"></div>
         </div>
       </ng-template>
 

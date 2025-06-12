@@ -1,7 +1,6 @@
 // src/app/invernaderos/components/invernadero-card-list.component.ts
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { InvernaderoModalService } from '../invernadero-modal.service';
 import { Invernadero } from '../models/invernadero.model';
 
 @Component({
@@ -38,7 +37,7 @@ import { Invernadero } from '../models/invernadero.model';
           <div class="flex justify-end space-x-2">
             <button
               class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-success hover:bg-success/10 transition-colors duration-200"
-              (click)="view(inv)"
+              (click)="viewInvernadero.emit(inv)"
               aria-label="Ver invernadero"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,7 +47,7 @@ import { Invernadero } from '../models/invernadero.model';
             </button>
             <button
               class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-success hover:bg-success/10 transition-colors duration-200"
-              (click)="edit(inv)"
+              (click)="editInvernadero.emit(inv)"
               aria-label="Editar invernadero"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -57,7 +56,7 @@ import { Invernadero } from '../models/invernadero.model';
             </button>
             <button
               class="btn btn-sm btn-ghost btn-circle border border-transparent hover:border-error hover:bg-error/10 transition-colors duration-200"
-              (click)="delete(inv)"
+              (click)="deleteInvernadero.emit(inv)"
               aria-label="Eliminar invernadero"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -104,6 +103,9 @@ export class InvernaderoCardListComponent implements OnChanges {
   @Input() invernaderos: Invernadero[] = [];
   @Input() loading = false;
   @Input() rowCount = 3;
+  @Output() viewInvernadero   = new EventEmitter<Invernadero>();
+  @Output() editInvernadero   = new EventEmitter<Invernadero>();
+  @Output() deleteInvernadero = new EventEmitter<Invernadero>();
 
   page = 1;
   pageSize = 10;
@@ -111,7 +113,6 @@ export class InvernaderoCardListComponent implements OnChanges {
   pages: number[] = [];
 
   constructor(
-    private modal: InvernaderoModalService,
     private viewport: ViewportScroller
   ) {}
 
@@ -141,13 +142,13 @@ export class InvernaderoCardListComponent implements OnChanges {
   }
 
   view(inv: Invernadero) {
-    this.modal.openModal('view', inv);
+    this.viewInvernadero.emit(inv);
   }
   edit(inv: Invernadero) {
-    this.modal.openModal('edit', inv);
+    this.editInvernadero.emit(inv);
   }
   delete(inv: Invernadero) {
-    this.modal.openModal('delete', inv);
+    this.deleteInvernadero.emit(inv);
   }
 
   get skeletonArray() {

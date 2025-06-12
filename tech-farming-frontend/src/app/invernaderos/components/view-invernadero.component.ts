@@ -78,11 +78,9 @@ import { AlertService } from '../../alertas/alertas.service';
       <div *ngIf="!isLoading; else loadingTpl">
       <section
         #snapContainer
-        class="w-full max-w-[70vw] max-h-[70vh] snap-container bg-base-100 text-base-content relative"
+        class="w-full h-auto overflow-y-auto snap-container lg:max-h-[80vh] lg:max-w-[70vw] lg:rounded-2xl lg:shadow-lg overflow-y-auto sm:overflow-y-hidden"
         role="region"
         aria-labelledby="titulo-invernadero"
-        (wheel)="$event.preventDefault()"
-        (touchmove)="$event.preventDefault()"
       >
         <!-- BOTÓN CERRAR -->
         <button
@@ -105,16 +103,13 @@ import { AlertService } from '../../alertas/alertas.service';
         <!-- ============== SECCIÓN 1: GENERAL ============== -->
         <section
           id="seccion-general"
-          class="snap-section h-full flex flex-col justify-start items-center px-4 lg:px-20"
+          class="snap-section w-full max-w-4xl space-y-6 justify-center items-center px-4 lg:px-20 py-12"
         >
-          <div class="max-w-4xl w-full bg-base-100 rounded-2xl p-8 space-y-6">
-            <h2
-              id="titulo-invernadero"
-              class="text-3xl font-extrabold text-success text-center"
-            >
+          <div class="max-w-4xl w-full bg-base-100 rounded-2xl p-8 space-y-5 sm:space-y-3">
+            <h2 id="titulo-invernadero" class="text-3xl font-extrabold text-success text-center">
               {{ invernaderoDetalle?.nombre || 'Invernadero' }}
             </h2>
-            <p class="text-center text-base-content/80">
+            <p class="text-center text-base-content/80 hidden sm:block">
               {{ invernaderoDetalle?.descripcion || 'Sin descripción' }}
               <span *ngIf="invernaderoDetalle?.creado_en">
                 • Creado en
@@ -123,96 +118,86 @@ import { AlertService } from '../../alertas/alertas.service';
               </span>
             </p>
   
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+            <div class="flex flex-col sm:grid sm:grid-cols-3 gap-4 mt-6 sm:flex-none sm:gap-4 justify-center items-center">
               <!-- CARD 1: Zonas -->
-              <div class="card bg-base-200 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center min-h-[120px]">
-                <!-- Ícono “Pin” -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 text-info"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z"
-                    clip-rule="evenodd"
-                  />
+              <div class="hidden sm:flex card bg-base-200 rounded-xl shadow p-4 flex-col items-center justify-center min-h-[110px] max-w-[12rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-info" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" clip-rule="evenodd" />
                 </svg>
-                <span class="mt-2 text-xl font-semibold">
-                  {{ resumenDelete?.zonasCount }}
-                  Zona{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
+                <span class="mt-1 text-lg font-semibold">
+                  {{ resumenDelete?.zonasCount }} Zona{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
                 </span>
-                <span class="text-sm text-base-content/60">
+                <span class="text-xs text-base-content/60">
                   Activa{{ resumenDelete?.zonasCount === 1 ? '' : 's' }}
                 </span>
               </div>
-  
               <!-- CARD 2: Sensores -->
-              <div class="card bg-base-200 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center min-h-[120px]">
-                <!-- Ícono “Termómetro” -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 text-accent"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z"
-                    clip-rule="evenodd"
-                  />
+              <div class="hidden sm:flex card bg-base-200 rounded-xl shadow p-4 flex-col items-center justify-center min-h-[110px] max-w-[12rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z" clip-rule="evenodd" />
                 </svg>
-                <span class="mt-2 text-xl font-semibold">
-                  {{ resumenDelete?.sensoresCount }}
-                  Sensor{{ resumenDelete?.sensoresCount === 1 ? '' : 'es' }}
+                <span class="mt-1 text-lg font-semibold">
+                  {{ resumenDelete?.sensoresCount }} Sensor{{ resumenDelete?.sensoresCount === 1 ? '' : 'es' }}
                 </span>
-                <span class="text-sm text-base-content/60">
+                <span class="text-xs text-base-content/60">
                   Registrado{{ resumenDelete?.sensoresCount === 1 ? '' : 's' }}
                 </span>
               </div>
-  
               <!-- CARD 3: Alertas -->
-              <div class="card bg-base-200 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center min-h-[120px]">
-                <!-- Ícono “Campana” -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-7 h-7 text-error"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z"
-                  />
+              <div class="hidden sm:flex card bg-base-200 rounded-xl shadow p-4 flex-col items-center justify-center min-h-[110px] max-w-[12rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-error" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z" />
                 </svg>
-                <span class="mt-2 text-xl font-semibold">
-                  {{ resumenDelete?.alertasActivasCount || 0 }}
-                  Alerta{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
+                <span class="mt-1 text-lg font-semibold">
+                  {{ resumenDelete?.alertasActivasCount || 0 }} Alerta{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
                 </span>
-                <span class="text-sm text-base-content/60">
+                <span class="text-xs text-base-content/60">
                   Activa{{ (resumenDelete?.alertasActivasCount || 0) === 1 ? '' : 's' }}
                 </span>
               </div>
+
+              <!-- Lista alternativa para móviles -->
+              <ul class="sm:hidden space-y-2 w-full">
+                <li class="flex items-center gap-3 bg-base-200 p-3 rounded-lg shadow">
+                  <svg class="w-5 h-5 text-info" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" clip-rule="evenodd" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">{{ resumenDelete?.zonasCount }} Zonas</p>
+                    <p class="text-xs text-base-content/60">Activas</p>
+                  </div>
+                </li>
+                <li class="flex items-center gap-3 bg-base-200 p-3 rounded-lg shadow">
+                  <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z" clip-rule="evenodd" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">{{ resumenDelete?.sensoresCount }} Sensores</p>
+                    <p class="text-xs text-base-content/60">Registrados</p>
+                  </div>
+                </li>
+                <li class="flex items-center gap-3 bg-base-200 p-3 rounded-lg shadow">
+                  <svg class="w-5 h-5 text-error" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">{{ resumenDelete?.alertasActivasCount || 0 }} Alertas</p>
+                    <p class="text-xs text-base-content/60">Activas</p>
+                  </div>
+                </li>
+              </ul>
             </div>
+
   
-            <div class="bg-base-100 p-6 rounded-lg shadow-md mt-8">
+            <div class="bg-base-200 rounded-lg p-4 mb-6 w-full">
               <h3 class="text-2xl font-bold mb-4">Detalles del Invernadero</h3>
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+              <!-- Vista Escritorio -->
+              <div class="hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <ul class="space-y-2">
-                  <li>
-                    <span class="font-semibold">ID:</span> {{ invernaderoDetalle?.id ?? '—' }}
-                  </li>
-                  <li>
-                    <span class="font-semibold">Nombre:</span>
-                    {{ invernaderoDetalle?.nombre || '—' }}
-                  </li>
-                  <li>
-                    <span class="font-semibold">Descripción:</span>
-                    {{ invernaderoDetalle?.descripcion || '—' }}
-                  </li>
+                  <li><span class="font-semibold">ID:</span> {{ invernaderoDetalle?.id ?? '—' }}</li>
+                  <li><span class="font-semibold">Nombre:</span> {{ invernaderoDetalle?.nombre || '—' }}</li>
+                  <li><span class="font-semibold">Descripción:</span> {{ invernaderoDetalle?.descripcion || '—' }}</li>
                 </ul>
                 <ul class="space-y-2">
                   <li *ngIf="invernaderoDetalle?.creado_en">
@@ -220,15 +205,30 @@ import { AlertService } from '../../alertas/alertas.service';
                     {{ invernaderoDetalle?.creado_en | date:'mediumDate':'':'es' }},
                     {{ invernaderoDetalle?.creado_en | date:'shortTime':'':'es' }}
                   </li>
-                  <li>
-                    <span class="font-semibold">Zonas activas:</span>
-                    {{ getZonasActivasCount() }}
-                  </li>
-                  <li>
-                    <span class="font-semibold">Sensores activos:</span>
-                    {{ getSensoresActivosCount() }}
-                  </li>
+                  <li><span class="font-semibold">Zonas activas:</span> {{ getZonasActivasCount() }}</li>
+                  <li><span class="font-semibold">Sensores activos:</span> {{ getSensoresActivosCount() }}</li>
                 </ul>
+              </div>
+
+              <!-- Vista Mobile -->
+              <div class="sm:hidden grid grid-cols-1 gap-2">
+                <div class="text-sm">
+                  <span class="font-semibold">ID:</span> {{ invernaderoDetalle?.id ?? '—' }}
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Nombre:</span> {{ invernaderoDetalle?.nombre || '—' }}
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Zonas activas:</span> {{ getZonasActivasCount() }}
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Sensores activos:</span> {{ getSensoresActivosCount() }}
+                </div>
+                <div class="text-sm" *ngIf="invernaderoDetalle?.creado_en">
+                  <span class="font-semibold">Creado en:</span>
+                  {{ invernaderoDetalle?.creado_en | date:'mediumDate':'':'es' }},
+                  {{ invernaderoDetalle?.creado_en | date:'shortTime':'':'es' }}
+                </div>
               </div>
             </div>
   
@@ -261,7 +261,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Tabla Desktop -->
               <table
                 *ngIf="!isLoadingZonas && zonasList.length; else tableZonasSkeleton"
-                class="table w-full hidden sm:table"
+                class="table table-xs w-full hidden sm:table"
               >
                 <thead class="bg-base-200">
                   <tr>
@@ -301,11 +301,11 @@ import { AlertService } from '../../alertas/alertas.service';
               </table>
 
               <ng-template #tableZonasSkeleton>
-                <table class="table w-full hidden sm:table">
+              <table class="table table-xs w-full hidden sm:table">
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
-                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                        <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
                       </td>
                     </tr>
                   </tbody>
@@ -323,13 +323,13 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Lista Mobile -->
               <ul
                 *ngIf="!isLoadingZonas && zonasList.length; else listZonasSkeleton"
-                class="sm:hidden flex flex-col divide-y divide-base-200"
+                class="sm:hidden flex flex-col divide-y divide-base-300"
                 role="list"
               >
                 <li *ngFor="let z of zonasList; trackBy: trackByZona" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium">{{ z.nombre }}</p>
+                      <p class="font-medium text-xs">{{ z.nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ z.creado_en | date:'short':'':'es' }}
                       </p>
@@ -365,7 +365,7 @@ import { AlertService } from '../../alertas/alertas.service';
                   </div>
                   <div
                     *ngIf="zonaExpandida === z.id"
-                    class="mt-2 bg-base-100 p-3 rounded-lg transition-max-height duration-200 ease-in-out"
+                    class="mt-2 bg-base-100 p-3 rounded-lg transition-max-height duration-200 ease-in-out max-h-[30vh] overflow-y-auto"
                   >
                     <p role="document"><strong>Descripción:</strong> {{ z.descripcion || '—' }}</p>
                     <p role="document"><strong>Sensores:</strong> {{ z.sensoresCount }}</p>
@@ -374,11 +374,11 @@ import { AlertService } from '../../alertas/alertas.service';
               </ul>
 
               <ng-template #listZonasSkeleton>
-                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                <ul class="sm:hidden flex flex-col divide-y divide-base-300" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
-                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
-                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-40"></div>
                     </div>
                   </li>
                 </ul>
@@ -453,7 +453,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Tabla Desktop -->
               <table
                 *ngIf="!isLoadingSensores && sensoresPage.data.length; else tableSkeleton"
-                class="table w-full hidden sm:table"
+                class="table table-xs w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
                   <tr>
@@ -487,11 +487,11 @@ import { AlertService } from '../../alertas/alertas.service';
               </table>
 
               <ng-template #tableSkeleton>
-                <table class="table w-full hidden sm:table">
+                <table class="table table-xs w-full hidden sm:table">
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
-                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                        <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
                       </td>
                     </tr>
                   </tbody>
@@ -509,13 +509,13 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Lista Mobile -->
               <ul
                 *ngIf="!isLoadingSensores && sensoresPage.data.length; else listSkeleton"
-                class="sm:hidden flex flex-col divide-y divide-base-200"
+                class="sm:hidden flex flex-col divide-y divide-base-300"
                 role="list"
               >
                 <li *ngFor="let s of sensoresPage.data; trackBy: trackBySensor" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium">{{ s.nombre }}</p>
+                      <p class="font-medium text-xs truncate max-w-[90%]">{{ s.nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ s.zona?.nombre || '—' }}
                       </p>
@@ -540,11 +540,11 @@ import { AlertService } from '../../alertas/alertas.service';
               </ul>
 
               <ng-template #listSkeleton>
-                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                <ul class="sm:hidden flex flex-col divide-y divide-base-300" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
-                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
-                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-40"></div>
                     </div>
                   </li>
                 </ul>
@@ -566,7 +566,7 @@ import { AlertService } from '../../alertas/alertas.service';
             >
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="sensoresPageIndex === 1 || isLoadingSensores"
                 (click)="cambiarPagina('sensores', -1)"
                 [attr.aria-label]="'Página anterior de sensores'"
@@ -581,12 +581,12 @@ import { AlertService } from '../../alertas/alertas.service';
                   />
                 </svg>
               </button>
-              <span class="px-2" aria-live="polite">
+              <span class="px-2 text-sm" aria-live="polite">
                 Página {{ sensoresPageIndex }} de {{ totalPagSensores }}
               </span>
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="sensoresPageIndex === totalPagSensores || isLoadingSensores"
                 (click)="cambiarPagina('sensores', +1)"
                 [attr.aria-label]="'Página siguiente de sensores'"
@@ -627,7 +627,7 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Tabla Desktop -->
               <table
                 *ngIf="!isLoadingAlertas && alertasPage.data.length; else tableAlertasSkeleton"
-                class="table w-full hidden sm:table"
+                class="table table-xs w-full hidden sm:table"
               >
                 <thead class="bg-base-200 sticky top-0">
                   <tr>
@@ -672,11 +672,11 @@ import { AlertService } from '../../alertas/alertas.service';
               </table>
 
               <ng-template #tableAlertasSkeleton>
-                <table class="table w-full hidden sm:table">
+                <table class="table table-xs w-full hidden sm:table">
                   <tbody>
                     <tr *ngFor="let _ of skeletonArray" class="hover">
                       <td colspan="5">
-                        <div class="skeleton h-6 w-full rounded bg-base-300 animate-pulse opacity-60"></div>
+                        <div class="skeleton h-4 w-full rounded bg-base-300 animate-pulse opacity-40"></div>
                       </td>
                     </tr>
                   </tbody>
@@ -694,13 +694,13 @@ import { AlertService } from '../../alertas/alertas.service';
               <!-- Lista Mobile -->
               <ul
                 *ngIf="!isLoadingAlertas && alertasPage.data.length; else listAlertasSkeleton"
-                class="sm:hidden flex flex-col divide-y divide-base-200"
+                class="sm:hidden flex flex-col divide-y divide-base-300"
                 role="list"
               >
                 <li *ngFor="let a of alertasPage.data; trackBy: trackByAlerta" class="py-4" role="listitem">
                   <div class="flex justify-between items-center">
                     <div>
-                      <p class="font-medium">{{ a.sensor_nombre }}</p>
+                      <p class="font-medium text-xs truncate max-w-[90%]">{{ a.sensor_nombre }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ a.fecha_hora | date:'short':'':'es' }}
                       </p>
@@ -732,11 +732,11 @@ import { AlertService } from '../../alertas/alertas.service';
               </ul>
 
               <ng-template #listAlertasSkeleton>
-                <ul class="sm:hidden flex flex-col divide-y divide-base-200" role="list">
+                <ul class="sm:hidden flex flex-col divide-y divide-base-300" role="list">
                   <li *ngFor="let _ of skeletonArray" class="py-4" role="listitem">
                     <div class="space-y-2">
-                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-60"></div>
-                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-60"></div>
+                      <div class="skeleton h-4 w-3/4 rounded bg-base-300 animate-pulse opacity-40"></div>
+                      <div class="skeleton h-4 w-1/2 rounded bg-base-300 animate-pulse opacity-40"></div>
                     </div>
                   </li>
                 </ul>
@@ -758,7 +758,7 @@ import { AlertService } from '../../alertas/alertas.service';
             >
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="alertasPageIndex === 1 || isLoadingAlertas"
                 (click)="cambiarPagina('alertas', -1)"
                 [attr.aria-label]="'Página anterior de alertas'"
@@ -773,12 +773,12 @@ import { AlertService } from '../../alertas/alertas.service';
                   />
                 </svg>
               </button>
-              <span class="px-2" aria-live="polite">
+              <span class="px-2 text-sm" aria-live="polite">
                 Página {{ alertasPageIndex }} de {{ totalPagAlertas }}
               </span>
               <button
                 type="button"
-                class="btn btn-sm btn-outline"
+                class="btn btn-xs btn-outline"
                 [disabled]="alertasPageIndex === totalPagAlertas || isLoadingAlertas"
                 (click)="cambiarPagina('alertas', +1)"
                 [attr.aria-label]="'Página siguiente de alertas'"
@@ -797,77 +797,6 @@ import { AlertService } from '../../alertas/alertas.service';
           </div>
         </div>
       </section>
-  
-      <!-- ======= BOTÓN FLOTANTE (FAB) “Acciones Rápidas” ======= -->
-      <button
-        type="button"
-        class="fab btn btn-primary btn-circle shadow-lg"
-        (click)="toggleBottomSheet()"
-        [attr.aria-label]="'Acciones rápidas'"
-        [attr.title]="'Acciones rápidas'"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M3 5a1 1 0 100 2h14a1 1 0 100-2H3zm0 4a1 1 0 100 2h14a1 1 0 100-2H3zm0 4a1 1 0 100 2h14a1 1 0 100-2H3z" />
-        </svg>
-      </button>
-  
-      <!-- ======= BOTTOM SHEET ======= -->
-      <div
-        *ngIf="isBottomSheetOpen"
-        class="bottom-sheet-backdrop"
-        (click)="toggleBottomSheet()"
-      >
-        <div class="bottom-sheet bottom-sheet-open" (click)="$event.stopPropagation()">
-          <!-- Handle visual -->
-          <div class="w-12 h-1 bg-base-content/30 rounded-full mx-auto mb-4"></div>
-          <h4 class="text-lg font-semibold mb-4">Acciones Rápidas</h4>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-2"
-            (click)="recargarZonas(); toggleBottomSheet()"
-            [attr.aria-label]="'Recargar Zonas'"
-            [attr.title]="'Recargar Zonas'"
-          >
-            ↻ Recargar Zonas
-          </button>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-2"
-            (click)="recargarSensores(); toggleBottomSheet()"
-            [attr.aria-label]="'Recargar Sensores'"
-            [attr.title]="'Recargar Sensores'"
-          >
-            ↻ Recargar Sensores
-          </button>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-2"
-            (click)="recargarAlertas(); toggleBottomSheet()"
-            [attr.aria-label]="'Recargar Alertas'"
-            [attr.title]="'Recargar Alertas'"
-          >
-            ↻ Recargar Alertas
-          </button>
-          <button
-            type="button"
-            class="btn btn-ghost w-full justify-start mb-4"
-            (click)="resolverTodasAlertas(); toggleBottomSheet()"
-            [attr.aria-label]="'Marcar todas alertas resueltas'"
-            [attr.title]="'Marcar todas alertas resueltas'"
-          >
-            ✓ Marcar todas alertas resueltas
-          </button>
-          <button
-            type="button"
-            class="btn btn-outline btn-sm w-full"
-            (click)="toggleBottomSheet()"
-            [attr.aria-label]="'Cerrar acciones rápidas'"
-            [attr.title]="'Cerrar acciones rápidas'"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
   
       <!-- ======= NAVEGACIÓN LATERAL (desktop) ======= -->
       <nav class="side-nav" aria-label="Navegación de secciones" role="navigation">
@@ -1003,6 +932,139 @@ import { AlertService } from '../../alertas/alertas.service';
             </svg>
         </button>
         </nav>
+
+        <!-- ======= BOTTOM NAV (mobile) ======= -->
+        <div class="fixed bottom-4 inset-x-0 z-40 lg:hidden">
+          <nav class="mx-auto w-11/12 max-w-md bg-base-200 rounded-full shadow-lg p-2 flex justify-around">
+            <!-- GENERAL -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-general'); activeSnap = 'seccion-general'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-general',
+                'bg-base-content/20': activeSnap !== 'seccion-general'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección General'"
+              [attr.aria-current]="activeSnap === 'seccion-general' ? 'page' : null"
+              title="General"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-general'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10 2a1 1 0 00-.707.293l-8 8A1 1 0 002 12h2v6a1 1 0 001 1h4a1 1 0 001-1v-4h2v4a1 1 0 001 1h4a1 1 0 001-1v-6h2a1 1 0 00.707-1.707l-8-8A1 1 0 0010 2z"
+                />
+              </svg>
+            </button>
+
+            <!-- ZONAS -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-zonas'); activeSnap = 'seccion-zonas'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-zonas',
+                'bg-base-content/20': activeSnap !== 'seccion-zonas'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección Zonas'"
+              [attr.aria-current]="activeSnap === 'seccion-zonas' ? 'page' : null"
+              title="Zonas"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-zonas'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <!-- SENSORES -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-sensores'); activeSnap = 'seccion-sensores'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-sensores',
+                'bg-base-content/20': activeSnap !== 'seccion-sensores'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección Sensores'"
+              [attr.aria-current]="activeSnap === 'seccion-sensores' ? 'page' : null"
+              title="Sensores"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-sensores'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M6 2a4 4 0 118 0v6.278A4.002 4.002 0 0110 14a4 4 0 01-4-4.722V2zm2 0v6a2 2 0 104 0V2a2 2 0 10-4 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <!-- ALERTAS -->
+            <button
+              type="button"
+              (click)="scrollToSection('seccion-alertas'); activeSnap = 'seccion-alertas'"
+              [ngClass]="{
+                'bg-success': activeSnap === 'seccion-alertas',
+                'bg-base-content/20': activeSnap !== 'seccion-alertas'
+              }"
+              class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-success"
+              [attr.aria-label]="'Ir a sección Alertas'"
+              [attr.aria-current]="activeSnap === 'seccion-alertas' ? 'page' : null"
+              title="Alertas"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                [ngStyle]="{
+                  color: activeSnap === 'seccion-alertas'
+                    ? 'white'
+                    : (isDarkMode() ? 'white' : 'black')
+                }"
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 004 15h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm-2 14a2 2 0 104 0H8z"
+                />
+              </svg>
+            </button>
+          </nav>
+        </div>
       </div>
       <ng-template #loadingTpl>
         <div class="p-8 text-center">
@@ -1018,8 +1080,6 @@ import { AlertService } from '../../alertas/alertas.service';
         /* ================= scroll-snap container y secciones ================= */
         .snap-container {
           scroll-snap-type: y mandatory;
-          height: 100vh;
-          overflow-y: hidden;      /* Deshabilitar scroll manual */
           scrollbar-width: none;
         }
         .snap-container::-webkit-scrollbar {
