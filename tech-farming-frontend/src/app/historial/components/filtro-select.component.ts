@@ -40,12 +40,12 @@ import {
     /** Texto que aparece encima */
     @Input() label!: string;
     /** Opciones a mostrar */
-    @Input() options: Array<{ id: number; label: string }> = [];
+    @Input() options: Array<{ id: string|number; label: string }> = [];
     /** Id actualmente seleccionado */
-    @Input() selectedId?: number;
+    @Input() selectedId?: string|number;
     /** Emite el nuevo id (número) o undefined al cambiar */
     @Input() allowUndefined = true;            // ← por defecto true
-    @Output() selectionChange = new EventEmitter<number|undefined>();
+    @Output() selectionChange = new EventEmitter<string|number|undefined>();
   
     ngOnChanges(changes: SimpleChanges) {
       if (changes['options'] && this.selectedId != null) {
@@ -57,7 +57,7 @@ import {
       }
     }
   
-    onSelect(value: number|undefined) {
+    onSelect(value: string|number|undefined) {
       this.selectionChange.emit(value);
     }
   }

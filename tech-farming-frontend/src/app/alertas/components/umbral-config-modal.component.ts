@@ -204,6 +204,14 @@ import { Sensor } from '../../sensores/models/sensor.model';
           </div>
         </div>
 
+        <!-- Switch de estado ACTIVO / INACTIVO -->
+        <div *ngIf="isEdit" class="form-control w-fit">
+          <label class="cursor-pointer label flex gap-2">
+            <span class="label-text">Activo</span>
+            <input type="checkbox" class="toggle toggle-success" formControlName="activo" />
+          </label>
+        </div>
+
         <!-- Acciones -->
         <div class="flex justify-end gap-4 pt-4 border-t border-base-content/20">
           <button type="button" class="btn btn-outline btn-neutral" (click)="cancel()">

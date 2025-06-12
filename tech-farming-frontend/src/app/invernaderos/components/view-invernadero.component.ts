@@ -1,5 +1,3 @@
-// src/app/invernaderos/components/view-invernadero.component.ts
-
 import {
     Component,
     Input,

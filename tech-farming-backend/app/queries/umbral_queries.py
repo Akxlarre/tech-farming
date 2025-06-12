@@ -22,7 +22,6 @@ def listar_umbrales(filtros):
             .joinedload(Sensor.zona)
             .joinedload(Zona.invernadero)
     )
-    query = query.filter(ConfiguracionUmbral.activo.is_(True))
 
     ambito = filtros.get("ambito")
     tipo_parametro_id = filtros.get("tipo_parametro_id")
@@ -176,6 +175,7 @@ def actualizar_umbral(umbral_id, data):
         umbral.advertencia_max = data.get("advertencia_max", umbral.advertencia_max)
         umbral.critico_min = data.get("critico_min", umbral.critico_min)
         umbral.critico_max = data.get("critico_max", umbral.critico_max)
+        umbral.activo = data.get("activo", umbral.activo)
 
         db.session.commit()
 
@@ -190,8 +190,10 @@ def eliminar_umbral(umbral_id):
         umbral = ConfiguracionUmbral.query.get(umbral_id)
         if not umbral:
             return {"error": "Umbral no encontrado"}
+        if umbral.activo:
+            return {"error": "Solo se pueden eliminar umbrales que estén inactivos"}
 
-        umbral.activo = False
+        db.session.delete(umbral)
         db.session.commit()
 
         return {"mensaje": "Umbral desactivado correctamente"}

@@ -14,10 +14,35 @@ import { FormsModule } from '@angular/forms';
     <div *ngIf="confirmDeleteVisible" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div class="bg-base-100 p-6 rounded-xl shadow-xl text-center w-[300px] space-y-3 border border-base-300">
         <h3 class="text-lg font-semibold text-error">¿Eliminar Umbral?</h3>
-        <p class="text-sm text-base-content/80">Esta acción desactivará el umbral de forma permanente.</p>
+
+        <ng-container *ngIf="umbralAEliminar?.activo; else confirmarTexto">
+          <p class="text-sm text-base-content/80">
+            Para eliminar este umbral, debe estar en estado <strong>Inactivo</strong>.
+          </p>
+        </ng-container>
+
+        <ng-template #confirmarTexto>
+          <p class="text-sm text-base-content/80">Esta acción eliminará el umbral de forma permanente.</p>
+          <p class="text-sm mt-2">Escribe <strong>Eliminar</strong> para confirmar:</p>
+          <input
+            type="text"
+            class="input input-bordered w-full"
+            [(ngModel)]="textoConfirmacion"
+            placeholder="Escribe aquí para confirmar"
+          />
+        </ng-template>
+
         <div class="flex justify-center gap-4 pt-2">
           <button class="btn btn-outline btn-neutral" (click)="cancelarEliminar()">Cancelar</button>
-          <button class="btn btn-error" (click)="confirmarEliminar()">Eliminar</button>
+
+          <button
+            *ngIf="!umbralAEliminar?.activo"
+            class="btn btn-error"
+            [disabled]="textoConfirmacion !== 'Eliminar'"
+            (click)="confirmarEliminar()"
+          >
+            Eliminar
+          </button>
         </div>
       </div>
     </div>
@@ -235,6 +260,7 @@ export class UmbralListComponent implements OnInit {
   totalPages = 1;
   totalUmbrales = 0;
 
+  textoConfirmacion = '';
   confirmDeleteVisible = false;
   umbralAEliminar: Umbral | null = null;
   deleteExitosoVisible = false;
@@ -331,6 +357,7 @@ export class UmbralListComponent implements OnInit {
 
   eliminar(u: Umbral) {
     this.umbralAEliminar = u;
+    this.textoConfirmacion = ''; 
     this.confirmDeleteVisible = true;
   }
 
@@ -353,5 +380,6 @@ export class UmbralListComponent implements OnInit {
   cancelarEliminar() {
     this.confirmDeleteVisible = false;
     this.umbralAEliminar = null;
+    this.textoConfirmacion = '';
   }
 }

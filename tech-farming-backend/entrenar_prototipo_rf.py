@@ -3,9 +3,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
 import joblib
+import os
 
+base_dir = os.path.dirname(__file__)
+csv_path = os.path.join(base_dir, 'IoT_subconjunto.csv')
 # 1. Preprocesamiento (igual que lo tenías): lectura, lags, deltas, dropna, split 70/30
-df = pd.read_csv('IoT_subconjunto.csv', parse_dates=['date'])
+df = pd.read_csv(csv_path, parse_dates=['date'])
 df = df.sort_values('date')
 
 # (a) Generar lags de temp, hum, N/P/K y deltas, hour, weekday…

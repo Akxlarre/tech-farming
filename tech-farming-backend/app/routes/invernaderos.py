@@ -310,6 +310,11 @@ def actualizar_invernadero_completo(inv_id):
                     continue
                 zona_a_borrar = Zona.query.filter_by(id=zid, invernadero_id=inv_id).first()
                 if zona_a_borrar:
+                    if zona_a_borrar.activo:
+                        db.session.rollback()
+                        return jsonify({
+                            "error": f"No se puede eliminar la zona '{zona_a_borrar.nombre}' porque aún está activa. Debe marcarla como inactiva antes de eliminarla."
+                        }), 400
                     db.session.delete(zona_a_borrar)
                     # gracias a cascade="all, delete-orphan", se borran sensores y alertas asociadas
         # 5) Confirmar cambios
@@ -366,7 +371,16 @@ def eliminar_invernadero(inv_id):
     DELETE /api/invernaderos/{inv_id}
     Elimina el invernadero y, en cascada, sus zonas (y sensores y alertas).
     """
-    inv = Invernadero.query.get_or_404(inv_id, description="Invernadero no encontrado")
+    inv = Invernadero.query.options(db.joinedload(Invernadero.zonas)).get_or_404(
+        inv_id, description="Invernadero no encontrado"
+    )
+
+    zonas_activas = [z for z in inv.zonas if z.activo]
+    if zonas_activas:
+        return jsonify({
+            "error": "No se puede eliminar el invernadero: todas sus zonas deben estar inactivas."
+        }), 400
+    
     try:
         db.session.delete(inv)
         db.session.commit()

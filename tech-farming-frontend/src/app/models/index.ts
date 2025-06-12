@@ -77,12 +77,18 @@ export interface PredicParams {
   invernaderoId: number;
   zonaId?:       number;
   horas:         6 | 12 | 24;
+  parametro:     string;
 }
 
 /** Resumen de la predicción */
 export interface Summary {
   updated: string;
   text:    string;
+  lastValue?:  number;
+  prediction?: number;
+  histMin?:    number;
+  histMax?:    number;
+  diff?:       number;
   action?: string;
 }
 
