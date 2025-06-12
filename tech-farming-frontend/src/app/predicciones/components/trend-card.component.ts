@@ -2,7 +2,6 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule }      from '@angular/common';
-import { MatCardModule }     from '@angular/material/card';
 
 import { TrendGaugeComponent } from './trend-gauge.component';
 
@@ -18,38 +17,23 @@ export interface Trend {
 @Component({
   selector: 'app-trend-card',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    TrendGaugeComponent
-  ],
+  imports: [CommonModule, TrendGaugeComponent],
   template: `
-    <mat-card class="trend-card h-full bg-base-100 p-6 rounded-lg shadow-sm flex flex-col">
-      <!-- HEADER -->
-      <div class="flex items-center mb-4">
-        <app-trend-gauge [pct]="pct" [size]="48" class="mr-3"></app-trend-gauge>
-        <h2 class="text-xl font-semibold">Tendencia</h2>
-      </div>
-
-      <!-- CUERPO -->
-      <div class="flex-1">
-        <!-- Título + porcentaje -->
-        <p class="text-lg font-medium mb-2" [ngClass]="riskMsgClass">
-          {{ trend?.title }} ({{ trend?.message }})
-        </p>
-
-        <!-- Mensaje específico de acción -->
-        <p *ngIf="action" class="text-sm font-medium mt-2">
-          {{ action }}
-        </p>
-      </div>
-    </mat-card>
+    <div
+      class="card w-48 bg-base-100 shadow-lg rounded-lg p-4 flex flex-col items-center gap-2 hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow focus:ring-2 focus:ring-primary"
+    >
+      <app-trend-gauge [pct]="pct" [size]="40"></app-trend-gauge>
+      <h4 class="text-lg font-medium">Tendencia</h4>
+      <p class="text-xl font-bold flex items-center gap-1" [ngClass]="riskMsgClass">
+        <i [class]="trendIcon"></i>
+        {{ pct | number:'1.0-1' }}%
+      </p>
+      <p *ngIf="action" class="text-sm text-gray-500/75 text-center">{{ action }}</p>
+    </div>
   `,
   styles: [`
-    :host { display: block; height: 100%; }
-    .trend-card { border: 1px solid var(--p-base-200); }
+    :host { display: block; }
 
-    /* Color del texto según nivel de riesgo */
     .msg-success { color: var(--p-success); }
     .msg-warning { color: var(--p-warning); }
     .msg-error   { color: var(--p-error); }
@@ -73,5 +57,17 @@ export class TrendCardComponent {
     if (p >= 10) return 'msg-error';
     if (p >= 5)  return 'msg-warning';
     return 'msg-success';
+  }
+
+  /** Icono según la tendencia */
+  get trendIcon(): string {
+    switch (this.trend?.type) {
+      case 'up':
+        return 'fas fa-arrow-up text-success';
+      case 'down':
+        return 'fas fa-arrow-down text-error';
+      default:
+        return 'fas fa-minus text-warning';
+    }
   }
 }

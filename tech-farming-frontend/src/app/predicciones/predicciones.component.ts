@@ -100,24 +100,29 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
             </div>
           </ng-container>
           <ng-template #dataTpl>
-            <!-- GRÁFICO -->
-            <div class="relative w-full h-96 bg-base-100 rounded-lg overflow-hidden shadow-xl animate-fade-in-down">
-              <app-prediction-chart
-                class="w-full h-full"
-                [historical]="data?.historical ?? []"
-                [future]    ="data?.future     ?? []"
-                [label]     ="selectedProjectionLabel"
-              ></app-prediction-chart>
-            </div>
+            <div class="space-y-4">
+              <!-- Chart -->
+              <div class="relative w-full h-96 bg-base-100 rounded-lg overflow-hidden shadow-xl p-6 animate-fade-in-down">
+                <app-prediction-chart
+                  class="w-full h-full"
+                  [historical]="data?.historical ?? []"
+                  [future]    ="data?.future     ?? []"
+                  [label]     ="selectedProjectionLabel"
+                ></app-prediction-chart>
+              </div>
 
-            <!-- RESUMEN & TENDENCIA -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-              <app-summary-card
-                class="h-full"
-                [summary]="data?.summary"
-                [projectionLabel]="selectedProjectionLabel"
-              ></app-summary-card>
-              <app-trend-card class="h-full" [trend]="uiTrend"></app-trend-card>
+              <!-- Resumen y Tendencia -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+                <div class="col-span-12 sm:col-span-1 lg:col-span-6">
+                  <app-summary-card
+                    [summary]="data?.summary"
+                    [projectionLabel]="selectedProjectionLabel"
+                  ></app-summary-card>
+                </div>
+                <div class="col-span-12 sm:col-span-1 lg:col-span-6 flex sm:justify-center lg:justify-start">
+                  <app-trend-card [trend]="uiTrend"></app-trend-card>
+                </div>
+              </div>
             </div>
           </ng-template>
         </div>
