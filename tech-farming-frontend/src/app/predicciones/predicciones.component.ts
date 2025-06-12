@@ -5,9 +5,6 @@ import { CommonModule }      from '@angular/common';
 import { FormsModule }       from '@angular/forms';
 import { HttpClientModule }  from '@angular/common/http';
 
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule }    from '@angular/material/select';
-import { MatButtonModule }    from '@angular/material/button';
 
 import { PrediccionesService } from './predicciones.service';
 import {
@@ -23,6 +20,7 @@ import { FiltroSelectComponent }    from '../historial/components/filtro-select.
 import { PredictionChartComponent } from './components/prediction-chart.component';
 import { SummaryCardComponent }     from './components/summary-card.component';
 import { Trend as UITrend, TrendCardComponent } from './components/trend-card.component';
+import { PrediccionesHeaderComponent } from './components/predicciones-header.component';
 
 @Component({
   selector: 'app-predicciones',
@@ -31,9 +29,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     CommonModule,
     FormsModule,
     HttpClientModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
+    PrediccionesHeaderComponent,
     FiltroSelectComponent,
     PredictionChartComponent,
     SummaryCardComponent,
@@ -42,18 +38,7 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
   template: `
     <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
-      <div class="flex items-center justify-between px-6 py-4 bg-base-200 border-b border-base-300">
-        <h1 class="text-3xl font-bold text-base-content">Predicciones</h1>
-        <button
-          mat-stroked-button
-          color="primary"
-          (click)="reload()"
-          [disabled]="!selectedInvernadero"
-          class="btn btn-sm btn-outline"
-        >
-          <i class="fas fa-sync-alt mr-2"></i> Actualizar
-        </button>
-      </div>
+      <app-predicciones-header></app-predicciones-header>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
         <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
@@ -183,18 +168,21 @@ export class PrediccionesComponent implements OnInit {
     this.svc.getZonasByInvernadero(idNum).subscribe(list => {
       this.zonas   = list;
       this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+      this.reload();
     });
   }
 
   onZonaChange(id: string|number|undefined) {
     const idNum = id == null ? undefined : (typeof id === 'string' ? +id : id);
     this.selectedZona = idNum;
+    this.reload();
   }
 
   onParametroChange(param: string|number|undefined) {
     // forzamos a string, ignoramos valores no-string
     if (typeof param === 'string') {
       this.selectedParametro = param;
+      this.reload();
     }
   }
 
@@ -202,6 +190,7 @@ export class PrediccionesComponent implements OnInit {
     const hNum = h == null ? undefined : (typeof h === 'string' ? +h : h);
     if (hNum != null) {
       this.selectedProjection = hNum as 6|12|24;
+      this.reload();
     }
   }
 
