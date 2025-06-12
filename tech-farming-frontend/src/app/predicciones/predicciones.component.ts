@@ -119,7 +119,10 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
                     [projectionLabel]="selectedProjectionLabel"
                   ></app-summary-card>
                 </div>
-                <div class="col-span-12 sm:col-span-1 lg:col-span-6 flex sm:justify-center lg:justify-start">
+                <div
+                  class="col-span-12 sm:col-span-1 lg:col-span-6 flex sm:justify-center lg:justify-start"
+                  *ngIf="uiTrend"
+                >
                   <app-trend-card [trend]="uiTrend"></app-trend-card>
                 </div>
               </div>
