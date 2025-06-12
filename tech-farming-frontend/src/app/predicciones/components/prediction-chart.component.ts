@@ -11,8 +11,8 @@ import {
     Inject,
     PLATFORM_ID
   } from '@angular/core';
-  import { CommonModule, isPlatformBrowser } from '@angular/common';
-  import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import Chart, { ChartConfiguration, ChartType } from 'chart.js/auto';
   
   export interface SeriesPoint {
     timestamp: string;
@@ -68,74 +68,85 @@ import {
       }
     }
   
-    private initChart() {
-      const ctx = this.canvas.nativeElement.getContext('2d')!;
-  
-      // Extraer colores de DaisyUI
-      const styles    = getComputedStyle(document.documentElement);
-      const histColor = styles.getPropertyValue('--p-primary').trim()      || '#3B82F6';
-      const futColor  = styles.getPropertyValue('--p-secondary').trim()    || '#F59E0B';
-      const textColor = styles.getPropertyValue('--p-base-content').trim() || '#111827';
-      const gridColor = styles.getPropertyValue('--p-base-300').trim()     || '#E5E7EB';
-  
-      const cfg: ChartConfiguration = {
-        type: 'line' as ChartType,
-        data: {
-          labels: [
-            ...this.historical.map(p => new Date(p.timestamp).toLocaleString()),
-            ...this.future.map(p => new Date(p.timestamp).toLocaleString())
-          ],
-          datasets: [
-            {
-              label: 'Histórico',
-              data: this.historical.map(p => p.value),
-              borderColor: histColor,
-              backgroundColor: histColor,
-              tension: 0.3,
-              fill: false,
-              pointRadius: 2
-            },
-            {
-              label: 'Predicción',
-              data: Array(this.historical.length).fill(null).concat(this.future.map(p => p.value)),
-              borderColor: futColor,
-              backgroundColor: futColor,
-              borderDash: [5,5],
-              tension: 0.3,
-              fill: false,
-              pointRadius: 3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              title: { display: true, text: 'Fecha / Hora', color: textColor },
-              ticks: { color: textColor },
-              grid:  { color: gridColor }
-            },
-            y: {
-              title: { display: true, text: this.label, color: textColor },
-              ticks: { color: textColor },
-              grid:  { color: gridColor }
-            }
+  private initChart() {
+    const ctx = this.canvas.nativeElement.getContext('2d')!;
+
+    const histColor = this.getCSSVar('--color-success', '#22c55e');
+    const futColor  = this.getCSSVar('--color-info', '#0ea5e9');
+    const baseColor = this.getCSSVar('--color-base-content', '#374151');
+
+    const cfg: ChartConfiguration<'line'> = {
+      type: 'line',
+      data: {
+        labels: [
+          ...this.historical.map(p => new Date(p.timestamp).toLocaleString()),
+          ...this.future.map(p => new Date(p.timestamp).toLocaleString())
+        ],
+        datasets: [
+          {
+            label: 'Histórico',
+            data: this.historical.map(p => p.value),
+            borderColor: histColor,
+            backgroundColor: histColor + '33',
+            fill: false,
+            tension: 0.3,
+            pointRadius: 2
           },
-          plugins: {
-            legend: {
-              labels: { color: textColor }
+          {
+            label: 'Predicción',
+            data: Array(this.historical.length).fill(null).concat(this.future.map(p => p.value)),
+            borderColor: futColor,
+            backgroundColor: futColor,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.3,
+            pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: { left: 16, right: 16, top: 0, bottom: 0 }
+        },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false },
+        scales: {
+          x: {
+            offset: true,
+            title: { display: true, text: 'Fecha / Hora', color: baseColor },
+            ticks: { color: baseColor, maxTicksLimit: 6, autoSkip: true },
+            grid: { color: baseColor + '20' }
+          },
+          y: {
+            title: { display: true, text: this.label, color: baseColor },
+            ticks: { color: baseColor },
+            grid: { color: baseColor + '20' }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: baseColor } },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleFont: { size: 14 },
+            bodyFont: { size: 13 },
+            padding: 8,
+            cornerRadius: 6,
+            displayColors: false,
+            callbacks: {
+              label: ctx => ctx.formattedValue
             }
           }
         }
-      };
-  
-      this.chart = new Chart(ctx, cfg);
+      }
+    };
+
+    this.chart = new Chart(ctx, cfg);
     }
   
-    private updateData() {
-      const hist   = this.historical.map(p => p.value);
-      const fut    = this.future.map(p => p.value);
+  private updateData() {
+    const hist   = this.historical.map(p => p.value);
+    const fut    = this.future.map(p => p.value);
       const labels = [
         ...this.historical.map(p => new Date(p.timestamp).toLocaleString()),
         ...this.future.map(p => new Date(p.timestamp).toLocaleString())
@@ -143,8 +154,14 @@ import {
   
       this.chart.data.labels           = labels;
       this.chart.data.datasets[0].data = hist;
-      this.chart.data.datasets[1].data = Array(hist.length).fill(null).concat(fut);
-      this.chart.update();
-    }
+    this.chart.data.datasets[1].data = Array(hist.length).fill(null).concat(fut);
+    this.chart.update();
   }
+
+  private getCSSVar(name: string, fallback: string): string {
+    const v = getComputedStyle(document.documentElement)
+                .getPropertyValue(name).trim();
+    return v || fallback;
+  }
+}
   
