@@ -226,7 +226,12 @@ export class PrediccionesComponent implements OnInit {
           return;
         }
 
-        this.data = res;
+        // filtrar predicciones según la proyección solicitada
+        let sliceUntil = 1;
+        if (this.selectedProjection === 12) sliceUntil = 2;
+        if (this.selectedProjection === 24) sliceUntil = 3;
+
+        this.data = { ...res, future: res.future.slice(0, sliceUntil) };
         this.uiTrend = this.mapTrend(res.trend);
 
         // construir summary enriquecido
