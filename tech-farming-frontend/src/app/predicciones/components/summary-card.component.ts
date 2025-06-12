@@ -2,18 +2,25 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule }      from '@angular/common';
-import { MatCardModule }     from '@angular/material/card';
 import { Summary }           from '../../models';
 
 @Component({
   selector: 'app-summary-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule],
   template: `
-    <mat-card class="summary-card h-full bg-base-100 p-6 rounded-lg shadow-sm flex flex-col">
+    <div
+      class="summary-card card relative overflow-hidden h-full bg-base-100 p-6 rounded-xl shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 transition"
+    >
+      <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 pointer-events-none"></div>
+
       <ng-container *ngIf="summary; else noSummaryTpl">
-        <h2 class="text-xl font-semibold mb-4">Resumen Predictivo</h2>
-        <div class="flex-1 space-y-2">
+        <div class="relative z-10 flex items-center mb-4">
+          <i class="fas fa-chart-bar text-accent text-2xl mr-2"></i>
+          <h2 class="text-xl font-semibold">Resumen Predictivo</h2>
+        </div>
+
+        <div class="relative z-10 flex-1 space-y-2">
           <p>
             <strong>Última medida:</strong>
             {{ summary.lastValue != null ? summary.lastValue.toFixed(2) : '—' }}
@@ -42,12 +49,13 @@ import { Summary }           from '../../models';
           </p>
         </div>
       </ng-container>
+
       <ng-template #noSummaryTpl>
-        <div class="text-gray-400 italic p-4 text-center">
+        <div class="relative z-10 text-gray-400 italic p-4 text-center">
           No hay un resumen disponible.
         </div>
       </ng-template>
-    </mat-card>
+    </div>
   `,
   styles: [`
     :host { display: block; height: 100%; }
