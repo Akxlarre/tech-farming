@@ -50,9 +50,11 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
         if (!metaHist.data.length || !metaPred.data.length) return;
 
         const start = metaHist.data[metaHist.data.length - 1];
-        const firstPredIdx = metaPred.data.findIndex(p => !isNaN((p as any).parsed.y as number));
-        if (firstPredIdx < 0) return;
-        const end = metaPred.data[firstPredIdx];
+        const firstPred = metaPred.data.find(p => {
+          const parsed = (p as any).parsed;
+          return parsed && !Number.isNaN(parsed.y);
+        });
+        if (!firstPred) return;
 
         const dsPred: any = chart.data.datasets[1];
         const ctx = chart.ctx;
@@ -62,7 +64,8 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
         ctx.lineWidth = dsPred.borderWidth || 3;
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
-        ctx.lineTo(end.x, end.y);
+        ctx.lineTo((firstPred as any).x, (firstPred as any).y);
+
         ctx.stroke();
         ctx.restore();
       }
