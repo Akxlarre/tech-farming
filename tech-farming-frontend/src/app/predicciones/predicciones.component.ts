@@ -5,9 +5,6 @@ import { CommonModule }      from '@angular/common';
 import { FormsModule }       from '@angular/forms';
 import { HttpClientModule }  from '@angular/common/http';
 
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule }    from '@angular/material/select';
-import { MatButtonModule }    from '@angular/material/button';
 
 import { PrediccionesService } from './predicciones.service';
 import {
@@ -31,9 +28,6 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
     CommonModule,
     FormsModule,
     HttpClientModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
     FiltroSelectComponent,
     PredictionChartComponent,
     SummaryCardComponent,
@@ -42,17 +36,19 @@ import { Trend as UITrend, TrendCardComponent } from './components/trend-card.co
   template: `
     <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
-      <div class="flex items-center justify-between px-6 py-4 bg-base-200 border-b border-base-300">
-        <h1 class="text-3xl font-bold text-base-content">Predicciones</h1>
-        <button
-          mat-stroked-button
-          color="primary"
-          (click)="reload()"
-          [disabled]="!selectedInvernadero"
-          class="btn btn-sm btn-outline"
-        >
-          <i class="fas fa-sync-alt mr-2"></i> Actualizar
-        </button>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 my-5 mx-6">
+        <h1 class="text-4xl font-bold text-success tracking-tight">Predicciones</h1>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button
+            class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content flex items-center gap-2"
+            (click)="reload()"
+            [disabled]="!selectedInvernadero"
+            aria-label="Actualizar predicciones"
+          >
+            <i class="fas fa-sync-alt"></i>
+            <span>Actualizar</span>
+          </button>
+        </div>
       </div>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
