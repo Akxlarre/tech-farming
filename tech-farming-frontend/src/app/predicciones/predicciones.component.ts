@@ -54,6 +54,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
             [options]="optInvernadero"
             [selectedId]="selectedInvernadero"
             (selectionChange)="onInvernaderoChange($event)"
+            [allowUndefined]="false"
           ></app-filtro-select>
 
           <!-- Zona -->
@@ -79,6 +80,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
             [options]="optProjection"
             [selectedId]="selectedProjection"
             (selectionChange)="onProjectionChange($event)"
+            [allowUndefined]="false"
           ></app-filtro-select>
         </div>
 
