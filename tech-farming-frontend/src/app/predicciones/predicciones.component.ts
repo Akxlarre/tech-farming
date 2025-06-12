@@ -38,11 +38,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
   template: `
     <div class="flex flex-col" style="height: calc(100vh - var(--header-height));">
       <!-- HEADER -->
-      <app-predicciones-header
-        (reload)="reload()"
-        [disabled]="!selectedInvernadero"
-      ></app-predicciones-header>
-
+      <app-predicciones-header></app-predicciones-header>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
         <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
@@ -172,18 +168,21 @@ export class PrediccionesComponent implements OnInit {
     this.svc.getZonasByInvernadero(idNum).subscribe(list => {
       this.zonas   = list;
       this.optZona = list.map(z => ({ id: z.id, label: z.nombre }));
+      this.reload();
     });
   }
 
   onZonaChange(id: string|number|undefined) {
     const idNum = id == null ? undefined : (typeof id === 'string' ? +id : id);
     this.selectedZona = idNum;
+    this.reload();
   }
 
   onParametroChange(param: string|number|undefined) {
     // forzamos a string, ignoramos valores no-string
     if (typeof param === 'string') {
       this.selectedParametro = param;
+      this.reload();
     }
   }
 
@@ -191,6 +190,7 @@ export class PrediccionesComponent implements OnInit {
     const hNum = h == null ? undefined : (typeof h === 'string' ? +h : h);
     if (hNum != null) {
       this.selectedProjection = hNum as 6|12|24;
+      this.reload();
     }
   }
 
