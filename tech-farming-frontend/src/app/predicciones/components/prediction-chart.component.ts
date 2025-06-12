@@ -46,26 +46,32 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
       id: 'bridgeLine',
       afterDatasetsDraw: (chart: Chart) => {
         const metaHist = chart.getDatasetMeta(0);
+        const predDataset = chart.data.datasets[1].data as (number|null)[];
+        const predStartIndex = metaHist.data.length;
+    
+        // buscamos el primer índice de predicción no-nulo
+        const firstPredIndex = predDataset.findIndex((v,i) =>
+          i >= predStartIndex && v != null && !Number.isNaN(v as any)
+        );
+    
+        // si no hay ninguno, salimos sin error
+        if (firstPredIndex < 0) {
+          return;
+        }
+    
         const metaPred = chart.getDatasetMeta(1);
-        if (!metaHist.data.length || !metaPred.data.length) return;
-
-        const start = metaHist.data[metaHist.data.length - 1];
-        const firstPred = metaPred.data.find(p => {
-          const parsed = (p as any).parsed;
-          return parsed && !Number.isNaN(parsed.y);
-        });
-        if (!firstPred) return;
-
-        const dsPred: any = chart.data.datasets[1];
-        const ctx = chart.ctx;
+        const start     = metaHist.data[metaHist.data.length - 1];
+        const firstPred = metaPred.data[firstPredIndex];
+    
+        const dsPred = chart.data.datasets[1] as any;
+        const ctx    = chart.ctx;
         ctx.save();
         ctx.strokeStyle = dsPred.borderColor || '#000';
         ctx.setLineDash(dsPred.borderDash || []);
-        ctx.lineWidth = dsPred.borderWidth || 3;
+        ctx.lineWidth   = dsPred.borderWidth || 3;
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
         ctx.lineTo((firstPred as any).x, (firstPred as any).y);
-
         ctx.stroke();
         ctx.restore();
       }
