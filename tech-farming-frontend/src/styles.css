@@ -4,8 +4,6 @@
 @tailwind utilities;
 
 :root {
-    --phi: 1.618;
-    --inv-phi: 0.618;
     --header-height: 3rem; /* 48px aprox. coincidiendo con h-12 */
 }
 [data-theme='light'] {
