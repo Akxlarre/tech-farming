@@ -36,6 +36,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
     TrendCardComponent
   ],
   template: `
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
     <div *ngIf="firstLoad; else loadedTpl" class="min-h-screen flex items-center justify-center bg-base-200">
       <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -51,6 +52,55 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
           <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
             ⚠️ No hay datos disponibles para esa selección.
           </div>
+=======
+    <div *ngIf="!loading; else loadingTpl" class="flex flex-col" style="height: calc(100vh - var(--header-height));">
+      <!-- HEADER -->
+      <app-predicciones-header></app-predicciones-header>
+
+      <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-base-200">
+        <div *ngIf="showNoDataMsg" class="alert alert-warning mb-4">
+          ⚠️ No hay datos disponibles para esa selección.
+        </div>
+        <!-- FILTROS -->
+        <div class="grid gap-4"
+             style="grid-template-columns: calc(100% * var(--inv-phi)) repeat(3, 1fr);">
+          
+          <!-- Invernadero -->
+          <app-filtro-select
+            label="Invernadero"
+            [options]="optInvernadero"
+            [selectedId]="selectedInvernadero"
+            (selectionChange)="onInvernaderoChange($event)"
+            [allowUndefined]="false"
+          ></app-filtro-select>
+
+          <!-- Zona -->
+          <app-filtro-select
+            label="Zona"
+            [options]="optZona"
+            [selectedId]="selectedZona"
+            (selectionChange)="onZonaChange($event)"
+          ></app-filtro-select>
+
+          <!-- Parámetro -->
+          <app-filtro-select
+            label="Parámetro"
+            [options]="optParametros"
+            [selectedId]="selectedParametro"
+            (selectionChange)="onParametroChange($event)"
+            [allowUndefined]="false"
+          ></app-filtro-select>
+
+          <!-- Proyección -->
+          <app-filtro-select
+            label="Proyección"
+            [options]="optProjection"
+            [selectedId]="selectedProjection"
+            (selectionChange)="onProjectionChange($event)"
+            [allowUndefined]="false"
+          ></app-filtro-select>
+        </div>
+>>>>>>> predicciones-ui
 
           <!-- FILTROS -->
           <div class="grid gap-4" style="grid-template-columns: calc(100% * var(--inv-phi)) repeat(3, 1fr);">
@@ -122,6 +172,17 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
           </ng-template>
         </div>
       </div>
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
+=======
+    </div>
+    <ng-template #loadingTpl>
+      <div class="min-h-screen flex items-center justify-center bg-base-200">
+        <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+      </div>
+>>>>>>> predicciones-ui
     </ng-template>
   `,
   styles: [`
@@ -164,8 +225,11 @@ export class PrediccionesComponent implements OnInit {
   uiTrend?: UITrend;
   showNoDataMsg = false;
   loading = true;
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
   /** Muestra spinner de página completa durante la carga inicial */
   firstLoad = true;
+=======
+>>>>>>> predicciones-ui
   constructor(private svc: PrediccionesService) {}
 
   ngOnInit() {
@@ -185,17 +249,26 @@ export class PrediccionesComponent implements OnInit {
             },
             error: () => {
               this.loading = false;
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
               this.firstLoad = false;
+=======
+>>>>>>> predicciones-ui
             }
           });
         } else {
           this.loading = false;
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
           this.firstLoad = false;
+=======
+>>>>>>> predicciones-ui
         }
       },
       error: () => {
         this.loading = false;
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
         this.firstLoad = false;
+=======
+>>>>>>> predicciones-ui
       }
     });
   }
@@ -342,11 +415,17 @@ export class PrediccionesComponent implements OnInit {
         this.uiTrend = undefined;
         this.mostrarMensajeNoData();
         this.loading = false;
+<<<<<<< g6w43b-codex/mejorar-diseño-del-header-de-predicciones
         this.firstLoad = false;
       },
       complete: () => {
         this.loading = false;
         if (this.firstLoad) this.firstLoad = false;
+=======
+      },
+      complete: () => {
+        this.loading = false;
+>>>>>>> predicciones-ui
       }
     });
   }
