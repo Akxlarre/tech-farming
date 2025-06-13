@@ -20,21 +20,21 @@ import { Summary }           from '../../models';
           <!-- Última medida -->
           <div class="flex flex-col">
             <span class="text-lg font-medium">Última medida</span>
-            <span class="text-2xl font-bold whitespace-nowrap">
+            <span class="text-xl md:text-2xl font-bold">
               {{ summary.lastValue != null ? (summary.lastValue | number:'1.2-2') : '—' }} {{ unit }}
             </span>
           </div>
           <!-- Predicción -->
           <div class="flex flex-col">
             <span class="text-lg font-medium">Predicción ({{ projectionLabel }})</span>
-            <span class="text-2xl font-bold whitespace-nowrap">
+            <span class="text-xl md:text-2xl font-bold">
               {{ summary.prediction != null ? (summary.prediction | number:'1.2-2') : '—' }} {{ unit }}
             </span>
           </div>
           <!-- Rango histórico -->
           <div class="flex flex-col">
             <span class="text-lg font-medium">Rango histórico</span>
-            <span class="text-2xl font-bold whitespace-nowrap">
+            <span class="text-xl md:text-2xl font-bold">
               [{{ summary.histMin != null ? (summary.histMin | number:'1.1-1') : '—' }}
                – {{ summary.histMax != null ? (summary.histMax | number:'1.1-1') : '—' }}]
             </span>
@@ -43,7 +43,7 @@ import { Summary }           from '../../models';
           <div class="flex flex-col">
             <span class="text-lg font-medium">Variación</span>
             <span
-              class="text-2xl font-bold whitespace-nowrap"
+              class="text-xl md:text-2xl font-bold"
               [ngClass]="{
                 'text-success': summary.diff != null && summary.diff > 0,
                 'text-error':   summary.diff != null && summary.diff < 0
