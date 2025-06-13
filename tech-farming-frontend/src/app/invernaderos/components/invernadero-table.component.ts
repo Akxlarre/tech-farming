@@ -28,10 +28,9 @@ import { Invernadero } from '../models/invernadero.model';
               <span
                 class="badge badge-md"
                 [ngClass]="{
-                  'badge-success': inv.estado === 'Activo',
-                  'badge-warning': inv.estado === 'Inactivo',
-                  'badge-error':   inv.estado === 'Mantenimiento',
-                  'badge-outline': inv.estado === 'Sin sensores'
+                  'badge-error': inv.nivel === 'Crítico',
+                  'badge-warning': inv.nivel === 'Advertencia',
+                  'badge-success': !inv.nivel
                 }"
               >
                 {{ inv.estado }}

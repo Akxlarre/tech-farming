@@ -89,11 +89,11 @@ export class InvernaderoService {
   getEstadosAlerta(
     page: number,
     pageSize: number
-  ): Observable<Array<{ id: number; estado: string }>> {
+  ): Observable<Array<{ id: number; estado: string; nivel: 'Advertencia' | 'Crítico' | null }>> {
     const params = new HttpParams()
       .set('page', page)
       .set('pageSize', pageSize);
-    return this.http.get<Array<{ id: number; estado: string }>>(
+    return this.http.get<Array<{ id: number; estado: string; nivel: 'Advertencia' | 'Crítico' | null }>>(
       `${this.baseUrl}/estados-alerta`,
       { params }
     );

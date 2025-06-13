@@ -40,14 +40,23 @@ def listar_invernaderos():
                 SensorParametro.sensor_id.in_(sensor_ids)
             )
 
-            # 5) Contar cuántas alertas ACTIVAS (tanto de tipo “Error” como “Umbral”)
-            alertas_activas = db.session.query(func.count(Alerta.id)).filter(
+            # 5) Obtener niveles de las alertas activas asociadas a este invernadero
+            alertas = db.session.query(Alerta.nivel).filter(
                 Alerta.estado == 'Activa',
                 or_(
                     Alerta.sensor_parametro_id.in_(param_ids),
                     Alerta.sensor_id.in_(sensor_ids)
                 )
-            ).scalar()
+            ).all()
+            alertas_activas = len(alertas)
+
+            niveles = [a.nivel for a in alertas]
+            if 'Crítico' in niveles:
+                nivel_alerta = 'Crítico'
+            elif 'Advertencia' in niveles:
+                nivel_alerta = 'Advertencia'
+            else:
+                nivel_alerta = None
 
             # 6) Formatear el texto de “estado”
             if alertas_activas == 0:
@@ -66,6 +75,7 @@ def listar_invernaderos():
                 "zonasActivas":   len(zonas_activas),
                 "sensoresActivos": len(sensores_activos),
                 "estado":         estado,
+                "nivel":          nivel_alerta,
                 "zonas": [
                     {
                         "id":         z.id,
@@ -134,13 +144,22 @@ def estados_alerta():
             # ).count()
 
             # AHORA:
-            alertas_activas = db.session.query(func.count(Alerta.id)).filter(
+            alertas = db.session.query(Alerta.nivel).filter(
                 Alerta.estado == 'Activa',
                 or_(
                     Alerta.sensor_parametro_id.in_(param_ids),
                     Alerta.sensor_id.in_(sensor_ids)
                 )
-            ).scalar()
+            ).all()
+            alertas_activas = len(alertas)
+
+            niveles = [a.nivel for a in alertas]
+            if 'Crítico' in niveles:
+                nivel_alerta = 'Crítico'
+            elif 'Advertencia' in niveles:
+                nivel_alerta = 'Advertencia'
+            else:
+                nivel_alerta = None
 
             if alertas_activas == 0:
                 estado = "Sin alertas"
@@ -151,7 +170,8 @@ def estados_alerta():
 
             result.append({
                 "id": inv.id,
-                "estado": estado
+                "estado": estado,
+                "nivel": nivel_alerta
             })
 
         return jsonify(result), 200
