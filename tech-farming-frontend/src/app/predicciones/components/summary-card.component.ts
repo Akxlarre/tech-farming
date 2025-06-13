@@ -15,6 +15,7 @@ import { Summary }           from '../../models';
                hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow
                focus:outline-none focus:ring-2 focus:ring-primary"
       >
+        <h4 class="font-semibold mb-2 text-center break-words" *ngIf="param">{{ param }}</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Última medida -->
           <div class="flex flex-col">
@@ -71,4 +72,5 @@ import { Summary }           from '../../models';
 export class SummaryCardComponent {
   @Input() summary?: Summary;
   @Input() projectionLabel: string = '';
+  @Input() param?: string;
 }
