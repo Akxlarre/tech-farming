@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, current_app, request, jsonify, g
 from app import db
 from app.models.usuario import Usuario
 from app.models.usuario_permiso import UsuarioPermiso
@@ -31,6 +31,9 @@ def crear_usuario_desde_supabase():
     nuevo_usuario = Usuario(
         supabase_uid=supabase_uid,
         email=email,
+        recibe_alertas=True,
+        alertas_cada_minutos=10,
+        cooldown_post_resolucion=120,
         rol_id=1,
         fecha_creacion=datetime.now(ZoneInfo("America/Santiago"))
     )
@@ -94,6 +97,9 @@ def invitar_usuario():
         apellido=apellido,
         email=email,
         telefono=telefono,
+        recibe_alertas=True,
+        alertas_cada_minutos=15,
+        cooldown_post_resolucion=120,
         rol_id=2,
         supabase_uid=supabase_uid,
         fecha_creacion=datetime.now(ZoneInfo("America/Santiago"))

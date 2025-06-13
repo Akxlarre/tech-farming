@@ -16,6 +16,7 @@ import { Alerta } from '../../models/index';
           <th>Nivel</th>
           <th>Mensaje</th>
           <th>Resuelta por</th>
+          <th>Fecha de resolución</th>
         </tr>
       </thead>
       <tbody *ngIf="!loading; else loadingRows">
@@ -36,6 +37,9 @@ import { Alerta } from '../../models/index';
           </td>
           <td>{{ a.mensaje }}</td>
           <td>{{ a.resuelta_por }}</td>
+          <td>
+            {{ a.fecha_resolucion ? (a.fecha_resolucion | date:'short') : '-' }}
+          </td>
         </tr>
       </tbody>
       <ng-template #loadingRows>

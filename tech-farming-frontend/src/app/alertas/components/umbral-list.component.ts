@@ -94,6 +94,7 @@ import { FormsModule } from '@angular/forms';
               <th *ngIf="scopes[scopeIndex] === 'sensor'">Sensor</th>
               <th>Advertencia</th>
               <th>Crítico</th>
+              <th>Estado</th>
               <th class="text-right">Acciones</th>
             </tr>
           </thead>
@@ -105,6 +106,14 @@ import { FormsModule } from '@angular/forms';
               <td *ngIf="scopes[scopeIndex] === 'sensor'">{{ u.sensor_nombre }}</td>
               <td>{{ u.advertencia_min }} – {{ u.advertencia_max }}</td>
               <td>{{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="u.activo ? 'badge-success' : 'badge-warning'"
+                >
+                  {{ u.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+            </td>
               <td class="flex justify-end gap-1">
                 <button
                   *ngIf="puedeEditar"
@@ -169,6 +178,7 @@ import { FormsModule } from '@angular/forms';
           </div>
           <div class="text-sm"><strong>Advertencia:</strong> {{ u.advertencia_min }} – {{ u.advertencia_max }}</div>
           <div class="text-sm"><strong>Crítico:</strong> {{ u.critico_min || '-' }} – {{ u.critico_max || '-' }}</div>
+          <div class="text-sm"><strong>Estado:</strong> {{ u.activo ? 'Activo' : 'Inactivo' }}</div>
           <div class="flex justify-end gap-2 pt-2">
             <button
               *ngIf="puedeEditar"
