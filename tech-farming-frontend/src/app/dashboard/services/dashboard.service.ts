@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
-import { Invernadero, Zona, Sensor } from '../../models';
+import { Invernadero, Zona, Sensor, PredicParams, PredicResult } from '../../models';
+import { PrediccionesService } from '../../predicciones/predicciones.service';
 import { BatchLectura, TimeSeriesService, HistorialResponse } from '../../sensores/time-series.service';
 import { AlertService, Alerta } from '../../alertas/alertas.service';
 
@@ -14,7 +15,8 @@ export class DashboardService {
   constructor(
     private http: HttpClient,
     private tsSvc: TimeSeriesService,
-    private alertSvc: AlertService
+    private alertSvc: AlertService,
+    private predSvc: PrediccionesService
   ) {}
 
   /** GET /api/invernaderos/getInvernaderos */
@@ -44,6 +46,10 @@ export class DashboardService {
   getLecturas(ids: number[]): Observable<BatchLectura[]> {
     const q = ids.join(',');
     return this.http.get<BatchLectura[]>(`${this.apiUrl}/sensores/lecturas?ids=${q}`);
+  }
+
+  getPredicciones(params: PredicParams): Observable<PredicResult> {
+    return this.predSvc.getPredicciones(params);
   }
 
   /** Delegates to TimeSeriesService.getHistorial */

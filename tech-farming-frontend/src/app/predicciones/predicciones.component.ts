@@ -117,6 +117,7 @@ import { PrediccionesHeaderComponent } from './components/predicciones-header.co
                   <app-summary-card
                     [summary]="data?.summary"
                     [projectionLabel]="selectedProjectionLabel"
+                    [param]="selectedParametroLabel"
                   ></app-summary-card>
                 </div>
                 <div
@@ -211,6 +212,10 @@ export class PrediccionesComponent implements OnInit {
 
   get selectedProjectionLabel(): string {
     return this.optProjection.find(p => p.id === this.selectedProjection)?.label ?? '';
+  }
+
+  get selectedParametroLabel(): string {
+    return this.optParametros.find(p => p.id === this.selectedParametro)?.label ?? this.selectedParametro;
   }
 
   onInvernaderoChange(id: string|number|undefined) {
