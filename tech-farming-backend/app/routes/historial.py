@@ -2,6 +2,7 @@
 
 from flask import Blueprint, request, jsonify, current_app, abort
 from dateutil.parser import isoparse
+from datetime import time, timedelta
 from influxdb_client.client.exceptions import InfluxDBError
 from app.queries.historial_queries import obtener_historial as helper_historial
 from app.models.tipo_parametro import TipoParametro as TipoParametroModel
@@ -28,8 +29,17 @@ def get_historial():
         dt_hasta_obj = isoparse(hasta_s)
     except (ValueError, TypeError):
         abort(400, description="Formato de fecha inválido. Usa ISO 8601, p.ej. 2025-05-21T12:00:00Z")
+
     if dt_desde_obj > dt_hasta_obj:
         abort(400, description="'desde' no puede ser posterior a 'hasta'")
+
+    # Si ambos timestamps son la misma fecha y a medianoche,
+    # extendemos 'hasta' un día para cubrir esa jornada completa.
+    if (
+        dt_desde_obj.date() == dt_hasta_obj.date()
+        and dt_desde_obj.time().replace(tzinfo=None) == dt_hasta_obj.time().replace(tzinfo=None) == time(0, 0)
+    ):
+        dt_hasta_obj += timedelta(days=1)
 
     # Convertimos de nuevo a ISO para pasarlo al helper
     dt_desde = dt_desde_obj.isoformat()
@@ -37,15 +47,18 @@ def get_historial():
 
     # 3) Elegir window_every dinámicamente
     span_sec = (dt_hasta_obj - dt_desde_obj).total_seconds()
-    max_points = 200
-    every_sec = max(int(span_sec / max_points), 1)
-
-    if every_sec < 60:
-        window_every = f"{every_sec}s"
-    elif every_sec < 3600:
-        window_every = f"{every_sec // 60}m"
+    if span_sec < 6 * 24 * 3600:
+        window_every = None
     else:
-        window_every = f"{every_sec // 3600}h"
+        max_points = 200
+        every_sec = max(int(span_sec / max_points), 1)
+
+        if every_sec < 60:
+            window_every = f"{every_sec}s"
+        elif every_sec < 3600:
+            window_every = f"{every_sec // 60}m"
+        else:
+            window_every = f"{every_sec // 3600}h"
 
     current_app.logger.debug(f"Historial rango {span_sec}s → window_every={window_every}")
 

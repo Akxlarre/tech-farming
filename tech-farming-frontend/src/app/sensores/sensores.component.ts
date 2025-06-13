@@ -31,6 +31,7 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
 import { NotificationService }       from '../shared/services/notification.service';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { ExportService } from '../shared/services/export.service';
 
 
@@ -480,13 +481,14 @@ onEdited(updated: Sensor) {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sensores');
       XLSX.writeFile(workbook, 'sensores.xlsx');
     } else if (format === 'pdf') {
-      const doc = new jsPDF();
-      let y = 10;
-      doc.text(headers.join(' | '), 10, y);
-      y += 10;
-      rows.forEach(row => {
-        doc.text(row.join(' | '), 10, y);
-        y += 10;
+      const doc = new jsPDF({ orientation: 'landscape' });
+      doc.setFontSize(14);
+      doc.text('Listado de Sensores', 14, 15);
+      autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: 20,
+        styles: { fontSize: 10 }
       });
       doc.save('sensores.pdf');
     }
