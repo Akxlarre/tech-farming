@@ -89,7 +89,12 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     console.log('[LineChart] updateChartData →', this.data);
 
     const labels = this.data.map(d =>
-      new Date(d.timestamp).toLocaleDateString('es-ES', { month: 'short', day: '2-digit' })
+      new Date(d.timestamp).toLocaleString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     );
     const values = this.data.map(d => d.value);
 
@@ -112,7 +117,12 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     // Preparamos etiquetas y valores
     const labels = this.data.map(d =>
-      new Date(d.timestamp).toLocaleDateString('es-ES', { month: 'short', day: '2-digit' })
+      new Date(d.timestamp).toLocaleString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     );
     const values = this.data.map(d => d.value);
 
@@ -148,7 +158,7 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
         scales: {
           x: {
             offset: true,   // asegura espacio extra entre primer/última etiqueta y el borde
-            title: { display: true, text: 'Fecha', color: colorBase },
+            title: { display: true, text: 'Fecha / Hora', color: colorBase },
             ticks: { color: colorBase, maxTicksLimit: 6, autoSkip: true },
             grid:  { color: colorBase + '20' }
           },
@@ -170,10 +180,14 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
             callbacks: {
               label: ctx => {
                 const val = ctx.formattedValue;
-                const date = new Date(ctx.label as string).toLocaleString('es-ES', {
-                  weekday: 'short', day: '2-digit',
-                  month: 'short', hour: '2-digit', minute: '2-digit'
-                });
+                const ts  = this.data[ctx.dataIndex]?.timestamp;
+                const date = ts ? new Date(ts).toLocaleString('es-ES', {
+                  weekday: 'short',
+                  day: '2-digit',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : ctx.label as string;
                 return [`${this.label}: ${val}`, `Hora: ${date}`];
               }
             }
