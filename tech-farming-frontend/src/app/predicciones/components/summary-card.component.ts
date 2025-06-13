@@ -82,5 +82,4 @@ export class SummaryCardComponent {
     if (p.includes('potas') || p === 'k') return 'mg/kg';
     return '°C';
   }
-
 }

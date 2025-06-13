@@ -764,15 +764,25 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
           parametro: v.nombre,
           horas: this.predIntervalo
         }).pipe(
-          map(res => ({
-            param: v.nombre,
-            summary: {
-              lastValue: res.historical.slice(-1)[0]?.value,
-              prediction: res.future.slice(-1)[0]?.value,
-              diff: (res.future.slice(-1)[0]?.value ?? 0) - (res.historical.slice(-1)[0]?.value ?? 0),
-              action: res.summary.action,
-            } as Summary
-          }))
+          map(res => {
+            const idx = [6, 12, 24].indexOf(this.predIntervalo);
+            const futureVal = res.future[idx]?.value;
+            const last = res.historical.slice(-1)[0]?.value;
+            const vals = res.historical.map(h => h.value);
+            const histMin = vals.length ? Math.min(...vals) : undefined;
+            const histMax = vals.length ? Math.max(...vals) : undefined;
+            return {
+              param: v.nombre,
+              summary: {
+                lastValue: last,
+                prediction: futureVal,
+                diff: (futureVal ?? 0) - (last ?? 0),
+                histMin,
+                histMax,
+                action: res.summary.action,
+              } as Summary
+            };
+          })
         )
       );
 
