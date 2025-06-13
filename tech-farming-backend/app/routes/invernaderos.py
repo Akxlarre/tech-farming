@@ -41,7 +41,7 @@ def listar_invernaderos():
             )
 
             # 5) Contar alertas activas (cualquier nivel)
-            alertas_activas = db.session.query(func.count(Alerta.id)).filter(
+            alertas = db.session.query(Alerta).filter(
                 Alerta.estado == 'Activa',
                 or_(
                     Alerta.sensor_parametro_id.in_(param_ids),
@@ -49,7 +49,6 @@ def listar_invernaderos():
                 )
             ).all()
             alertas_activas = len(alertas)
-
             niveles = [a.nivel for a in alertas]
             if 'Crítico' in niveles:
                 nivel_alerta = 'Crítico'
@@ -57,8 +56,6 @@ def listar_invernaderos():
                 nivel_alerta = 'Advertencia'
             else:
                 nivel_alerta = None
-
-            hay_alertas = alertas_activas > 0
 
             hay_alertas = alertas_activas > 0
 
@@ -148,7 +145,7 @@ def estados_alerta():
             # ).count()
 
             # AHORA: contar alertas activas sin importar su nivel
-            alertas_activas = db.session.query(func.count(Alerta.id)).filter(
+            alertas = db.session.query(Alerta).filter(
                 Alerta.estado == 'Activa',
                 or_(
                     Alerta.sensor_parametro_id.in_(param_ids),
@@ -156,7 +153,6 @@ def estados_alerta():
                 )
             ).all()
             alertas_activas = len(alertas)
-
             niveles = [a.nivel for a in alertas]
             if 'Crítico' in niveles:
                 nivel_alerta = 'Crítico'
@@ -164,8 +160,6 @@ def estados_alerta():
                 nivel_alerta = 'Advertencia'
             else:
                 nivel_alerta = None
-
-            hay_alertas = alertas_activas > 0
 
             hay_alertas = alertas_activas > 0
 
