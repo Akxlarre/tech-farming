@@ -69,4 +69,11 @@ export class AdminService {
       eliminar: permisos.eliminar
     });
   }
+
+  /**
+   * Elimina un trabajador por ID
+   */
+  eliminarTrabajador(usuarioId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/trabajadores/${usuarioId}`);
+  }
 }

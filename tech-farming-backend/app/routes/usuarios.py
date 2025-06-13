@@ -1,10 +1,11 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from app import db
 from app.models.usuario import Usuario
 from app.models.usuario_permiso import UsuarioPermiso
 from app.models.rol import Rol
 from datetime import datetime
 from supabase import create_client
+from app.utils.auth_supabase import usuario_autenticado_requerido
 import os
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -130,3 +131,19 @@ def actualizar_permisos(usuario_id):
 
     db.session.commit()
     return jsonify({"mensaje": "Permisos actualizados correctamente"}), 200
+
+@router.route('/trabajadores/<int:usuario_id>', methods=['DELETE'])
+@usuario_autenticado_requerido
+def eliminar_trabajador(usuario_id):
+    if not getattr(g.permisos, "puede_eliminar", False):
+        return jsonify({"error": "No tienes permiso para eliminar usuarios"}), 403
+
+    usuario = Usuario.query.get_or_404(usuario_id, description="Usuario no encontrado")
+    try:
+        UsuarioPermiso.query.filter_by(usuario_id=usuario.id).delete()
+        db.session.delete(usuario)
+        db.session.commit()
+        return '', 204
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "No se pudo eliminar el usuario"}), 500
