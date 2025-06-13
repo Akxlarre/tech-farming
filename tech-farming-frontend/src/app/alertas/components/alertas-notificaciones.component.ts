@@ -74,12 +74,21 @@ import { AlertasModalService } from '../alertas-modal.service';
               <option [value]="60">Cada 1 hora</option>
               <option [value]="-1">Otro (personalizado)</option>
             </select>
-            <input *ngIf="form.value.alertas_cada_minutos == -1"
-                  type="number"
-                  min="1"
-                  placeholder="Ingresa los minutos"
-                  formControlName="alertas_personalizado"
-                  class="input input-bordered w-full mt-2" />
+            <div *ngIf="form.value.alertas_cada_minutos == -1" class="flex gap-2 mt-2">
+              <input type="number"
+                    [min]="form.value.alertas_unidad === 'h' ? 1 : 5"
+                    class="input input-bordered w-full"
+                    placeholder="Cantidad"
+                    formControlName="alertas_cantidad" />
+              <select class="select select-bordered" formControlName="alertas_unidad">
+                <option value="min">minutos</option>
+                <option value="h">horas</option>
+              </select>
+            </div>
+            <p class="text-sm text-base-content/60 mt-1">
+              Cada cuánto tiempo el sistema enviará alertas por WhatsApp mientras el problema persista.
+              Por ejemplo, si el parámetro del sensor sigue fuera del umbral, recibirás una nueva alerta cada X minutos.
+            </p>
           </div>
 
           <!-- Cooldown después de resolución -->
@@ -92,12 +101,20 @@ import { AlertasModalService } from '../alertas-modal.service';
               <option [value]="360">6 horas</option>
               <option [value]="-1">Otro (personalizado)</option>
             </select>
-            <input *ngIf="form.value.cooldown_post_resolucion == -1"
-                  type="number"
-                  min="1"
-                  placeholder="Ingresa los minutos"
-                  formControlName="cooldown_personalizado"
-                  class="input input-bordered w-full mt-2" />
+            <div *ngIf="form.value.cooldown_post_resolucion == -1" class="flex gap-2 mt-2">
+              <input type="number"
+                    [min]="form.value.cooldown_unidad === 'h' ? 1 : 30"
+                    class="input input-bordered w-full"
+                    placeholder="Cantidad"
+                    formControlName="cooldown_cantidad" />
+              <select class="select select-bordered" formControlName="cooldown_unidad">
+                <option value="min">minutos</option>
+                <option value="h">horas</option>
+              </select>
+            </div>
+            <p class="text-sm text-base-content/60 mt-1">
+              Tiempo de espera después de marcar una alerta como resuelta antes de permitir nuevas alertas para el mismo parámetro del sensor.
+            </p>
           </div>
 
           <!-- Botón guardar -->
@@ -130,8 +147,10 @@ export class AlertNotificationsComponent {
       recibe_notificaciones: [true],
       alertas_cada_minutos: [10],
       cooldown_post_resolucion: [120],
-      alertas_personalizado: [null],
-      cooldown_personalizado: [null]
+      alertas_cantidad: [null],
+      alertas_unidad: ['min'],
+      cooldown_cantidad: [null],
+      cooldown_unidad: ['h']
     });
 
     this.inicializarFormulario();
@@ -149,13 +168,33 @@ export class AlertNotificationsComponent {
     const frecuencia = usuario.alertas_cada_minutos ?? 10;
     const cooldown = usuario.cooldown_post_resolucion ?? 120;
 
-    this.form.patchValue({
-      recibe_notificaciones: recibe,
-      alertas_cada_minutos: frecuencia,
-      cooldown_post_resolucion: cooldown
-    });
+    this.form.patchValue({ recibe_notificaciones: recibe });
 
-    this.isLoading = false
+    // Frecuencia de notificación
+    if ([5, 10, 15, 30, 60].includes(frecuencia)) {
+      this.form.patchValue({ alertas_cada_minutos: frecuencia });
+    } else {
+      const esMultiploDeHora = frecuencia % 60 === 0;
+      this.form.patchValue({
+        alertas_cada_minutos: -1,
+        alertas_cantidad: esMultiploDeHora ? frecuencia / 60 : frecuencia,
+        alertas_unidad: esMultiploDeHora ? 'h' : 'min'
+      });
+    }
+
+    // Cooldown tras resolución
+    if ([60, 120, 240, 360].includes(cooldown)) {
+      this.form.patchValue({ cooldown_post_resolucion: cooldown });
+    } else {
+      const esMultiploDeHora = cooldown % 60 === 0;
+      this.form.patchValue({
+        cooldown_post_resolucion: -1,
+        cooldown_cantidad: esMultiploDeHora ? cooldown / 60 : cooldown,
+        cooldown_unidad: esMultiploDeHora ? 'h' : 'min'
+      });
+    }
+
+    this.isLoading = false;
   }
 
   async guardar() {
@@ -164,8 +203,16 @@ export class AlertNotificationsComponent {
     if (!uid) return;
 
     const recibe = this.form.get('recibe_notificaciones')!.value === true;
-    const alertas = Number(this.form.get('alertas_personalizado')!.value ?? this.form.get('alertas_cada_minutos')!.value);
-    const cooldown = Number(this.form.get('cooldown_personalizado')!.value ?? this.form.get('cooldown_post_resolucion')!.value);
+    const alertas = this.form.value.alertas_cada_minutos !== -1
+      ? this.form.value.alertas_cada_minutos
+      : this.form.value.alertas_unidad === 'h'
+        ? Number(this.form.value.alertas_cantidad) * 60
+        : Number(this.form.value.alertas_cantidad);
+    const cooldown = this.form.value.cooldown_post_resolucion !== -1
+      ? this.form.value.cooldown_post_resolucion
+      : this.form.value.cooldown_unidad === 'h'
+        ? Number(this.form.value.cooldown_cantidad) * 60
+        : Number(this.form.value.cooldown_cantidad);
 
     const { error } = await this.perfilService.actualizarNotificaciones(uid, {
       recibe_notificaciones: recibe,

@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
       <!-- Botón Configurar Notificaciones -->
       <div class="flex flex-col sm:flex-row gap-2">
         <button
-          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content mx-3"
+          class="btn bg-transparent border-success text-base-content hover:bg-success hover:text-success-content"
           (click)="configurarNotificaciones.emit()"
           aria-label="Abrir configuración de notificaciones"
         >

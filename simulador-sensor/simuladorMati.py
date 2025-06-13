@@ -51,4 +51,4 @@ for index, row in df.iterrows():
         print(f"❌ Error inesperado: {e}")
 
     # 5) Espera 5 segundos antes de la siguiente iteración
-    time.sleep(5)
+    time.sleep(30)

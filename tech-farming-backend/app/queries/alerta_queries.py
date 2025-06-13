@@ -30,6 +30,9 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
 
     timestamp = timestamp or datetime.now(ZoneInfo("America/Santiago"))
 
+    frecuencia_alertas_min = 5     # Generar nueva alerta solo cada 5 min si sigue activa
+    cooldown_post_resolucion_min = 30  # Esperar 1h después de resolverse para volver a generar
+
     sensor_param = SensorParametro.query.get(sensor_parametro_id)
     if not sensor_param:
         return  # No existe sensor_parametro asociado
@@ -61,25 +64,135 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
             sensor_parametro_id=None,
             activo=True
         ).first()
-
     if not umbral:
         return  # No hay umbral aplicable definido
 
     # Evaluar contra umbrales críticos y de advertencia
     nivel_alerta = None
-
     if umbral.critico_min is not None and valor < umbral.critico_min or umbral.critico_max is not None and valor > umbral.critico_max:
         nivel_alerta = "Crítico"
     elif valor < umbral.advertencia_min or valor > umbral.advertencia_max:
         nivel_alerta = "Advertencia"
-
     if not nivel_alerta:
-        return    
+        return
+    
+    # Buscar última alerta del mismo sensor/param
+    alerta_antigua = (
+        Alerta.query
+        .filter_by(sensor_parametro_id=sensor_parametro_id, tipo="Umbral", nivel=nivel_alerta)
+        .order_by(Alerta.fecha_hora.desc())
+        .first()
+    )
 
-    # Crear la alerta
+    if alerta_antigua:
+        print(f"[ALERT DEBUG] Última alerta encontrada: ID {alerta_antigua.id} ({alerta_antigua.estado})")
+        if alerta_antigua.estado == "Resuelta":
+            fecha_res = alerta_antigua.fecha_resolucion
+            if fecha_res and fecha_res.tzinfo is None:
+                fecha_res = fecha_res.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
+            if fecha_res:
+                minutos = (timestamp - fecha_res).total_seconds() / 60
+                print(f"[ALERT DEBUG] Última alerta resuelta: {alerta_antigua.id}")
+                print(f"[ALERT DEBUG] Tiempo desde resolución: {minutos:.2f} minutos")
+                print(f"[ALERT DEBUG] Cooldown permitido: {cooldown_post_resolucion_min} minutos")
+                if minutos < cooldown_post_resolucion_min:
+                    print("[ALERT DEBUG] ❌ No se genera alerta: aún en cooldown post resolución")
+                    return
+        else:
+            fecha_alerta = alerta_antigua.fecha_hora
+            if fecha_alerta:
+                print(f"[ALERTA DEBUG] Última alerta activa encontrada: ID {alerta_antigua.id}")
+                print(f"[ALERTA DEBUG] Fecha alerta activa: {fecha_alerta.isoformat()}")
+                if fecha_alerta.tzinfo is None:
+                    print("[ALERTA DEBUG] Fecha sin tzinfo, asignando America/Santiago")
+                    fecha_alerta = fecha_alerta.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
+
+                minutos_transcurridos = (timestamp - fecha_alerta).total_seconds() / 60
+                print(f"[ALERTA DEBUG] Minutos desde última alerta activa: {minutos_transcurridos:.2f}")
+                print(f"[ALERTA DEBUG] Frecuencia mínima requerida: {frecuencia_alertas_min} minutos")
+
+                if minutos_transcurridos < frecuencia_alertas_min:
+                    print("[ALERTA DEBUG] No se generará nueva alerta aún (frecuencia mínima no cumplida)")
+                    return  # Aún no han pasado los minutos requeridos
+    else:
+        print("[ALERT DEBUG] No se encontró ninguna alerta previa: se permitirá generar nueva alerta.")
+
+    # Mensaje de alerta
     parametro = TipoParametro.query.get(tipo_parametro_id)
     mensaje = f"El valor {valor} de {parametro.nombre} ({parametro.unidad}) excede el umbral {nivel_alerta.upper()}."
+    # Mensaje para WhatsApp
+    hora_lectura = timestamp.strftime("%d/%m/%Y %H:%M:%S")
+    sensor_nombre = sensor.nombre if sensor else "Desconocido"
+    zona_nombre = zona.nombre if zona else "Zona desconocida"
+    invernadero = invernadero_nombre or "Invernadero desconocido"
+    mensaje_whatsapp = (
+        f"🚨 *ALERTA {nivel_alerta.upper()}*\n"
+        f"{mensaje}\n\n"
+        f"📍 Sensor: {sensor_nombre}\n"
+        f"📦 Zona: {zona_nombre}\n"
+        f"🏡 Invernadero: {invernadero}\n"
+        f"⏰ Fecha y hora: {hora_lectura}"
+    )
 
+    # --- Lógica de envío WhatsApp ---
+    usuarios_a_notificar = Usuario.query.filter(Usuario.telefono.isnot(None)).all()
+    for u in usuarios_a_notificar:
+        if not u.recibe_notificaciones:
+            print(f"[WHATSAPP DEBUG] Usuario {u.nombre} tiene notificaciones desactivadas")
+            continue
+
+        print(f"[WHATSAPP DEBUG] Evaluando usuario: {u.nombre}")
+
+        alerta_antigua = (
+            Alerta.query
+            .filter_by(sensor_parametro_id=sensor_parametro_id, tipo="Umbral")
+            .order_by(Alerta.fecha_hora.desc())
+            .first()
+        )
+
+        enviar = True
+
+        if alerta_antigua:
+            print(f"[WHATSAPP DEBUG] Última alerta encontrada: {alerta_antigua.id} ({alerta_antigua.estado})")
+            if alerta_antigua.estado == "Resuelta":
+                if alerta_antigua.fecha_resolucion:
+                    fecha_res = alerta_antigua.fecha_resolucion
+                    if fecha_res.tzinfo is None:
+                        print(f"[WHATSAPP DEBUG] Fecha resolución sin tzinfo, asumiendo UTC")
+                        fecha_res = fecha_res.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
+
+                    delta = (timestamp - fecha_res).total_seconds() / 60
+                    print(f"[WHATSAPP DEBUG] Tiempo desde resolución: {delta:.2f} minutos")
+                    print(f"[WHATSAPP DEBUG] Cooldown permitido: {u.cooldown_post_resolucion} minutos")
+
+                    if delta < u.cooldown_post_resolucion:
+                        print(f"[WHATSAPP DEBUG] Dentro del cooldown post resolución. No se enviará a {u.nombre}")
+                        enviar = False
+            else:
+                fecha_ant = alerta_antigua.fecha_hora
+                if fecha_ant.tzinfo is None:
+                    print(f"[WHATSAPP DEBUG] Fecha alerta activa sin tzinfo, asumiendo UTC")
+                    fecha_ant = fecha_ant.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
+
+                delta = (timestamp - fecha_ant).total_seconds() / 60
+                print(f"[WHATSAPP DEBUG] Tiempo desde alerta activa: {delta:.2f} minutos")
+                print(f"[WHATSAPP DEBUG] Frecuencia permitida: {u.alertas_cada_minutos} minutos")
+
+                if delta < u.alertas_cada_minutos:
+                    print(f"[WHATSAPP DEBUG] No ha pasado el tiempo suficiente para notificar a {u.nombre}")
+                    enviar = False
+
+        if enviar:
+            try:
+                telefono = u.telefono.strip()
+                print(f"[WHATSAPP] Enviando mensaje a {telefono} ({u.nombre})...\n{mensaje_whatsapp}")
+                enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
+            except Exception as e:
+                print(f"[WHATSAPP] Error enviando mensaje a {u.nombre}: {e}")
+        else:
+            print(f"[WHATSAPP DEBUG] Mensaje a {u.nombre} no enviado por reglas de frecuencia o cooldown.\n")
+
+    # Crear alerta
     alerta = Alerta(
         sensor_id=sensor.id,
         sensor_parametro_id=sensor_parametro_id,
@@ -92,54 +205,6 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     )
     db.session.add(alerta)
     db.session.commit()
-
-    # Mensaje para WhatsApp
-    hora_lectura = timestamp.strftime("%d/%m/%Y %H:%M:%S")
-    sensor_nombre = sensor.nombre if sensor else "Desconocido"
-    zona_nombre = zona.nombre if zona else "Zona desconocida"
-    invernadero = invernadero_nombre or "Invernadero desconocido"
-
-    mensaje_whatsapp = (
-        f"🚨 *ALERTA {nivel_alerta.upper()}*\n"
-        f"{mensaje}\n\n"
-        f"📍 Sensor: {sensor_nombre}\n"
-        f"📦 Zona: {zona_nombre}\n"
-        f"🏡 Invernadero: {invernadero}\n"
-        f"⏰ Fecha y hora: {hora_lectura}"
-    )
-
-    usuarios_a_notificar = Usuario.query.filter(Usuario.telefono.isnot(None)).all()
-    for u in usuarios_a_notificar:
-        if not u.recibe_notificaciones:
-            continue
-
-        # Verificar última alerta resuelta
-        alerta_antigua = (
-            Alerta.query
-            .filter_by(sensor_parametro_id=sensor_parametro_id, tipo="Umbral")
-            .order_by(Alerta.fecha_hora.desc())
-            .first()
-        )
-
-        enviar = True
-
-        if alerta_antigua:
-            if alerta_antigua.estado == "Resuelta":
-                if alerta_antigua.fecha_resolucion:
-                    delta = (timestamp - alerta_antigua.fecha_resolucion).total_seconds() / 60
-                    if delta < u.cooldown_post_resolucion:
-                        enviar = False
-            else:
-                delta = (timestamp - alerta_antigua.fecha_hora).total_seconds() / 60
-                if delta < u.alertas_cada_minutos:
-                    enviar = False
-
-        if enviar:
-            try:
-                telefono = u.telefono.strip()
-                enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
-            except Exception as e:
-                print(f"[WHATSAPP] Error enviando mensaje a {u.nombre}: {e}")
 
 def listar_alertas(filtros: dict):
     page     = filtros.get("page", 1)

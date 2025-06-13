@@ -81,7 +81,7 @@ def invitar_usuario():
         email=email,
         telefono=telefono,
         recibe_alertas=True,
-        alertas_cada_minutos=10,
+        alertas_cada_minutos=15,
         cooldown_post_resolucion=120,
         rol_id=2,
         supabase_uid=supabase_uid,
