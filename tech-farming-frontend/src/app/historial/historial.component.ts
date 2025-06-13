@@ -15,6 +15,7 @@ import { FiltroComponent } from './components/filtro.component';
 import { LineChartComponent } from './components/line-chart.component';
 import { StatsCardComponent } from './components/stats-card.component';
 import { HistorialHeaderComponent } from './components/historial-header.component';
+import { ExportService } from '../shared/services/export.service';
 
 @Component({
   selector: 'app-historial',
@@ -160,7 +161,10 @@ export class HistorialComponent implements OnInit {
   /** Texto del eje Y (nombre del parámetro seleccionado) */
   textoParametro = '';
 
-  constructor(private historialService: HistorialService) { }
+  constructor(
+    private historialService: HistorialService,
+    private exportSvc: ExportService
+  ) { }
 
   ngOnInit() {
     // Pre-cargamos la lista de Tipos de Parámetro
@@ -204,18 +208,17 @@ export class HistorialComponent implements OnInit {
    */
   onExport(format: 'pdf' | 'excel' | 'csv') {
     if (!this.historial) return;
-
-    if (format === 'csv') {
-      const csv = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'historial.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      console.log(`Exportar ${format} aún no implementado`);
+    const data = this.historial.series.map(s => ({ timestamp: s.timestamp, value: s.value }));
+    switch (format) {
+      case 'csv':
+        this.exportSvc.toCsv(data, 'historial');
+        break;
+      case 'excel':
+        this.exportSvc.toExcel(data, 'historial');
+        break;
+      case 'pdf':
+        this.exportSvc.toPdf(data, 'historial');
+        break;
     }
   }
 }

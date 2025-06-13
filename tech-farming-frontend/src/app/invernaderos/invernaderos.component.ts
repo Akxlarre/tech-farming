@@ -13,6 +13,7 @@ import {
 import { InvernaderoModalService } from './invernadero-modal.service';
 
 import { NotificationService } from '../shared/services/notification.service';
+import { ExportService } from '../shared/services/export.service';
 import { SupabaseService } from '../services/supabase.service';
 import { ExportService } from '../shared/services/export.service';
 
@@ -437,31 +438,18 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
-    const headers = [
-      'ID',
-      'Nombre',
-      'Zonas Activas',
-      'Sensores Activos',
-      'Estado',
-      'Creado en'
-    ];
-    const rows = this.invernaderos.map(i => [
-      i.id,
-      i.nombre,
-      i.zonasActivas ?? 0,
-      i.sensoresActivos ?? 0,
-      i.estado ?? '',
-      i.creado_en
-    ]);
+    const data = this.invernaderos.map(i => ({ id: i.id, nombre: i.nombre }));
+    switch (format) {
+      case 'csv':
+        this.exportSvc.toCsv(data, 'invernaderos');
+        break;
+      case 'excel':
+        this.exportSvc.toExcel(data, 'invernaderos');
+        break;
+      case 'pdf':
+        this.exportSvc.toPdf(data, 'invernaderos');
+        break;
 
-    const base = 'invernaderos';
-
-    if (format === 'csv') {
-      this.exportSvc.exportAsCSV(`${base}.csv`, headers, rows);
-    } else if (format === 'excel') {
-      this.exportSvc.exportAsExcel(`${base}.xlsx`, headers, rows);
-    } else {
-      this.exportSvc.exportAsPDF(`${base}.pdf`, headers, rows);
     }
   }
 

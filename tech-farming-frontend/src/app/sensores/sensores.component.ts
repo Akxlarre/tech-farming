@@ -29,7 +29,7 @@ import { InvernaderoService }        from '../invernaderos/invernaderos.service'
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
 import { NotificationService }       from '../shared/services/notification.service';
-import { ExportService }             from '../shared/services/export.service';
+import { ExportService } from '../shared/services/export.service';
 
 @Component({
   selector: 'app-sensores',
@@ -423,6 +423,19 @@ onEdited(updated: Sensor) {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
+<<<<<<< codex/introduce-exportservice-y-refactorizar-exportaciones
+    const data = this.sensoresConLectura.map(s => ({ id: s.id, nombre: s.nombre }));
+    switch (format) {
+      case 'csv':
+        this.exportSvc.toCsv(data, 'sensores');
+        break;
+      case 'excel':
+        this.exportSvc.toExcel(data, 'sensores');
+        break;
+      case 'pdf':
+        this.exportSvc.toPdf(data, 'sensores');
+        break;
+=======
     const headers = ['ID', 'Nombre'];
     const rows = this.sensoresConLectura.map(s => [s.id, s.nombre]);
     if (format === 'csv') {
@@ -431,6 +444,7 @@ onEdited(updated: Sensor) {
       this.exportSvc.exportAsExcel('sensores.xlsx', headers, rows);
     } else {
       this.exportSvc.exportAsPDF('sensores.pdf', headers, rows);
+>>>>>>> tabs
     }
   }
 
