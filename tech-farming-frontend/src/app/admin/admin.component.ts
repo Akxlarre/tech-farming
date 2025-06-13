@@ -44,6 +44,7 @@ interface Usuario {
         [usuarios]="usuariosFiltrados"
         [paginaActual]="paginaActual"
         [totalPaginas]="totalPaginas"
+        [totalUsuarios]="totalUsuarios"
         [loading]="!isDataFullyLoaded"
         [rowCount]="pageSize"
         (paginaCambiada)="cambiarPagina($event)"
