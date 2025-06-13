@@ -16,7 +16,7 @@ def obtener_historial(
     hasta:          str,
     zona_id:        Optional[int] = None,
     sensor_id:      Optional[int] = None,
-    window_every:   str = "5s"
+    window_every:   Optional[str] = "5s"
 ) -> Dict[str, Any]:
     """
     1) Obtiene sólo los IDs de sensores según invernadero/zona/sensor.
@@ -44,6 +44,10 @@ def obtener_historial(
     sensor_ids = [str(id_) for id_ in ids]
     lista      = ",".join(f'"{sid}"' for sid in sensor_ids)
 
+    agg_line = ""
+    if window_every is not None:
+        agg_line = f"  |> aggregateWindow(every: {window_every}, fn: mean, column: \"valor\")\n"
+
     flux = f'''
 from(bucket: "{bucket}")
   |> range(start: {desde}, stop: {hasta})
@@ -61,9 +65,7 @@ from(bucket: "{bucket}")
 
   |> filter(fn: (r) => contains(value: r.sensor_id, set: [{lista}]) and
                       r.parametro == "{tipo_parametro}")
-
-  |> aggregateWindow(every: {window_every}, fn: mean, column: "valor")
-  |> yield(name: "serie")
+{agg_line}  |> yield(name: "serie")
 '''
 
     # 3) Ejecutar Flux y compilar resultados
