@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
       <!-- Arco de fondo -->
       <path
         d="M10,50 A40,40 0 0,1 90,50"
-        stroke="#ddd"
+        stroke="var(--color-base-300, #ddd)"
         stroke-width="10"
         fill="none"
       />
@@ -27,11 +27,11 @@ import { CommonModule } from '@angular/common';
       <line
         x1="50" y1="50"
         [attr.x2]="needleX" [attr.y2]="needleY"
-        stroke="#333"
+        stroke="var(--color-base-content, #333)"
         stroke-width="2"
       />
       <!-- Centro -->
-      <circle cx="50" cy="50" r="3" fill="#333"/>
+        <circle cx="50" cy="50" r="3" fill="var(--color-base-content, #333)"/>
     </svg>
   `,
   styles: [`
