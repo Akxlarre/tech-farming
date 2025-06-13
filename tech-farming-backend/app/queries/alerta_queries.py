@@ -137,60 +137,12 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     # --- Lógica de envío WhatsApp ---
     usuarios_a_notificar = Usuario.query.filter(Usuario.telefono.isnot(None)).all()
     for u in usuarios_a_notificar:
-        if not u.recibe_notificaciones:
-            print(f"[WHATSAPP DEBUG] Usuario {u.nombre} tiene notificaciones desactivadas")
-            continue
-
-        print(f"[WHATSAPP DEBUG] Evaluando usuario: {u.nombre}")
-
-        alerta_antigua = (
-            Alerta.query
-            .filter_by(sensor_parametro_id=sensor_parametro_id, tipo="Umbral")
-            .order_by(Alerta.fecha_hora.desc())
-            .first()
-        )
-
-        enviar = True
-
-        if alerta_antigua:
-            print(f"[WHATSAPP DEBUG] Última alerta encontrada: {alerta_antigua.id} ({alerta_antigua.estado})")
-            if alerta_antigua.estado == "Resuelta":
-                if alerta_antigua.fecha_resolucion:
-                    fecha_res = alerta_antigua.fecha_resolucion
-                    if fecha_res.tzinfo is None:
-                        print(f"[WHATSAPP DEBUG] Fecha resolución sin tzinfo, asumiendo UTC")
-                        fecha_res = fecha_res.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
-
-                    delta = (timestamp - fecha_res).total_seconds() / 60
-                    print(f"[WHATSAPP DEBUG] Tiempo desde resolución: {delta:.2f} minutos")
-                    print(f"[WHATSAPP DEBUG] Cooldown permitido: {u.cooldown_post_resolucion} minutos")
-
-                    if delta < u.cooldown_post_resolucion:
-                        print(f"[WHATSAPP DEBUG] Dentro del cooldown post resolución. No se enviará a {u.nombre}")
-                        enviar = False
-            else:
-                fecha_ant = alerta_antigua.fecha_hora
-                if fecha_ant.tzinfo is None:
-                    print(f"[WHATSAPP DEBUG] Fecha alerta activa sin tzinfo, asumiendo UTC")
-                    fecha_ant = fecha_ant.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
-
-                delta = (timestamp - fecha_ant).total_seconds() / 60
-                print(f"[WHATSAPP DEBUG] Tiempo desde alerta activa: {delta:.2f} minutos")
-                print(f"[WHATSAPP DEBUG] Frecuencia permitida: {u.alertas_cada_minutos} minutos")
-
-                if delta < u.alertas_cada_minutos:
-                    print(f"[WHATSAPP DEBUG] No ha pasado el tiempo suficiente para notificar a {u.nombre}")
-                    enviar = False
-
-        if enviar:
-            try:
-                telefono = u.telefono.strip()
-                print(f"[WHATSAPP] Enviando mensaje a {telefono} ({u.nombre})...\n{mensaje_whatsapp}")
-                enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
-            except Exception as e:
-                print(f"[WHATSAPP] Error enviando mensaje a {u.nombre}: {e}")
-        else:
-            print(f"[WHATSAPP DEBUG] Mensaje a {u.nombre} no enviado por reglas de frecuencia o cooldown.\n")
+        try:
+            telefono = u.telefono.strip()
+            print(f"[WHATSAPP] Enviando alerta a {u.nombre} ({telefono})...\n{mensaje_whatsapp}")
+            enviar_whatsapp(mensaje_whatsapp, f"whatsapp:{telefono}")
+        except Exception as e:
+            print(f"[WHATSAPP] ❌ Error al enviar a {u.nombre}: {e}")
 
     # Crear alerta
     alerta = Alerta(
@@ -286,7 +238,13 @@ def listar_alertas(filtros: dict):
                     a.fecha_hora.replace(tzinfo=timezone.utc)
                     .astimezone(ZoneInfo("America/Santiago"))
                     .isoformat()
-        ),
+                ),
+                "fecha_resolucion": (
+                    a.fecha_resolucion.replace(tzinfo=timezone.utc)
+                    .astimezone(ZoneInfo("America/Santiago"))
+                    .isoformat()
+                    if a.fecha_resolucion else None
+                ),
                 "estado": a.estado,
                 "resuelta_por": f"{a.usuario_resolutor.nombre} {a.usuario_resolutor.apellido}" if a.usuario_resolutor else None
             } for a in paginated.items

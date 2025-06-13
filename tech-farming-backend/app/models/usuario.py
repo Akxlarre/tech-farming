@@ -10,8 +10,6 @@ class Usuario(db.Model):
     telefono = db.Column(db.String(14), unique=True, nullable=True)
     avatar_url = db.Column(db.String(200), nullable=True)
     recibe_notificaciones = db.Column(db.Boolean, default=True)
-    alertas_cada_minutos = db.Column(db.Numeric, default=10)
-    cooldown_post_resolucion = db.Column(db.Numeric, default=120)
     rol_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     usuario_admin_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     supabase_uid = db.Column(db.UUID(as_uuid=True), unique=True, nullable=False)

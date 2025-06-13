@@ -46,8 +46,6 @@ export class PerfilService {
 
   async actualizarNotificaciones(uid: string, cambios: {
     recibe_notificaciones: boolean;
-    alertas_cada_minutos: number;
-    cooldown_post_resolucion: number;
   }) {
     const { error } = await this._supabaseClient
       .from('usuarios')

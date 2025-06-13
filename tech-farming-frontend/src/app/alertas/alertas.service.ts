@@ -12,6 +12,7 @@ export interface Alerta {
   nivel: 'Advertencia' | 'Crítico';
   valor_detectado: number;
   fecha_hora: string;
+  fecha_resolucion?: string;
   mensaje: string;
   estado: 'Activa' | 'Resuelta';
   resuelta_por?: string;
