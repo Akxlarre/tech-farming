@@ -83,6 +83,5 @@
   .pulse-alerta {
     animation: pulse-alerta 1.5s ease-in-out infinite;
   }
-/* Ensure red alerts have visible border */
-.alert-error { border: var(--border) solid var(--color-error); }
+
 
