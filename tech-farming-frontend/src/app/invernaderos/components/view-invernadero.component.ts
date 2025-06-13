@@ -1385,7 +1385,7 @@ import { AlertService } from '../../alertas/alertas.service';
             descripcion: z.descripcion,
             activo: z.activo,
             creado_en: z.creado_en,
-            sensores_count: Array.isArray(z.sensores) ? z.sensores.length : 0,
+            sensores_count: z.sensores_count ?? (Array.isArray(z.sensores) ? z.sensores.length : 0),
             sensores: z.sensores
           }))
         } as InvernaderoDetalle;
@@ -1417,7 +1417,7 @@ import { AlertService } from '../../alertas/alertas.service';
               descripcion: z.descripcion,
               activo: z.activo,
               creado_en: z.creado_en,
-              sensoresCount: Array.isArray(z.sensores) ? z.sensores.length : 0
+              sensoresCount: (z as any).sensores_count ?? (Array.isArray((z as any).sensores) ? (z as any).sensores.length : 0)
             }));
           }),
           catchError((err) => {
