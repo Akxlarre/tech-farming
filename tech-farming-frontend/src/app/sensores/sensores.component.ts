@@ -50,6 +50,7 @@ import { NotificationService }       from '../shared/services/notification.servi
     <!-- HEADER -->
     <app-sensor-header
       (create)="modal.openModal('create')"
+      (exportar)="onExport($event)"
       [puedeCrear]="puedeCrear">
     </app-sensor-header>
 
@@ -417,6 +418,21 @@ onEdited(updated: Sensor) {
   onCloseModal() {
     this.modal.closeWithAnimation();
     this.loadPage(this.currentPage);
+  }
+
+  onExport(format: 'pdf' | 'excel' | 'csv') {
+    if (format === 'csv') {
+      const csv = this.sensoresConLectura.map(s => `${s.id},${s.nombre}`).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sensores.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      console.log(`Exportar ${format} aún no implementado`);
+    }
   }
 
   trackBySensorId(_i: any, s: Sensor) {

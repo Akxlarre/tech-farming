@@ -53,8 +53,9 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
     <section class="space-y-6">
 
       <!-- HEADER + BOTON “Crear” -->
-      <app-invernadero-header 
+      <app-invernadero-header
         (create)="open('create')"
+        (exportar)="onExport($event)"
         [puedeCrear]="puedeCrear">
       </app-invernadero-header>
 
@@ -430,6 +431,21 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
     if (this.loadCount === 0) {
       this.loading = false;
       this.initialLoad = false;
+    }
+  }
+
+  onExport(format: 'pdf' | 'excel' | 'csv') {
+    if (format === 'csv') {
+      const csv = this.invernaderos.map(i => `${i.id},${i.nombre}`).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'invernaderos.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      console.log(`Exportar ${format} aún no implementado`);
     }
   }
 

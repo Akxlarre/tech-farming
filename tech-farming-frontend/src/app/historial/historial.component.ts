@@ -31,7 +31,7 @@ import { HistorialHeaderComponent } from './components/historial-header.componen
 
       <app-historial-header
         [title]="'Historial de Variables'"
-        (exportCsv)="exportCsv()"
+        (exportar)="onExport($event)"
       ></app-historial-header>
       <!-- COMPONENTE DE FILTROS -->
       <app-filtro-global (filtrosSubmit)="onFiltrosAplicados($event)"></app-filtro-global>
@@ -200,17 +200,22 @@ export class HistorialComponent implements OnInit {
   }
 
   /**
-   * Exporta a CSV la serie actual (si existe historial).
+   * Maneja la exportación según el formato elegido.
    */
-  exportCsv() {
+  onExport(format: 'pdf' | 'excel' | 'csv') {
     if (!this.historial) return;
-    const csv = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'historial.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+
+    if (format === 'csv') {
+      const csv = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'historial.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      console.log(`Exportar ${format} aún no implementado`);
+    }
   }
 }
