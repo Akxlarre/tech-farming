@@ -13,10 +13,11 @@ import { LineChartComponent } from './components/line-chart.component';
 import { AlertCardComponent } from './components/alert-card.component';
 import { TabsPanelComponent } from './components/tabs-panel.component';
 import { FooterComponent } from './components/footer.component';
+import { ZonaPredCardComponent } from './components/zona-pred-card.component';
 import { DashboardService } from './services/dashboard.service';
 import { NotificationService } from '../shared/services/notification.service';
-import { Invernadero, Zona, Sensor, Alerta } from '../models';
-import { finalize } from 'rxjs';
+import { Invernadero, Zona, Sensor, Alerta, Summary, Trend } from '../models';
+import { finalize, forkJoin, map } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -29,6 +30,7 @@ import { finalize } from 'rxjs';
     AlertCardComponent,
     TabsPanelComponent,
     FooterComponent,
+    ZonaPredCardComponent,
   ],
   template: `
     <div *ngIf="!loading; else loadingTpl" class="flex flex-col h-full bg-base-200">
@@ -266,26 +268,46 @@ import { finalize } from 'rxjs';
 
             <!-- Tab “Predicciones” -->
             <ng-container *ngIf="tabActiva === 'predicciones'">
-              <ng-container *ngIf="predicciones.length; else sinPredicciones">
-                <div class="space-y-3 pb-4">
-                  <div
-                    *ngFor="let p of predicciones"
-                    class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <p class="font-semibold text-base-content">
-                      Predicción a {{ p.intervalo }}h: {{ p.valor }} {{ getUnidad(p.variable) }}
-                    </p>
-                    <p class="text-sm text-base-content/60">Confianza: {{ p.confianza }}%</p>
-                    <p class="text-sm text-base-content/60">Recomendación: {{ p.recomendacion }}</p>
-                  </div>
+              <div class="flex justify-center mb-4">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button class="btn btn-sm" [ngClass]="{ 'btn-success': predIntervalo === 6, 'btn-outline': predIntervalo !== 6 }" (click)="setPredIntervalo(6)">6h</button>
+                  <button class="btn btn-sm" [ngClass]="{ 'btn-success': predIntervalo === 12, 'btn-outline': predIntervalo !== 12 }" (click)="setPredIntervalo(12)">12h</button>
+                  <button class="btn btn-sm" [ngClass]="{ 'btn-success': predIntervalo === 24, 'btn-outline': predIntervalo !== 24 }" (click)="setPredIntervalo(24)">24h</button>
+                </div>
+              </div>
+
+              <ng-container *ngIf="predLoading">
+                <div class="flex items-center justify-center py-8">
+                  <svg class="animate-spin w-8 h-8 text-success mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
                 </div>
               </ng-container>
-              <ng-template #sinPredicciones>
-                <div class="text-center text-base-content/60 py-8">
-                  <i class="ri-calendar-event-line text-3xl text-info mb-2" aria-hidden="true"></i>
-                  <p>Selecciona intervalo para ver predicciones.</p>
-                </div>
-              </ng-template>
+
+              <ng-container *ngIf="!predLoading">
+                <ng-container *ngIf="zonaPreds.length; else sinPreds">
+                  <div class="space-y-4 pb-4">
+                    <app-zona-pred-card
+                      *ngFor="let z of paginatedZonaPreds"
+                      [zonaNombre]="z.zona.nombre"
+                      [preds]="z.predicciones"
+                      [projectionLabel]="predIntervaloLabel"
+                    ></app-zona-pred-card>
+                  </div>
+                  <div class="flex justify-center items-center gap-4 mt-4" *ngIf="totalPredPages > 1">
+                    <button class="btn btn-sm" (click)="prevPredPage()" [disabled]="predPage === 1">Anterior</button>
+                    <span>Página {{ predPage }} / {{ totalPredPages }}</span>
+                    <button class="btn btn-sm" (click)="nextPredPage()" [disabled]="predPage === totalPredPages">Siguiente</button>
+                  </div>
+                </ng-container>
+                <ng-template #sinPreds>
+                  <div class="text-center text-base-content/60 py-8">
+                    <i class="ri-calendar-event-line text-3xl text-info mb-2" aria-hidden="true"></i>
+                    <p>No hay predicciones disponibles.</p>
+                  </div>
+                </ng-template>
+              </ng-container>
             </ng-container>
 
             <!-- Tab “Acciones” -->
@@ -464,14 +486,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }> = [];
   resolviendoId: number | null = null;
 
-  // ───────── PREDICCIONES SIMULADAS ─────────
-  predicciones: {
-    intervalo: 6 | 12 | 24;
-    valor: number;
-    confianza: number;
-    recomendacion: string;
-    variable: 'Temperatura' | 'Humedad' | 'Nitrógeno';
-  }[] = [];
+  // ───────── PREDICCIONES POR ZONA ─────────
+  predIntervalo: 6 | 12 | 24 = 6;
+  zonaPreds: Array<{
+    zona: Zona;
+    predicciones: Array<{ parametro: string; summary: Summary; trend: Trend }>;
+  }> = [];
+  predPage = 1;
+  readonly predPageSize = 5;
+  predLoading = false;
 
   // ───────── TAB ACTIVA ─────────
   tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
@@ -498,17 +521,20 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     this.updateEstadoCard();
     this.cargarZonasYsensores();
     this.cargarAlertas();
+    this.cargarPredicciones();
   }
 
   onZonaChange(): void {
     this.cargarAlertas();
     this.cambiarIntervalo(this.intervaloSeleccionado);
+    this.cargarPredicciones();
   }
 
   aplicarFiltros(): void {
     this.cargarZonasYsensores();
     this.cargarAlertas();
     this.cambiarIntervalo(this.intervaloSeleccionado);
+    this.cargarPredicciones();
   }
 
   onSensorChange(): void {
@@ -785,6 +811,90 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       arr.push(`${dia}/${mes}`);
     }
     return arr;
+  }
+
+  // ──────────── PREDICCIONES ────────────
+  setPredIntervalo(h: 6 | 12 | 24) {
+    if (this.predIntervalo !== h) {
+      this.predIntervalo = h;
+      this.predPage = 1;
+      this.cargarPredicciones();
+    }
+  }
+
+  get predIntervaloLabel(): string {
+    return `${this.predIntervalo}h`;
+  }
+
+  get totalPredPages(): number {
+    return Math.max(1, Math.ceil(this.zonaPreds.length / this.predPageSize));
+  }
+
+  get paginatedZonaPreds() {
+    const start = (this.predPage - 1) * this.predPageSize;
+    return this.zonaPreds.slice(start, start + this.predPageSize);
+  }
+
+  nextPredPage() {
+    if (this.predPage < this.totalPredPages) this.predPage++;
+  }
+
+  prevPredPage() {
+    if (this.predPage > 1) this.predPage--;
+  }
+
+  cargarPredicciones() {
+    if (!this.filtros.invernaderoId) return;
+
+    const zonas = this.filtros.zonaId
+      ? (this.zonasMap[this.filtros.invernaderoId] || []).filter(z => z.id === this.filtros.zonaId)
+      : (this.zonasMap[this.filtros.invernaderoId] || []);
+    if (!zonas.length) {
+      this.zonaPreds = [];
+      return;
+    }
+
+    const obs = zonas.map(z =>
+      forkJoin([
+        this.dashSvc.getPredicciones({
+          invernaderoId: this.filtros.invernaderoId!,
+          zonaId: z.id,
+          horas: this.predIntervalo,
+          parametro: 'Temperatura'
+        }),
+        this.dashSvc.getPredicciones({
+          invernaderoId: this.filtros.invernaderoId!,
+          zonaId: z.id,
+          horas: this.predIntervalo,
+          parametro: 'Humedad'
+        }),
+        this.dashSvc.getPredicciones({
+          invernaderoId: this.filtros.invernaderoId!,
+          zonaId: z.id,
+          horas: this.predIntervalo,
+          parametro: 'K'
+        })
+      ]).pipe(
+        map(([t, h, k]) => ({
+          zona: z,
+          predicciones: [
+            { parametro: 'Temperatura', summary: t.summary, trend: t.trend },
+            { parametro: 'Humedad', summary: h.summary, trend: h.trend },
+            { parametro: 'Potasio', summary: k.summary, trend: k.trend }
+          ]
+        }))
+      )
+    );
+
+    this.predLoading = true;
+    forkJoin(obs)
+      .pipe(finalize(() => (this.predLoading = false)))
+      .subscribe({
+        next: list => {
+          this.zonaPreds = list;
+        },
+        error: () => this.notify.error('Error al cargar predicciones')
+      });
   }
 
   private startLoading(): void {
