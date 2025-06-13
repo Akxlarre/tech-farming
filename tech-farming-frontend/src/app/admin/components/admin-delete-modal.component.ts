@@ -18,6 +18,7 @@ import { AdminService } from '../admin.service';
         [(ngModel)]="confirmText"
         placeholder="Escribe aquí para confirmar"
       />
+      <p *ngIf="errorMessage" class="text-error text-sm">{{ errorMessage }}</p>
       <div class="flex justify-end space-x-2 pt-2">
         <button class="btn btn-ghost" (click)="cancel.emit()" [disabled]="loading">Cancelar</button>
         <button class="btn btn-error" [disabled]="!canDelete || loading" (click)="onDelete()">Eliminar</button>
@@ -33,6 +34,7 @@ export class AdminDeleteModalComponent {
 
   confirmText = '';
   loading = false;
+  errorMessage = '';
 
   constructor(private svc: AdminService) {}
 
@@ -43,11 +45,12 @@ export class AdminDeleteModalComponent {
   onDelete() {
     if (this.loading) return;
     this.loading = true;
+    this.errorMessage = '';
     this.svc.eliminarTrabajador(this.usuarioId).subscribe({
       next: () => this.deleted.emit(this.usuarioId),
-      error: () => {
+      error: err => {
         this.loading = false;
-        alert('No se pudo eliminar el usuario.');
+        this.errorMessage = err?.error?.error || 'No se pudo eliminar el usuario.';
       }
     });
   }
