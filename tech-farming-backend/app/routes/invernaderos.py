@@ -60,6 +60,8 @@ def listar_invernaderos():
 
             hay_alertas = alertas_activas > 0
 
+            hay_alertas = alertas_activas > 0
+
             # 6) Formatear el texto de “estado”
             if alertas_activas == 0:
                 estado = "Sin alertas"
@@ -162,6 +164,8 @@ def estados_alerta():
                 nivel_alerta = 'Advertencia'
             else:
                 nivel_alerta = None
+
+            hay_alertas = alertas_activas > 0
 
             hay_alertas = alertas_activas > 0
 
