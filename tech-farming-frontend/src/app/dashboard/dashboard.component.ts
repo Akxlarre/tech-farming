@@ -319,29 +319,7 @@ interface ZoneSummary {
                   <p>No hay predicciones para la zona seleccionada.</p>
                 </div>
               </ng-template>
-            </ng-container>
-
-            <!-- Tab “Acciones” -->
-            <ng-container *ngIf="tabActiva === 'acciones'">
-              <div class="space-y-3 pb-4">
-                <div
-                  class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                  <p class="font-semibold text-base-content">
-                    Aumentar ventilación si temperatura > 28 °C
-                  </p>
-                  <p class="text-sm text-base-content/60">Recomendación generada automáticamente.</p>
-                </div>
-                <div
-                  class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                  <p class="font-semibold text-base-content">
-                    Revisar nivel de fertilizante si Nitrógeno > 10 ppm
-                  </p>
-                  <p class="text-sm text-base-content/60">Recomendación IA basada en histórico.</p>
-                </div>
-              </div>
-            </ng-container>
+            </ng-container> 
           </div>
         </div>
       </section>
@@ -502,7 +480,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   predIntervalo: 6 | 12 | 24 = 6;
 
   // ───────── TAB ACTIVA ─────────
-  tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
+  tabActiva: 'alertas' | 'predicciones' = 'alertas';
 
   constructor(
     private dashSvc: DashboardService,
