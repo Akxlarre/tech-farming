@@ -40,8 +40,9 @@ interface Usuario {
             <td>{{ u.puedeEditar ? '✔️' : '❌' }}</td>
             <td>{{ u.puedeCrear ? '✔️' : '❌' }}</td>
             <td>{{ u.puedeEliminar ? '✔️' : '❌' }}</td>
-            <td class="text-center">
+            <td class="text-center space-x-2">
               <button class="btn btn-sm btn-outline" (click)="editarUsuario.emit(u)">Editar</button>
+              <button class="btn btn-sm btn-error" (click)="eliminarUsuario.emit(u)">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -98,6 +99,7 @@ export class AdminTableComponent {
   @Input() rowCount = 5;
   @Output() paginaCambiada = new EventEmitter<number>();
   @Output() editarUsuario = new EventEmitter<Usuario>();
+  @Output() eliminarUsuario = new EventEmitter<Usuario>();
 
   irPagina(p: number) {
     if (p < 1 || p > this.totalPaginas) return;

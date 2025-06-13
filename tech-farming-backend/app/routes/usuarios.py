@@ -130,3 +130,14 @@ def actualizar_permisos(usuario_id):
 
     db.session.commit()
     return jsonify({"mensaje": "Permisos actualizados correctamente"}), 200
+
+@router.route('/trabajadores/<int:usuario_id>', methods=['DELETE'])
+def eliminar_trabajador(usuario_id):
+    usuario = Usuario.query.get_or_404(usuario_id, description="Usuario no encontrado")
+    try:
+        db.session.delete(usuario)
+        db.session.commit()
+        return '', 204
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "No se pudo eliminar el usuario"}), 500
