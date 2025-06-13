@@ -19,7 +19,7 @@ export class ExportService {
         .join(','))
     ].join('\n');
 
-    const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(["\uFEFF" + csvRows], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, `${filename}.csv`);
   }
 

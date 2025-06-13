@@ -224,7 +224,7 @@ export class HistorialComponent implements OnInit {
       const seriesHeader = `\nFecha,${this.textoParametro}\n`;
       const series = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
       const csv = header + stats + seriesHeader + series;
-      const blob = new Blob([csv], { type: 'text/csv' });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
