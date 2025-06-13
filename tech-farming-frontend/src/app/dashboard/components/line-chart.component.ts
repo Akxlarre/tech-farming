@@ -5,7 +5,8 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
-  OnDestroy
+  OnDestroy,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -41,6 +42,8 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   private chartInstance!: Chart<'line', number[], string>;
   public chartReady = false;
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   ngOnInit(): void {
     // No se crea el gráfico aquí porque el canvas aún no está en el DOM
   }
@@ -48,6 +51,7 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Crear el gráfico cuando el canvas esté disponible
     this.createChart();
+    this.cdr.detectChanges();
   }
 
   private createChart(): void {
