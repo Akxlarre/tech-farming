@@ -54,13 +54,23 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
     const ctx = this.chartCanvas.nativeElement.getContext('2d') as ChartItem;
     const isDarkMode = document.documentElement.classList.contains('dark');
 
-    // Obtener colores de variables CSS definidas por DaisyUI / Tailwind
-    const successColor = this.getTailwindColor('--color-success') || '#2B6B4A';
-    const infoColor = this.getTailwindColor('--color-info') || '#3182CE';
-    const secondaryColor = this.getTailwindColor('--color-secondary') || '#4C51BF';
-    const baseTextColor =
-      this.getTailwindColor('--color-base-content') ||
-      (isDarkMode ? '#FFFFFF' : '#333333');
+    // Obtener colores de variables CSS definidas por DaisyUI / Tailwind y normalizarlos
+    const successColor = this.normalizeColor(
+      this.getTailwindColor('--color-success'),
+      '#2B6B4A'
+    );
+    const infoColor = this.normalizeColor(
+      this.getTailwindColor('--color-info'),
+      '#3182CE'
+    );
+    const secondaryColor = this.normalizeColor(
+      this.getTailwindColor('--color-secondary'),
+      '#4C51BF'
+    );
+    const baseTextColor = this.normalizeColor(
+      this.getTailwindColor('--color-base-content'),
+      isDarkMode ? '#FFFFFF' : '#333333'
+    );
 
     // Elegir color según la variable actual
     let borderColor = successColor;
@@ -187,7 +197,8 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
    * Convierte un color en hex (#RRGGBB o #RGB) + alpha en formato rgba().
    */
   private hexToRgba(hex: string, alpha: number): string {
-    let c = hex.replace('#', '');
+    const hexColor = this.normalizeColor(hex, '#000000');
+    let c = hexColor.replace('#', '');
     if (c.length === 3) {
       c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
     }
@@ -203,6 +214,35 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   private getTailwindColor(varName: string): string | null {
     const val = getComputedStyle(document.documentElement).getPropertyValue(varName);
     return val ? val.trim() : null;
+  }
+
+  /**
+   * Normaliza un color obtenido de CSS a formato hexadecimal. Si no es válido,
+   * retorna el fallback proporcionado.
+   */
+  private normalizeColor(color: string | null, fallback: string): string {
+    if (!color) return fallback;
+    const trimmed = color.trim();
+    if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = trimmed;
+      const computed = ctx.fillStyle;
+      if (/^#([0-9A-Fa-f]{6})$/.test(computed)) {
+        return computed;
+      }
+      const rgb = computed.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (rgb) {
+        const r = (+rgb[1]).toString(16).padStart(2, '0');
+        const g = (+rgb[2]).toString(16).padStart(2, '0');
+        const b = (+rgb[3]).toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`;
+      }
+    }
+    return fallback;
   }
 
   /**
