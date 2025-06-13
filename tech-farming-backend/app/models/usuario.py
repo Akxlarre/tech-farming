@@ -9,6 +9,7 @@ class Usuario(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=True)
     telefono = db.Column(db.String(14), unique=True, nullable=True)
     avatar_url = db.Column(db.String(200), nullable=True)
+    recibe_notificaciones = db.Column(db.Boolean, default=True)
     rol_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     usuario_admin_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     supabase_uid = db.Column(db.UUID(as_uuid=True), unique=True, nullable=False)

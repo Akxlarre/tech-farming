@@ -1,28 +1,27 @@
 import { Component, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UmbralModalService } from '../umbral-modal.service';
+import { AlertasModalService } from '../alertas-modal.service';
+import { AlertNotificationsComponent } from './alertas-notificaciones.component';
 
 @Component({
-  selector: 'app-umbral-modal-wrapper',
+  selector: 'app-alertas-modal-wrapper',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AlertNotificationsComponent],
   template: `
     <dialog class="modal" open (click)="onOverlayClick($event)">
-
       <div
         #modalContent
-        class="modal-box bg-base-100 rounded-2xl shadow-xl w-full max-w-[95vw] sm:max-w-4xl overflow-auto"
+        class="modal-box bg-base-100 rounded-2xl shadow-xl w-full max-w-[95vw] sm:max-w-2xl overflow-auto"
       >
-        <ng-content></ng-content>
+        <app-alerts-notifications-modal></app-alerts-notifications-modal>
       </div>
     </dialog>
-  `,
-  styles: []
+  `
 })
-export class UmbralModalWrapperComponent {
+export class AlertasModalWrapperComponent {
   @ViewChild('modalContent', { static: true }) modalContent!: ElementRef;
 
-  constructor(public modal: UmbralModalService) {}
+  constructor(public modal: AlertasModalService) {}
 
   @HostListener('document:keydown.escape')
   onEsc() {
