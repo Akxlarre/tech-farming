@@ -7,6 +7,7 @@ export interface Zona {
   descripcion?: string;
   activo: boolean;
   creado_en: string;
+  sensores_count?: number;
   sensores?: Sensor[];  // Lista de sensores en esta zona
 }
 

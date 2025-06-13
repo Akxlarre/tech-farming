@@ -7,6 +7,7 @@ export interface Zona {
   id: number;
   nombre: string;
   invernaderoId: number;
+  sensores_count?: number;
 }
 
 export interface Sensor {
