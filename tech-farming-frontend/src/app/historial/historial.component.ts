@@ -15,6 +15,7 @@ import { FiltroComponent } from './components/filtro.component';
 import { LineChartComponent } from './components/line-chart.component';
 import { StatsCardComponent } from './components/stats-card.component';
 import { HistorialHeaderComponent } from './components/historial-header.component';
+import { ExportService } from '../shared/services/export.service';
 
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -168,6 +169,7 @@ export class HistorialComponent implements OnInit {
   lastParams?: HistorialParams;
 
   constructor(private historialService: HistorialService) { }
+
 
   ngOnInit() {
     // Pre-cargamos la lista de Tipos de Parámetro
