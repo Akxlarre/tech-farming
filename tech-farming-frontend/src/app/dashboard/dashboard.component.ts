@@ -3,7 +3,8 @@ import {
   Component,
   OnInit,
   AfterViewInit,
-  ViewChild
+  ViewChild,
+  OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -374,7 +375,7 @@ interface ZoneSummary {
     `,
   ],
 })
-export class DashboardPageComponent implements OnInit, AfterViewInit {
+export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy {
   // ───────── FILTROS ─────────
   invernaderos: Invernadero[] = [];
   zonasMap: Record<number, Zona[]> = {};
@@ -397,6 +398,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   sparkNit = { labels: [] as string[], data: [] as number[] };
   sparkSens = { labels: [] as string[], data: [] as number[] };
   private readonly LECTURA_MAX_AGE_MS = 60 * 60 * 1000; // 1h
+  private autoRefreshId: any = null;
 
   kpiCards: Array<{
     label: string;
@@ -504,6 +506,9 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     // Forzamos que el gráfico se redibuje con estilo y datos iniciales
     this.cambiarIntervalo(this.intervaloSeleccionado);
+    this.autoRefreshId = setInterval(() => {
+      this.cambiarIntervalo(this.intervaloSeleccionado);
+    }, 60_000);
   }
 
   // ───────── FILTROS ─────────
@@ -887,5 +892,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   private updateFormattedLastUpdate(): void {
     const opts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
     this.formattedLastUpdate = this.ultimaActualizacion.toLocaleTimeString([], opts);
+  }
+
+  ngOnDestroy(): void {
+    if (this.autoRefreshId) {
+      clearInterval(this.autoRefreshId);
+      this.autoRefreshId = null;
+    }
   }
 }
