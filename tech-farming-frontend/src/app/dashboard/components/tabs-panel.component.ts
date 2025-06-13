@@ -64,48 +64,23 @@ import { CommonModule } from '@angular/common';
       >
         Predicciones
       </button>
-
-      <!-- Pestaña “Acciones” -->
-      <button
-        id="tab-acciones-btn"
-        role="tab"
-        class="
-          tab flex-1 text-center 
-          py-2 
-          text-sm font-medium 
-          transition-colors duration-200 
-          focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-1
-        "
-        [ngClass]="{
-          'tab-active text-success bg-base-50 dark:bg-base-900': activeTab === 'acciones',
-          'text-base-content/70 hover:text-base-content dark:text-base-content/50 dark:hover:text-base-content/80': activeTab !== 'acciones'
-        }"
-        [attr.aria-selected]="activeTab === 'acciones'"
-        [attr.tabindex]="activeTab === 'acciones' ? 0 : -1"
-        aria-controls="tab-acciones"
-        (click)="onTabClick('acciones')"
-        (keydown)="onKeyDown($event, 'acciones')"
-      >
-        Acciones
-      </button>
     </div>
   `,
 })
 export class TabsPanelComponent {
-  @Input() activeTab!: 'alertas' | 'predicciones' | 'acciones';
-  @Output() activeTabChange = new EventEmitter<'alertas' | 'predicciones' | 'acciones'>();
+  @Input() activeTab!: 'alertas' | 'predicciones';
+  @Output() activeTabChange = new EventEmitter<'alertas' | 'predicciones'>();
 
-  onTabClick(tab: 'alertas' | 'predicciones' | 'acciones') {
+  onTabClick(tab: 'alertas' | 'predicciones') {
     if (this.activeTab !== tab) {
       this.activeTabChange.emit(tab);
     }
   }
 
-  onKeyDown(event: KeyboardEvent, tab: 'alertas' | 'predicciones' | 'acciones') {
-    const tabsOrder: Array<'alertas' | 'predicciones' | 'acciones'> = [
+  onKeyDown(event: KeyboardEvent, tab: 'alertas' | 'predicciones' ) {
+    const tabsOrder: Array<'alertas' | 'predicciones'> = [
       'alertas',
       'predicciones',
-      'acciones',
     ];
     const idx = tabsOrder.indexOf(tab);
 
