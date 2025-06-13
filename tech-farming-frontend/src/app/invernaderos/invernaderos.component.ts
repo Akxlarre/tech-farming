@@ -276,7 +276,7 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
             const inv = this.invernaderos.find(i => i.id === est.id);
             if (inv) {
               inv.estado = est.estado || 'Sin alertas';
-              inv.nivel = est.nivel ?? null;
+              inv.hayAlertas = est.hayAlertas ?? false;
             }
           });
         }

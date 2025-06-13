@@ -40,8 +40,8 @@ def listar_invernaderos():
                 SensorParametro.sensor_id.in_(sensor_ids)
             )
 
-            # 5) Obtener niveles de las alertas activas asociadas a este invernadero
-            alertas = db.session.query(Alerta.nivel).filter(
+            # 5) Contar alertas activas (cualquier nivel)
+            alertas_activas = db.session.query(func.count(Alerta.id)).filter(
                 Alerta.estado == 'Activa',
                 or_(
                     Alerta.sensor_parametro_id.in_(param_ids),
@@ -57,6 +57,8 @@ def listar_invernaderos():
                 nivel_alerta = 'Advertencia'
             else:
                 nivel_alerta = None
+
+            hay_alertas = alertas_activas > 0
 
             # 6) Formatear el texto de “estado”
             if alertas_activas == 0:
@@ -75,7 +77,7 @@ def listar_invernaderos():
                 "zonasActivas":   len(zonas_activas),
                 "sensoresActivos": len(sensores_activos),
                 "estado":         estado,
-                "nivel":          nivel_alerta,
+                "hayAlertas":     hay_alertas,
                 "zonas": [
                     {
                         "id":         z.id,
@@ -143,8 +145,8 @@ def estados_alerta():
             #     Alerta.estado == 'activo'
             # ).count()
 
-            # AHORA:
-            alertas = db.session.query(Alerta.nivel).filter(
+            # AHORA: contar alertas activas sin importar su nivel
+            alertas_activas = db.session.query(func.count(Alerta.id)).filter(
                 Alerta.estado == 'Activa',
                 or_(
                     Alerta.sensor_parametro_id.in_(param_ids),
@@ -161,6 +163,8 @@ def estados_alerta():
             else:
                 nivel_alerta = None
 
+            hay_alertas = alertas_activas > 0
+
             if alertas_activas == 0:
                 estado = "Sin alertas"
             elif alertas_activas == 1:
@@ -171,7 +175,7 @@ def estados_alerta():
             result.append({
                 "id": inv.id,
                 "estado": estado,
-                "nivel": nivel_alerta
+                "hayAlertas": hay_alertas
             })
 
         return jsonify(result), 200

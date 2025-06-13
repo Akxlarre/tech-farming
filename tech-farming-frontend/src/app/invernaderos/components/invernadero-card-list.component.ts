@@ -18,9 +18,8 @@ import { Invernadero } from '../models/invernadero.model';
             <span
               class="badge badge-sm"
               [ngClass]="{
-                'badge-error': inv.nivel === 'Crítico',
-                'badge-warning': inv.nivel === 'Advertencia',
-                'badge-success': !inv.nivel
+                'badge-error': inv.hayAlertas,
+                'badge-success': !inv.hayAlertas
               }"
             >{{ inv.estado }}</span>
           </div>
