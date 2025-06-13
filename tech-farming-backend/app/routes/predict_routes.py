@@ -5,6 +5,7 @@ import pandas as pd
 import joblib
 from flask import Blueprint, request, jsonify
 from datetime import timedelta, datetime
+from zoneinfo import ZoneInfo
 
 from app.config import Config
 from app.queries.prediction_queries import obtener_serie_prediccion
@@ -99,7 +100,7 @@ def predict_from_influx():
         return jsonify({"error": f"parametro inválido (elegir uno de {validos})"}), 400
 
     # Rango de consulta: últimas 24h
-    now = datetime.utcnow()
+    now = datetime.now(ZoneInfo("America/Santiago"))
     desde = (now - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%SZ")
     hasta =  now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -175,7 +176,7 @@ def predict_from_influx():
     avg_fut  = sum(p["value"] for p in future)     / len(future)
     diff_pct = ((avg_fut-avg_hist)/avg_hist)*100
     summary = {
-        "updated": datetime.utcnow().isoformat(),
+        "updated": datetime.now(ZoneInfo("America/Santiago")).isoformat(),
         "text":    f"Predicción de {horas}h de {parametro} en inv.{inv_id}",
         "model":   mname
     }

@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from app import db
 
 class Alerta(db.Model):
@@ -11,7 +12,11 @@ class Alerta(db.Model):
     tipo = db.Column(db.String(50), nullable=False)
     mensaje = db.Column(db.Text, nullable=False)
     valor_detectado = db.Column(db.Numeric, nullable=True)
-    fecha_hora = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    fecha_hora = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(ZoneInfo("America/Santiago")),
+        nullable=False
+    )
     nivel = db.Column(db.String(20))
     estado = db.Column(db.String(20), default="activo", nullable=False)
     fecha_resolucion = db.Column(db.DateTime, nullable=True)

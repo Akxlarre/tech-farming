@@ -4,6 +4,7 @@ from app.queries.alerta_queries import listar_alertas
 from app.models.alerta import Alerta
 from app.utils.auth_supabase import usuario_autenticado_requerido
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 router = Blueprint('alertas', __name__)
 
@@ -41,7 +42,7 @@ def resolver_alerta(alerta_id):
         usuario = g.usuario
         
         alerta.estado = "Resuelta"
-        alerta.fecha_resolucion = datetime.utcnow()
+        alerta.fecha_resolucion = datetime.now(ZoneInfo("America/Santiago"))
         alerta.resuelta_por = usuario.id
         db.session.commit()
 

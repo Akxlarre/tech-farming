@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient, Point
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # Cargar las variables del archivo .env
 load_dotenv()
@@ -35,7 +36,7 @@ def escribir_dato(sensor_id, parametro, valor):
         .tag("sensor_id", sensor_id)
         .field("parametro", parametro)
         .field("valor", valor)
-        .time(datetime.utcnow())
+        .time(datetime.now(ZoneInfo("America/Santiago")))
     )
 
     if Config.client:

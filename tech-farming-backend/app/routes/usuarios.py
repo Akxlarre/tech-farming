@@ -4,6 +4,7 @@ from app.models.usuario import Usuario
 from app.models.usuario_permiso import UsuarioPermiso
 from app.models.rol import Rol
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from supabase import create_client
 from app.utils.auth_supabase import usuario_autenticado_requerido
 import os
@@ -31,7 +32,7 @@ def crear_usuario_desde_supabase():
         supabase_uid=supabase_uid,
         email=email,
         rol_id=1,
-        fecha_creacion=datetime.utcnow()
+        fecha_creacion=datetime.now(ZoneInfo("America/Santiago"))
     )
     db.session.add(nuevo_usuario)
     db.session.flush()
@@ -95,7 +96,7 @@ def invitar_usuario():
         telefono=telefono,
         rol_id=2,
         supabase_uid=supabase_uid,
-        fecha_creacion=datetime.utcnow()
+        fecha_creacion=datetime.now(ZoneInfo("America/Santiago"))
     )
     db.session.add(nuevo_usuario)
     db.session.flush()

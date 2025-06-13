@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from app import db
 
 class Zona(db.Model):
@@ -7,7 +8,10 @@ class Zona(db.Model):
     invernadero_id = db.Column(db.Integer, db.ForeignKey('invernaderos.id'), nullable=False)
     nombre         = db.Column(db.String(100), nullable=False)
     descripcion    = db.Column(db.Text)
-    creado_en      = db.Column(db.DateTime, default=datetime.utcnow)
+    creado_en      = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(ZoneInfo("America/Santiago"))
+    )
     activo         = db.Column(db.Boolean, default=True)
 
     invernadero   = db.relationship(
