@@ -1,9 +1,9 @@
 // src/app/dashboard/services/dashboard.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
-import { Invernadero, Zona, Sensor } from '../../models';
+import { Invernadero, Zona, Sensor, PredicResult } from '../../models';
 import { BatchLectura, TimeSeriesService, HistorialResponse } from '../../sensores/time-series.service';
 import { AlertService, Alerta } from '../../alertas/alertas.service';
 
@@ -83,5 +83,22 @@ export class DashboardService {
 
   resolverAlerta(id: number) {
     return this.alertSvc.resolverAlerta(id);
+  }
+
+  /** GET /api/predict_influx */
+  getPredicciones(params: {
+    invernaderoId: number;
+    zonaId?: number;
+    horas: 6 | 12 | 24;
+    parametro: string;
+  }) {
+    const httpParams = new HttpParams()
+      .set('invernaderoId', params.invernaderoId)
+      .set('horas', params.horas)
+      .set('parametro', params.parametro)
+      .set('zonaId', params.zonaId != null ? params.zonaId : '');
+    return this.http.get<PredicResult>(`${this.apiUrl}/predict_influx`, {
+      params: httpParams
+    });
   }
 }
