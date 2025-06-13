@@ -59,6 +59,14 @@ Algunas alertas históricas se generaron antes de contar con el campo
 `sensor_id`. Por compatibilidad, el listado verifica tanto `Alerta.sensor_id`
 como el sensor asociado al `sensor_parametro` cuando se filtra por sensor.
 
+### Rango de fechas en `/api/historial`
+
+Si se envían las fechas `desde` y `hasta` con el mismo día y ambas en
+`00:00:00`, el backend interpretará que se desea consultar todo ese día y
+extenderá internamente el parámetro `hasta` 24 horas. El componente de filtros
+del frontend ajusta automáticamente la hora de `fechaHasta` a `23:59:59` para
+cubrir la jornada completa.
+
 ## 🌐 Configuración de entorno
 
 La clave de acceso de Supabase ya no se incluye en el código fuente. Antes de
