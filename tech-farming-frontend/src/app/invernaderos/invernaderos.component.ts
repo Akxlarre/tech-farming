@@ -274,7 +274,10 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
           // Solo actualizamos el “estado” en cada invernadero visible
           estados.forEach((est: any) => {
             const inv = this.invernaderos.find(i => i.id === est.id);
-            if (inv) inv.estado = est.estado || 'Sin alertas';
+            if (inv) {
+              inv.estado = est.estado || 'Sin alertas';
+              inv.nivel = est.nivel ?? null;
+            }
           });
         }
       }),
