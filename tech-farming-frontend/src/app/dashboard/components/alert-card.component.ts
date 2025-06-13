@@ -9,10 +9,10 @@ import { CommonModule } from '@angular/common';
   template: `
     <div
       tabindex="0"
-      class="flex items-start rounded-lg p-4 shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1"
+      class="flex items-start rounded-lg p-4 shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 border"
       [ngClass]="{
-        'border border-error bg-error/10 hover:bg-error/20 dark:bg-error/20 dark:hover:bg-error/30 focus:ring-error focus:ring-offset-base-100': nivel === 'critica',
-        'border border-warning bg-warning/10 hover:bg-warning/20 dark:bg-warning/20 dark:hover:bg-warning/30 focus:ring-warning focus:ring-offset-base-100': nivel === 'advertencia'
+        'border-error bg-error/10 hover:bg-error/20 dark:bg-error/20 dark:hover:bg-error/30 focus:ring-error focus:ring-offset-base-100': nivel === 'critica',
+        'border-warning bg-warning/10 hover:bg-warning/20 dark:bg-warning/20 dark:hover:bg-warning/30 focus:ring-warning focus:ring-offset-base-100': nivel === 'advertencia'
       }"
       role="alert"
       aria-live="polite"
