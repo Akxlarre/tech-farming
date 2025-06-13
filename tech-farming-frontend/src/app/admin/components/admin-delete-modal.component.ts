@@ -35,7 +35,6 @@ export class AdminDeleteModalComponent {
   confirmText = '';
   loading = false;
   errorMessage = '';
-
   constructor(private svc: AdminService) {}
 
   get canDelete(): boolean {

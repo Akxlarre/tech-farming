@@ -276,15 +276,35 @@ interface ZoneSummary {
 
             <!-- Tab “Predicciones” -->
             <ng-container *ngIf="tabActiva === 'predicciones'">
+              <div class="flex justify-end mb-4">
+                <div class="btn-group btn-group-sm" role="group" aria-label="Intervalo predicción">
+                  <button
+                    class="btn btn-sm"
+                    [ngClass]="{ 'btn-info': predIntervalo === 6, 'btn-outline': predIntervalo !== 6 }"
+                    (click)="cambiarPredIntervalo(6)"
+                  >6h</button>
+                  <button
+                    class="btn btn-sm"
+                    [ngClass]="{ 'btn-info': predIntervalo === 12, 'btn-outline': predIntervalo !== 12 }"
+                    (click)="cambiarPredIntervalo(12)"
+                  >12h</button>
+                  <button
+                    class="btn btn-sm"
+                    [ngClass]="{ 'btn-info': predIntervalo === 24, 'btn-outline': predIntervalo !== 24 }"
+                    (click)="cambiarPredIntervalo(24)"
+                  >24h</button>
+                </div>
+              </div>
               <ng-container *ngIf="zoneSummaries.length; else sinPredicciones">
                 <div class="space-y-6">
                   <div *ngFor="let zs of zoneSummaries" class="bg-base-100 border rounded-lg p-4">
                     <h3 class="text-lg font-semibold mb-2">{{ zs.zone.nombre }}</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       <app-summary-card
                         *ngFor="let s of zs.summaries"
                         [summary]="s.summary"
-                        [projectionLabel]="intervaloSeleccionado + 'h'"
+                        [projectionLabel]="predIntervalo + 'h'"
+                        [param]="s.param"
                       ></app-summary-card>
                     </div>
                   </div>
@@ -476,6 +496,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
   // ───────── PREDICCIONES POR ZONA ─────────
   zoneSummaries: ZoneSummary[] = [];
+  predIntervalo: 6 | 12 | 24 = 6;
 
   // ───────── TAB ACTIVA ─────────
   tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
@@ -576,8 +597,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
           this.updateFormattedLastUpdate();
           this.loadZoneSummaries();
         },
-        error: () => this.notify.error('Error al cargar historial')
+      error: () => this.notify.error('Error al cargar historial')
       });
+  }
+
+  cambiarPredIntervalo(horas: 6 | 12 | 24): void {
+    this.predIntervalo = horas;
+    this.loadZoneSummaries();
   }
 
   resolverAlerta(id: number) {
@@ -736,7 +762,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
           invernaderoId: this.filtros.invernaderoId!,
           zonaId: zone.id,
           parametro: v.nombre,
-          horas: this.intervaloSeleccionado
+          horas: this.predIntervalo
         }).pipe(
           map(res => ({
             param: v.nombre,
