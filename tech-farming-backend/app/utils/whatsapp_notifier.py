@@ -1,17 +1,18 @@
-from twilio.rest import Client
+import requests
 import os
+from twilio.rest import Client
 
-account_sid = os.getenv("TWILIO_SID")
+""" account_sid = os.getenv("TWILIO_SID")
 auth_token = os.getenv("TWILIO_TOKEN")
-twilio_whatsapp = os.getenv("TWILIO_WHATSAPP_NUMBER")
+twilio_whatsapp = os.getenv("TWILIO_WHATSAPP_NUMBER") """
+ULTRAMSG_INSTANCE_ID = os.getenv("ULTRAMSG_INSTANCE_ID")
+ULTRAMSG_TOKEN = os.getenv("ULTRAMSG_TOKEN")
+print("Instance:", ULTRAMSG_INSTANCE_ID)
+print("Token:", ULTRAMSG_TOKEN)
 
-client = Client(account_sid, auth_token)
+# client = Client(account_sid, auth_token)
 
-def enviar_whatsapp(mensaje: str, numero_destino: str):
-    """
-    Envía un mensaje de WhatsApp usando Twilio Sandbox.
-    El número destino debe ser del tipo: 'whatsapp:+56912345678'
-    """
+""" def enviar_whatsapp(mensaje: str, numero_destino: str):
     try:
         mensaje_enviado = client.messages.create(
             body=mensaje,
@@ -23,3 +24,28 @@ def enviar_whatsapp(mensaje: str, numero_destino: str):
     except Exception as e:
         print(f"[ERROR WHATSAPP] {e}")
         return False
+ """
+
+def enviar_whatsapp(mensaje: str, numero_destino: str):
+    """
+    Envía un mensaje de WhatsApp usando UltraMsg API.
+    El número debe ir como 'whatsapp:+56912345678' o '+56912345678'.
+    """
+    numero = numero_destino.replace("whatsapp:", "").replace(" ", "").strip()
+
+    url = f"https://api.ultramsg.com/{ULTRAMSG_INSTANCE_ID}/messages/chat"
+    payload = {
+        "token": ULTRAMSG_TOKEN,
+        "to": numero,
+        "body": mensaje
+    }
+
+    response = requests.post(url, data=payload)
+    
+    if response.status_code == 200:
+        print(f"[WHATSAPP] ✅ Mensaje enviado a {numero}")
+        return True
+    else:
+        print(f"[WHATSAPP] ❌ Error al enviar a {numero}: {response.text}")
+        return False
+    
