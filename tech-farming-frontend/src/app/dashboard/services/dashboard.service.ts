@@ -92,11 +92,15 @@ export class DashboardService {
     horas: 6 | 12 | 24;
     parametro: string;
   }) {
-    const httpParams = new HttpParams()
-      .set('invernaderoId', params.invernaderoId)
-      .set('horas', params.horas)
-      .set('parametro', params.parametro)
-      .set('zonaId', params.zonaId != null ? params.zonaId : '');
+    let httpParams = new HttpParams()
+      .set('invernaderoId', params.invernaderoId.toString())
+      .set('horas', params.horas.toString())
+      .set('parametro', params.parametro);
+
+    if (params.zonaId != null) {
+      httpParams = httpParams.set('zonaId', params.zonaId.toString());
+    }
+
     return this.http.get<PredicResult>(`${this.apiUrl}/predict_influx`, {
       params: httpParams
     });
