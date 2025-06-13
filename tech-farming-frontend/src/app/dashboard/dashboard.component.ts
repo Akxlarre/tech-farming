@@ -309,28 +309,6 @@ import { finalize, forkJoin, map, catchError, of } from 'rxjs';
                 </ng-template>
               </ng-container>
             </ng-container>
-
-            <!-- Tab “Acciones” -->
-            <ng-container *ngIf="tabActiva === 'acciones'">
-              <div class="space-y-3 pb-4">
-                <div
-                  class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                  <p class="font-semibold text-base-content">
-                    Aumentar ventilación si temperatura > 28 °C
-                  </p>
-                  <p class="text-sm text-base-content/60">Recomendación generada automáticamente.</p>
-                </div>
-                <div
-                  class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                  <p class="font-semibold text-base-content">
-                    Revisar nivel de fertilizante si Nitrógeno > 10 ppm
-                  </p>
-                  <p class="text-sm text-base-content/60">Recomendación IA basada en histórico.</p>
-                </div>
-              </div>
-            </ng-container>
           </div>
         </div>
       </section>
@@ -497,7 +475,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   predLoading = false;
 
   // ───────── TAB ACTIVA ─────────
-  tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
+  tabActiva: 'alertas' | 'predicciones' = 'alertas';
 
   constructor(
     private dashSvc: DashboardService,
@@ -897,7 +875,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       .pipe(finalize(() => (this.predLoading = false)))
       .subscribe({
         next: list => {
-          this.zonaPreds = list.filter(z => z.predicciones.length > 0);
+          this.zonaPreds = list
+            .map(z => ({
+              zona: z.zona,
+              predicciones: z.predicciones.filter(p => p !== null)
+            }))
+            .filter(z => z.predicciones.length > 0);
         },
         error: () => this.notify.error('Error al cargar predicciones')
       });
