@@ -71,6 +71,8 @@ import { SupabaseService } from '../../services/supabase.service';
           </div>
         </div>
 
+        <div *ngIf="error" class="text-error">{{ error }}</div>
+
         <!-- BOTONES -->
         <div class="modal-action mt-6 flex justify-end gap-2">
           <button type="button" (click)="close.emit()" class="btn btn-outline">Cancelar</button>
@@ -123,6 +125,7 @@ export class AdminCreateModalComponent {
       });
 
       if (response.success) {
+        this.error = '';
         this.mensajeConfirmacion = 'Usuario creado correctamente.';
         this.confirmacionVisible = true;
         setTimeout(() => {
