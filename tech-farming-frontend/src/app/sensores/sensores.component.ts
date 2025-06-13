@@ -29,6 +29,8 @@ import { InvernaderoService }        from '../invernaderos/invernaderos.service'
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
 import { NotificationService }       from '../shared/services/notification.service';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-sensores',
@@ -421,8 +423,47 @@ onEdited(updated: Sensor) {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
+    const headers = [
+      'ID',
+      'Nombre',
+      'Tipo de sensor',
+      'Zona',
+      'Invernadero',
+      'Estado',
+      'Última lectura',
+      'Valores'
+    ];
+
+    const rows = this.sensoresConLectura.map(s => {
+      const ult = s.ultimaLectura;
+      let valores = '';
+      if (ult?.parametros?.length) {
+        valores = ult.parametros
+          .map((nombre, idx) => {
+            const valor = Array.isArray(ult.valores) && ult.valores[idx] != null
+              ? ult.valores[idx]
+              : '—';
+            const meta = s.parametros.find(p => p.nombre === nombre);
+            const unidad = meta?.unidad ? ` ${meta.unidad}` : '';
+            return `${nombre}: ${valor}${unidad}`.trim();
+          })
+          .join('; ');
+      }
+      return [
+        s.id,
+        s.nombre,
+        s.tipo_sensor.nombre,
+        s.zona?.nombre ?? '',
+        s.invernadero?.nombre ?? '',
+        s.alertaActiva ? 'Alerta' : s.estado,
+        ult?.time ? new Date(ult.time).toLocaleString() : '',
+        valores
+      ];
+    });
+
     if (format === 'csv') {
-      const csv = this.sensoresConLectura.map(s => `${s.id},${s.nombre}`).join('\n');
+      const escape = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -430,8 +471,21 @@ onEdited(updated: Sensor) {
       a.download = 'sensores.csv';
       a.click();
       URL.revokeObjectURL(url);
-    } else {
-      console.log(`Exportar ${format} aún no implementado`);
+    } else if (format === 'excel') {
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sensores');
+      XLSX.writeFile(workbook, 'sensores.xlsx');
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text(headers.join(' | '), 10, y);
+      y += 10;
+      rows.forEach(row => {
+        doc.text(row.join(' | '), 10, y);
+        y += 10;
+      });
+      doc.save('sensores.pdf');
     }
   }
 
