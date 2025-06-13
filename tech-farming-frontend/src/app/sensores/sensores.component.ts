@@ -28,6 +28,7 @@ import { TipoSensorService }         from './tipos_sensor.service';
 import { InvernaderoService }        from '../invernaderos/invernaderos.service';
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
+import { NotificationService }       from '../shared/services/notification.service';
 
 @Component({
   selector: 'app-sensores',
@@ -235,6 +236,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
     private tiposSvc: TipoSensorService,
     private invSvc: InvernaderoService,
     public  modal: SensorModalService,
+    private notify: NotificationService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -399,11 +401,12 @@ export class SensoresComponent implements OnInit, OnDestroy {
     // aquí manejas solo la creación (token), sin cerrar inmediatamente
   }
 
- onEdited(updated: Sensor) {
-   // refresca la tabla tras guardar edición
-    this.modal.closeWithAnimation();
-    this.loadPage(this.currentPage);
-  }
+onEdited(updated: Sensor) {
+  // refresca la tabla tras guardar edición
+  this.modal.closeWithAnimation();
+  this.loadPage(this.currentPage);
+  this.notify.success('Sensor actualizado correctamente.');
+}
   
   onDeleted(id: number) {
     this.modal.closeWithAnimation();
