@@ -263,6 +263,7 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
     const isDarkMode =
       document.documentElement.getAttribute('data-theme') === 'dark';
 
+
     const successColor = this.normalizeColor(
       this.getTailwindColor('--color-success'),
       '#2B6B4A'

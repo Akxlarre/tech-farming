@@ -437,7 +437,15 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
-    const data = this.invernaderos.map(i => ({ id: i.id, nombre: i.nombre }));
+    const data = this.invernaderos.map(i => ({
+      id: i.id,
+      nombre: i.nombre,
+      descripcion: i.descripcion ?? '',
+      zonasActivas: i.zonasActivas ?? 0,
+      sensoresActivos: i.sensoresActivos ?? 0,
+      estado: i.estado ?? '',
+      creado: new Date(i.creado_en).toLocaleString()
+    }));
     switch (format) {
       case 'csv':
         this.exportSvc.toCsv(data, 'invernaderos');
