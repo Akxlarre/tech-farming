@@ -32,6 +32,7 @@ import { NotificationService }       from '../shared/services/notification.servi
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 
+
 @Component({
   selector: 'app-sensores',
   standalone: true,
@@ -240,6 +241,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
     private invSvc: InvernaderoService,
     public  modal: SensorModalService,
     private notify: NotificationService,
+    private exportSvc: ExportService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 

@@ -13,7 +13,9 @@ import {
 import { InvernaderoModalService } from './invernadero-modal.service';
 
 import { NotificationService } from '../shared/services/notification.service';
+import { ExportService } from '../shared/services/export.service';
 import { SupabaseService } from '../services/supabase.service';
+import { ExportService } from '../shared/services/export.service';
 
 /* Componentes “genéricos” ya existentes */
 import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper.component';
@@ -219,7 +221,8 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
     private svc: InvernaderoService,
     private supaSvc: SupabaseService,
     public modal: InvernaderoModalService,
-    private notify: NotificationService
+    private notify: NotificationService,
+    private exportSvc: ExportService
   ) {}
 
   async ngOnInit() {
@@ -435,17 +438,18 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
-    if (format === 'csv') {
-      const csv = this.invernaderos.map(i => `${i.id},${i.nombre}`).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'invernaderos.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      console.log(`Exportar ${format} aún no implementado`);
+    const data = this.invernaderos.map(i => ({ id: i.id, nombre: i.nombre }));
+    switch (format) {
+      case 'csv':
+        this.exportSvc.toCsv(data, 'invernaderos');
+        break;
+      case 'excel':
+        this.exportSvc.toExcel(data, 'invernaderos');
+        break;
+      case 'pdf':
+        this.exportSvc.toPdf(data, 'invernaderos');
+        break;
+
     }
   }
 
