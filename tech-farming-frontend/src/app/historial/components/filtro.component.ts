@@ -316,8 +316,8 @@ export class FiltroComponent implements OnInit, OnDestroy {
       const desdeStr = group.get('desde')!.value as string;
       const hastaStr = group.get('hasta')!.value as string;
       if (desdeStr && hastaStr) {
-        const desde = new Date(desdeStr);
-        const hasta = new Date(hastaStr);
+        const desde = new Date(`${desdeStr}T00:00:00`);
+        const hasta = new Date(`${hastaStr}T00:00:00`);
         if (desde > hasta) {
           return { rangoInvalido: true };
         }
@@ -336,7 +336,8 @@ export class FiltroComponent implements OnInit, OnDestroy {
     }
 
     const v = this.form.value;
-    const hasta = new Date(v.hasta);
+    // Parseamos las fechas manualmente para respetar la zona horaria local
+    const hasta = new Date(`${v.hasta}T00:00:00`);
     // Al enviar solo la fecha "hasta" se ajusta a las 23:59 para cubrir el día completo
     hasta.setHours(23, 59, 59, 999);
 
@@ -345,7 +346,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
       zonaId:          v.zonaId != null ? Number(v.zonaId) : undefined,
       sensorId:        v.sensorId != null ? Number(v.sensorId) : undefined,
       tipoParametroId: Number(v.tipoParametroId),
-      fechaDesde:      new Date(v.desde),
+      fechaDesde:      new Date(`${v.desde}T00:00:00`),
       fechaHasta:      hasta
     };
 
