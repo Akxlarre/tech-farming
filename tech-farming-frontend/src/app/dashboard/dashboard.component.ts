@@ -81,7 +81,6 @@ interface ZoneSummary {
                 [disabled]="!filtros.invernaderoId"
                 [ngClass]="{ 'opacity-50 cursor-not-allowed': !filtros.invernaderoId }"
                 aria-label="Selecciona Zona"
-                (change)="onZonaChange()"
               >
                 <option [ngValue]="null">— Zona —</option>
                 <option *ngFor="let z of zonasMap[filtros.invernaderoId!]" [ngValue]="z.id">
@@ -509,7 +508,6 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   onZonaChange(): void {
     this.cargarAlertas();
     this.cambiarIntervalo(this.intervaloSeleccionado);
-    this.loadZoneSummaries();
   }
 
   aplicarFiltros(): void {
