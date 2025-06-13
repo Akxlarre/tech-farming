@@ -17,6 +17,10 @@ import { StatsCardComponent } from './components/stats-card.component';
 import { HistorialHeaderComponent } from './components/historial-header.component';
 import { ExportService } from '../shared/services/export.service';
 
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 @Component({
   selector: 'app-historial',
   standalone: true,
@@ -161,10 +165,11 @@ export class HistorialComponent implements OnInit {
   /** Texto del eje Y (nombre del parámetro seleccionado) */
   textoParametro = '';
 
-  constructor(
-    private historialService: HistorialService,
-    private exportSvc: ExportService
-  ) { }
+  /** Últimos filtros aplicados para saber rango y parámetro */
+  lastParams?: HistorialParams;
+
+  constructor(private historialService: HistorialService) { }
+
 
   ngOnInit() {
     // Pre-cargamos la lista de Tipos de Parámetro
@@ -180,6 +185,7 @@ export class HistorialComponent implements OnInit {
     this.isLoading = true;
     this.noData = false;
     this.historial = undefined;
+    this.lastParams = params;
 
     this.historialService.getHistorial(params).subscribe(
       data => {
@@ -207,18 +213,71 @@ export class HistorialComponent implements OnInit {
    * Maneja la exportación según el formato elegido.
    */
   onExport(format: 'pdf' | 'excel' | 'csv') {
-    if (!this.historial) return;
-    const data = this.historial.series.map(s => ({ timestamp: s.timestamp, value: s.value }));
-    switch (format) {
-      case 'csv':
-        this.exportSvc.toCsv(data, 'historial');
-        break;
-      case 'excel':
-        this.exportSvc.toExcel(data, 'historial');
-        break;
-      case 'pdf':
-        this.exportSvc.toPdf(data, 'historial');
-        break;
+    if (!this.historial || !this.lastParams) return;
+
+    const desde = this.lastParams.fechaDesde.toLocaleString();
+    const hasta = this.lastParams.fechaHasta.toLocaleString();
+
+    if (format === 'csv') {
+      const header = `Parametro:,${this.textoParametro}\nDesde:,${desde}\nHasta:,${hasta}\n`;
+      const stats =
+        `Promedio,${this.historial.stats.promedio}\n` +
+        `Minimo,${this.historial.stats.minimo.value} (${this.historial.stats.minimo.fecha})\n` +
+        `Maximo,${this.historial.stats.maximo.value} (${this.historial.stats.maximo.fecha})\n` +
+        `Desvio estandar,${this.historial.stats.desviacion}\n`;
+      const seriesHeader = `\nFecha,${this.textoParametro}\n`;
+      const series = this.historial.series.map(s => `${s.timestamp},${s.value}`).join('\n');
+      const csv = header + stats + seriesHeader + series;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'historial.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (format === 'excel') {
+      const wb = XLSX.utils.book_new();
+      const summaryData = [
+        ['Parámetro', this.textoParametro],
+        ['Desde', desde],
+        ['Hasta', hasta],
+        [],
+        ['Promedio', this.historial.stats.promedio],
+        ['Mínimo', `${this.historial.stats.minimo.value} (${this.historial.stats.minimo.fecha})`],
+        ['Máximo', `${this.historial.stats.maximo.value} (${this.historial.stats.maximo.fecha})`],
+        ['Desvío estándar', this.historial.stats.desviacion]
+      ];
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, summarySheet, 'Resumen');
+
+      const series = this.historial.series.map(s => ({ Fecha: s.timestamp, [this.textoParametro]: s.value }));
+      const seriesSheet = XLSX.utils.json_to_sheet(series);
+      XLSX.utils.book_append_sheet(wb, seriesSheet, 'Datos');
+      XLSX.writeFile(wb, 'historial.xlsx');
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.text(`Historial de ${this.textoParametro}`, 14, 15);
+      doc.text(`Desde: ${desde}`, 14, 22);
+      doc.text(`Hasta: ${hasta}`, 14, 29);
+
+      autoTable(doc, {
+        head: [['Métrica', 'Valor']],
+        body: [
+          ['Promedio', this.historial.stats.promedio],
+          ['Mínimo', `${this.historial.stats.minimo.value} (${this.historial.stats.minimo.fecha})`],
+          ['Máximo', `${this.historial.stats.maximo.value} (${this.historial.stats.maximo.fecha})`],
+          ['Desvío estándar', this.historial.stats.desviacion]
+        ],
+        startY: 35
+      });
+
+      autoTable(doc, {
+        head: [['Fecha', this.textoParametro]],
+        body: this.historial.series.map(s => [s.timestamp, s.value]),
+        startY: (doc as any).lastAutoTable.finalY + 10
+      });
+
+      doc.save('historial.pdf');
     }
   }
 }
