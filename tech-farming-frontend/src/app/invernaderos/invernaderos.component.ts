@@ -14,6 +14,7 @@ import { InvernaderoModalService } from './invernadero-modal.service';
 
 import { NotificationService } from '../shared/services/notification.service';
 import { SupabaseService } from '../services/supabase.service';
+import { ExportService } from '../shared/services/export.service';
 
 /* Componentes “genéricos” ya existentes */
 import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper.component';
@@ -219,7 +220,8 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
     private svc: InvernaderoService,
     private supaSvc: SupabaseService,
     public modal: InvernaderoModalService,
-    private notify: NotificationService
+    private notify: NotificationService,
+    private exportSvc: ExportService
   ) {}
 
   async ngOnInit() {
@@ -435,17 +437,31 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
+    const headers = [
+      'ID',
+      'Nombre',
+      'Zonas Activas',
+      'Sensores Activos',
+      'Estado',
+      'Creado en'
+    ];
+    const rows = this.invernaderos.map(i => [
+      i.id,
+      i.nombre,
+      i.zonasActivas ?? 0,
+      i.sensoresActivos ?? 0,
+      i.estado ?? '',
+      i.creado_en
+    ]);
+
+    const base = 'invernaderos';
+
     if (format === 'csv') {
-      const csv = this.invernaderos.map(i => `${i.id},${i.nombre}`).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'invernaderos.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+      this.exportSvc.exportAsCSV(`${base}.csv`, headers, rows);
+    } else if (format === 'excel') {
+      this.exportSvc.exportAsExcel(`${base}.xlsx`, headers, rows);
     } else {
-      console.log(`Exportar ${format} aún no implementado`);
+      this.exportSvc.exportAsPDF(`${base}.pdf`, headers, rows);
     }
   }
 

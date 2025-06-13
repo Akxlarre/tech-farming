@@ -29,6 +29,7 @@ import { InvernaderoService }        from '../invernaderos/invernaderos.service'
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
 import { NotificationService }       from '../shared/services/notification.service';
+import { ExportService }             from '../shared/services/export.service';
 
 @Component({
   selector: 'app-sensores',
@@ -238,6 +239,7 @@ export class SensoresComponent implements OnInit, OnDestroy {
     private invSvc: InvernaderoService,
     public  modal: SensorModalService,
     private notify: NotificationService,
+    private exportSvc: ExportService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -421,17 +423,14 @@ onEdited(updated: Sensor) {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
+    const headers = ['ID', 'Nombre'];
+    const rows = this.sensoresConLectura.map(s => [s.id, s.nombre]);
     if (format === 'csv') {
-      const csv = this.sensoresConLectura.map(s => `${s.id},${s.nombre}`).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sensores.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+      this.exportSvc.exportAsCSV('sensores.csv', headers, rows);
+    } else if (format === 'excel') {
+      this.exportSvc.exportAsExcel('sensores.xlsx', headers, rows);
     } else {
-      console.log(`Exportar ${format} aún no implementado`);
+      this.exportSvc.exportAsPDF('sensores.pdf', headers, rows);
     }
   }
 
