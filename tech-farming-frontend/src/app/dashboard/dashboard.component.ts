@@ -212,6 +212,9 @@ interface ZoneSummary {
             <!-- Cuando hay variable seleccionada, mostramos line-chart -->
             <ng-container *ngIf="variableSeleccionada">
               <div class="relative w-full h-96">
+                <div *ngIf="chartLoading" class="absolute inset-0 flex items-center justify-center bg-base-200/70 z-10">
+                  <span class="loading loading-spinner text-success"></span>
+                </div>
                 <app-line-chart
                   #lineChart
                   [labels]="graficaData.labels"
@@ -294,24 +297,29 @@ interface ZoneSummary {
                   >24h</button>
                 </div>
               </div>
-              <ng-container *ngIf="zoneSummaries.length; else sinPredicciones">
-                <div class="space-y-6">
-                  <div *ngFor="let zs of zoneSummaries" class="bg-base-100 border rounded-lg p-4">
-                    <h3 class="text-lg font-semibold mb-2">{{ zs.zone.nombre }}</h3>
-                    <div
-                      class="grid gap-4"
-                      style="grid-template-columns: repeat(auto-fit,minmax(12rem,1fr));"
-                    >
-                      <app-summary-card
-                        *ngFor="let s of zs.summaries"
-                        [summary]="s.summary"
-                        [projectionLabel]="predIntervalo + 'h'"
-                        [param]="s.param"
-                      ></app-summary-card>
+              <div class="relative">
+                <div *ngIf="predLoading" class="absolute inset-0 flex items-center justify-center bg-base-200/70 z-10">
+                  <span class="loading loading-spinner text-info"></span>
+                </div>
+                <ng-container *ngIf="zoneSummaries.length; else sinPredicciones">
+                  <div class="space-y-6">
+                    <div *ngFor="let zs of zoneSummaries" class="bg-base-100 border rounded-lg p-4">
+                      <h3 class="text-lg font-semibold mb-2">{{ zs.zone.nombre }}</h3>
+                      <div
+                        class="grid gap-4"
+                        style="grid-template-columns: repeat(auto-fit,minmax(12rem,1fr));"
+                      >
+                        <app-summary-card
+                          *ngFor="let s of zs.summaries"
+                          [summary]="s.summary"
+                          [projectionLabel]="predIntervalo + 'h'"
+                          [param]="s.param"
+                        ></app-summary-card>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </ng-container>
+                </ng-container>
+              </div>
               <ng-template #sinPredicciones>
                 <div class="text-center text-base-content/60 py-8">
                   <i class="ri-calendar-event-line text-3xl text-info mb-2" aria-hidden="true"></i>
@@ -374,6 +382,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   loading = true;
   private loadCount = 0;
   private initialLoad = true;
+  chartLoading = false;
+  predLoading = false;
 
   // ───────── KPI PRINCIPALES ─────────
   tempActual = 0;
@@ -540,8 +550,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     const hasta = new Date();
     const desde = new Date(hasta.getTime() - horas * 60 * 60 * 1000);
     const tipoId = this.variableSeleccionada ? this.variableSeleccionada.id : 0;
-
-    this.startLoading();
+    if (this.initialLoad) {
+      this.startLoading();
+    } else {
+      this.chartLoading = true;
+    }
     this.dashSvc
       .getHistorial({
         invernaderoId: this.filtros.invernaderoId,
@@ -551,7 +564,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
         desde: desde.toISOString(),
         hasta: hasta.toISOString(),
       })
-      .pipe(finalize(() => this.endLoading()))
+      .pipe(finalize(() => {
+        if (this.initialLoad) {
+          this.endLoading();
+        } else {
+          this.chartLoading = false;
+        }
+      }))
       .subscribe({
         next: (resp) => {
           this.graficaData = {
@@ -728,7 +747,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
   private loadZoneSummaries() {
     if (!this.filtros.invernaderoId) return;
-    this.loading = true;
+    this.predLoading = true;
 
     const allZones = this.zonasMap[this.filtros.invernaderoId!] || [];
     const targetZones = this.filtros.zonaId
@@ -771,7 +790,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     });
 
     forkJoin(calls).pipe(
-      finalize(() => this.loading = false)
+      finalize(() => this.predLoading = false)
     ).subscribe(results => {
       this.zoneSummaries = results;
     });
@@ -851,13 +870,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }
 
   private startLoading(): void {
-    if (!this.initialLoad) return;
     this.loadCount++;
     this.loading = true;
   }
 
   private endLoading(): void {
-    if (!this.initialLoad) return;
     if (this.loadCount > 0) {
       this.loadCount--;
     }
