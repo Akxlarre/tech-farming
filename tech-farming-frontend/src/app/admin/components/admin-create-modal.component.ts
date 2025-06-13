@@ -54,7 +54,7 @@ import { SupabaseService } from '../../services/supabase.service';
 
         <!-- Permisos -->
         <div class="form-control">
-          <label class="label font-semibold mb-2">Permisos</label>
+          <label class="label font-semibold mb-2">Permisos (Invernaderos, Zonas, Sensores, Umbrales)</label>
           <div class="flex flex-wrap gap-4">
             <label class="cursor-pointer label gap-2">
               <input type="checkbox" [(ngModel)]="nuevoUsuario.permisos.editar" name="editar" class="checkbox checkbox-success" />
@@ -70,6 +70,8 @@ import { SupabaseService } from '../../services/supabase.service';
             </label>
           </div>
         </div>
+
+        <div *ngIf="error" class="text-error">{{ error }}</div>
 
         <!-- BOTONES -->
         <div class="modal-action mt-6 flex justify-end gap-2">
@@ -123,6 +125,7 @@ export class AdminCreateModalComponent {
       });
 
       if (response.success) {
+        this.error = '';
         this.mensajeConfirmacion = 'Usuario creado correctamente.';
         this.confirmacionVisible = true;
         setTimeout(() => {

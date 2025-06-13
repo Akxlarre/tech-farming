@@ -1,6 +1,7 @@
 import traceback
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 from uuid import uuid4
 from flask import Blueprint, g, request, jsonify, abort, current_app
 from sqlalchemy.orm import joinedload
@@ -164,7 +165,7 @@ def crear_sensor():
         nombre=nombre,
         descripcion=descripcion,
         estado=estado,
-        fecha_instalacion=datetime.utcnow(),
+        fecha_instalacion=datetime.now(ZoneInfo("America/Santiago")).date(),
         tipo_sensor_id=tipo_sensor_id,
         token=token
     )

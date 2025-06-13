@@ -7,6 +7,7 @@ export interface Zona {
   descripcion?: string;
   activo: boolean;
   creado_en: string;
+  sensores_count?: number;
   sensores?: Sensor[];  // Lista de sensores en esta zona
 }
 
@@ -20,4 +21,5 @@ export interface Invernadero {
   sensoresActivos?: number;
   sensoresTotales?: number;
   estado?: string;  // ej: "2 alertas activas" o "Sin alertas"
+  hayAlertas?: boolean;
 }

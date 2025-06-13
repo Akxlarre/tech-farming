@@ -146,7 +146,7 @@ export class DeleteInvernaderoWithSummaryComponent implements OnInit {
         this.zonas = detalle.zonas.map((z: Zona) => ({
           nombre: z.nombre,
           activo: z.activo,
-          sensoresCount: Array.isArray((z as any).sensores) ? (z as any).sensores.length : 0
+          sensoresCount: (z as any).sensores_count ?? (Array.isArray((z as any).sensores) ? (z as any).sensores.length : 0)
         }));
 
         this.isLoading = false;

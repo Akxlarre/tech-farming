@@ -13,10 +13,19 @@ import { LineChartComponent } from './components/line-chart.component';
 import { AlertCardComponent } from './components/alert-card.component';
 import { TabsPanelComponent } from './components/tabs-panel.component';
 import { FooterComponent } from './components/footer.component';
+import { SummaryCardComponent } from '../predicciones/components/summary-card.component';
 import { DashboardService } from './services/dashboard.service';
 import { NotificationService } from '../shared/services/notification.service';
-import { Invernadero, Zona, Sensor, Alerta } from '../models';
-import { finalize } from 'rxjs';
+import { Invernadero, Zona, Sensor, Alerta, Summary } from '../models';
+import { finalize, forkJoin, map } from 'rxjs';
+
+interface ZoneSummary {
+  zone: Zona;
+  summaries: Array<{
+    param: string;
+    summary: Summary;
+  }>;
+}
 
 @Component({
   selector: 'app-dashboard-page',
@@ -29,6 +38,7 @@ import { finalize } from 'rxjs';
     AlertCardComponent,
     TabsPanelComponent,
     FooterComponent,
+    SummaryCardComponent,
   ],
   template: `
     <div *ngIf="!loading; else loadingTpl" class="flex flex-col h-full bg-base-200">
@@ -71,7 +81,6 @@ import { finalize } from 'rxjs';
                 [disabled]="!filtros.invernaderoId"
                 [ngClass]="{ 'opacity-50 cursor-not-allowed': !filtros.invernaderoId }"
                 aria-label="Selecciona Zona"
-                (change)="onZonaChange()"
               >
                 <option [ngValue]="null">— Zona —</option>
                 <option *ngFor="let z of zonasMap[filtros.invernaderoId!]" [ngValue]="z.id">
@@ -203,6 +212,9 @@ import { finalize } from 'rxjs';
             <!-- Cuando hay variable seleccionada, mostramos line-chart -->
             <ng-container *ngIf="variableSeleccionada">
               <div class="relative w-full h-96">
+                <div *ngIf="chartLoading" class="absolute inset-0 flex items-center justify-center bg-base-200/70 z-10">
+                  <span class="loading loading-spinner text-success"></span>
+                </div>
                 <app-line-chart
                   #lineChart
                   [labels]="graficaData.labels"
@@ -266,49 +278,55 @@ import { finalize } from 'rxjs';
 
             <!-- Tab “Predicciones” -->
             <ng-container *ngIf="tabActiva === 'predicciones'">
-              <ng-container *ngIf="predicciones.length; else sinPredicciones">
-                <div class="space-y-3 pb-4">
-                  <div
-                    *ngFor="let p of predicciones"
-                    class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <p class="font-semibold text-base-content">
-                      Predicción a {{ p.intervalo }}h: {{ p.valor }} {{ getUnidad(p.variable) }}
-                    </p>
-                    <p class="text-sm text-base-content/60">Confianza: {{ p.confianza }}%</p>
-                    <p class="text-sm text-base-content/60">Recomendación: {{ p.recomendacion }}</p>
-                  </div>
+              <div class="flex justify-end mb-4">
+                <div class="btn-group btn-group-sm" role="group" aria-label="Intervalo predicción">
+                  <button
+                    class="btn btn-sm"
+                    [ngClass]="{ 'btn-info': predIntervalo === 6, 'btn-outline': predIntervalo !== 6 }"
+                    (click)="cambiarPredIntervalo(6)"
+                  >6h</button>
+                  <button
+                    class="btn btn-sm"
+                    [ngClass]="{ 'btn-info': predIntervalo === 12, 'btn-outline': predIntervalo !== 12 }"
+                    (click)="cambiarPredIntervalo(12)"
+                  >12h</button>
+                  <button
+                    class="btn btn-sm"
+                    [ngClass]="{ 'btn-info': predIntervalo === 24, 'btn-outline': predIntervalo !== 24 }"
+                    (click)="cambiarPredIntervalo(24)"
+                  >24h</button>
                 </div>
-              </ng-container>
+              </div>
+              <div class="relative">
+                <div *ngIf="predLoading" class="absolute inset-0 flex items-center justify-center bg-base-200/70 z-10">
+                  <span class="loading loading-spinner text-info"></span>
+                </div>
+                <ng-container *ngIf="zoneSummaries.length; else sinPredicciones">
+                  <div class="space-y-6">
+                    <div *ngFor="let zs of zoneSummaries" class="bg-base-100 border rounded-lg p-4">
+                      <h3 class="text-lg font-semibold mb-2">{{ zs.zone.nombre }}</h3>
+                      <div
+                        class="grid gap-4"
+                        style="grid-template-columns: repeat(auto-fit,minmax(12rem,1fr));"
+                      >
+                        <app-summary-card
+                          *ngFor="let s of zs.summaries"
+                          [summary]="s.summary"
+                          [projectionLabel]="predIntervalo + 'h'"
+                          [param]="s.param"
+                        ></app-summary-card>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
               <ng-template #sinPredicciones>
                 <div class="text-center text-base-content/60 py-8">
                   <i class="ri-calendar-event-line text-3xl text-info mb-2" aria-hidden="true"></i>
-                  <p>Selecciona intervalo para ver predicciones.</p>
+                  <p>No hay predicciones para la zona seleccionada.</p>
                 </div>
               </ng-template>
-            </ng-container>
-
-            <!-- Tab “Acciones” -->
-            <ng-container *ngIf="tabActiva === 'acciones'">
-              <div class="space-y-3 pb-4">
-                <div
-                  class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                  <p class="font-semibold text-base-content">
-                    Aumentar ventilación si temperatura > 28 °C
-                  </p>
-                  <p class="text-sm text-base-content/60">Recomendación generada automáticamente.</p>
-                </div>
-                <div
-                  class="bg-base-100 border border-base-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                  <p class="font-semibold text-base-content">
-                    Revisar nivel de fertilizante si Nitrógeno > 10 ppm
-                  </p>
-                  <p class="text-sm text-base-content/60">Recomendación IA basada en histórico.</p>
-                </div>
-              </div>
-            </ng-container>
+            </ng-container> 
           </div>
         </div>
       </section>
@@ -364,6 +382,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   loading = true;
   private loadCount = 0;
   private initialLoad = true;
+  chartLoading = false;
+  predLoading = false;
 
   // ───────── KPI PRINCIPALES ─────────
   tempActual = 0;
@@ -464,17 +484,12 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }> = [];
   resolviendoId: number | null = null;
 
-  // ───────── PREDICCIONES SIMULADAS ─────────
-  predicciones: {
-    intervalo: 6 | 12 | 24;
-    valor: number;
-    confianza: number;
-    recomendacion: string;
-    variable: 'Temperatura' | 'Humedad' | 'Nitrógeno';
-  }[] = [];
+  // ───────── PREDICCIONES POR ZONA ─────────
+  zoneSummaries: ZoneSummary[] = [];
+  predIntervalo: 6 | 12 | 24 = 6;
 
   // ───────── TAB ACTIVA ─────────
-  tabActiva: 'alertas' | 'predicciones' | 'acciones' = 'alertas';
+  tabActiva: 'alertas' | 'predicciones' = 'alertas';
 
   constructor(
     private dashSvc: DashboardService,
@@ -535,8 +550,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     const hasta = new Date();
     const desde = new Date(hasta.getTime() - horas * 60 * 60 * 1000);
     const tipoId = this.variableSeleccionada ? this.variableSeleccionada.id : 0;
-
-    this.startLoading();
+    if (this.initialLoad) {
+      this.startLoading();
+    } else {
+      this.chartLoading = true;
+    }
     this.dashSvc
       .getHistorial({
         invernaderoId: this.filtros.invernaderoId,
@@ -546,7 +564,13 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
         desde: desde.toISOString(),
         hasta: hasta.toISOString(),
       })
-      .pipe(finalize(() => this.endLoading()))
+      .pipe(finalize(() => {
+        if (this.initialLoad) {
+          this.endLoading();
+        } else {
+          this.chartLoading = false;
+        }
+      }))
       .subscribe({
         next: (resp) => {
           this.graficaData = {
@@ -569,9 +593,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
           this.tooltipFijo = `${ultimoVal ?? '-'} ${unidad}`;
           this.ultimaActualizacion = new Date();
           this.updateFormattedLastUpdate();
+          this.loadZoneSummaries();
         },
-        error: () => this.notify.error('Error al cargar historial')
+      error: () => this.notify.error('Error al cargar historial')
       });
+  }
+
+  cambiarPredIntervalo(horas: 6 | 12 | 24): void {
+    this.predIntervalo = horas;
+    this.loadZoneSummaries();
   }
 
   resolverAlerta(id: number) {
@@ -715,6 +745,57 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private loadZoneSummaries() {
+    if (!this.filtros.invernaderoId) return;
+    this.predLoading = true;
+
+    const allZones = this.zonasMap[this.filtros.invernaderoId!] || [];
+    const targetZones = this.filtros.zonaId
+      ? allZones.filter(z => z.id === this.filtros.zonaId)
+      : allZones;
+
+    const calls = targetZones.map(zone => {
+      const paramCalls = this.variablesDisponibles.map(v =>
+        this.dashSvc.getPredicciones({
+          invernaderoId: this.filtros.invernaderoId!,
+          zonaId: zone.id,
+          parametro: v.nombre,
+          horas: this.predIntervalo
+        }).pipe(
+          map(res => {
+            const idx = [6, 12, 24].indexOf(this.predIntervalo);
+            const futureVal = res.future[idx]?.value;
+            const last = res.historical.slice(-1)[0]?.value;
+            const vals = res.historical.map(h => h.value);
+            const histMin = vals.length ? Math.min(...vals) : undefined;
+            const histMax = vals.length ? Math.max(...vals) : undefined;
+            return {
+              param: v.nombre,
+              summary: {
+                lastValue: last,
+                prediction: futureVal,
+                diff: (futureVal ?? 0) - (last ?? 0),
+                histMin,
+                histMax,
+                action: res.summary.action,
+              } as Summary
+            };
+          })
+        )
+      );
+
+      return forkJoin(paramCalls).pipe(
+        map(summaries => ({ zone, summaries }))
+      );
+    });
+
+    forkJoin(calls).pipe(
+      finalize(() => this.predLoading = false)
+    ).subscribe(results => {
+      this.zoneSummaries = results;
+    });
+  }
+
   private cargarAlertas() {
     this.startLoading();
     this.dashSvc
@@ -751,9 +832,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
 
   /** Obtiene unidad según variable seleccionada */
-  getUnidad(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): string {
+  getUnidad(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno' | 'Potasio' | 'Fósforo'): string {
     if (variable === 'Humedad') return '%';
     if (variable === 'Nitrógeno') return 'ppm';
+    if (variable === 'Potasio' || variable === 'Fósforo') return 'ppm';
     return '°C';
   }
 
@@ -788,13 +870,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
   }
 
   private startLoading(): void {
-    if (!this.initialLoad) return;
     this.loadCount++;
     this.loading = true;
   }
 
   private endLoading(): void {
-    if (!this.initialLoad) return;
     if (this.loadCount > 0) {
       this.loadCount--;
     }

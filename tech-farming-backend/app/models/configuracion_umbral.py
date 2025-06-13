@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from sqlalchemy.orm import validates
 from sqlalchemy import CheckConstraint
 from app import db
@@ -15,6 +16,9 @@ class ConfiguracionUmbral(db.Model):
     critico_min = db.Column(db.Numeric)
     critico_max = db.Column(db.Numeric)
 
-    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    creado_en = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(ZoneInfo("America/Santiago"))
+    )
     activo = db.Column(db.Boolean, default=True)
 

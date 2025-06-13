@@ -4,6 +4,7 @@ from app.queries.alerta_queries import listar_alertas
 from app.models.alerta import Alerta
 from app.utils.auth_supabase import usuario_autenticado_requerido
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 router = Blueprint('alertas', __name__)
 
@@ -39,16 +40,33 @@ def resolver_alerta(alerta_id):
 
         # Recuperar el Supabase UID desde JWT validado
         usuario = g.usuario
+        ahora = datetime.now(ZoneInfo("America/Santiago"))
         
         alerta.estado = "Resuelta"
-        alerta.fecha_resolucion = datetime.utcnow()
+        alerta.fecha_resolucion = datetime.now(ZoneInfo("America/Santiago"))
+
         alerta.resuelta_por = usuario.id
+
+        # Resolver también todas las alertas activas anteriores del mismo sensor/param
+        alertas_relacionadas = Alerta.query.filter(
+            Alerta.id != alerta.id,
+            Alerta.sensor_parametro_id == alerta.sensor_parametro_id,
+            Alerta.tipo == "Umbral",
+            Alerta.estado == "Activa"
+        ).all()
+
+        for a in alertas_relacionadas:
+            a.estado = "Resuelta"
+            a.fecha_resolucion = ahora
+            a.resuelta_por = usuario.id
+
         db.session.commit()
 
         return jsonify({
             "mensaje": "Alerta resuelta correctamente",
             "resuelta_por": f"{usuario.nombre} {usuario.apellido}",
-            "fecha_resolucion": alerta.fecha_resolucion.isoformat()
+            "fecha_resolucion": alerta.fecha_resolucion.isoformat(),
+            "otras_alertas_resueltas": len(alertas_relacionadas)
         }), 200
 
     except Exception as e:
