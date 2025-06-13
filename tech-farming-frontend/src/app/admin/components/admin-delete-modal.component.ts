@@ -8,7 +8,7 @@ import { AdminService } from '../admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="p-6 bg-base-100 rounded-lg shadow-lg max-w-md w-full space-y-4">
+    <div class="p-6 bg-base-100 rounded-lg shadow-lg  w-full space-y-4">
       <h2 class="text-xl font-bold text-error">⚠️ Eliminar usuario</h2>
       <p>¿Estás seguro de que quieres eliminar a <strong>{{ nombre }}</strong>?</p>
       <p>Escribe <strong>Eliminar {{ nombre }}</strong> para confirmar:</p>

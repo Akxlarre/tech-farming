@@ -834,9 +834,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
 
   /** Obtiene unidad según variable seleccionada */
-  getUnidad(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno'): string {
+  getUnidad(variable: 'Temperatura' | 'Humedad' | 'Nitrógeno' | 'Potasio' | 'Fósforo'): string {
     if (variable === 'Humedad') return '%';
     if (variable === 'Nitrógeno') return 'ppm';
+    if (variable === 'Potasio' || variable === 'Fósforo') return 'ppm';
     return '°C';
   }
 
