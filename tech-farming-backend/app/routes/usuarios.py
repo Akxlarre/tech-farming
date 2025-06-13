@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from app import db
 from app.models.usuario import Usuario
 from app.models.usuario_permiso import UsuarioPermiso
@@ -68,7 +68,19 @@ def invitar_usuario():
             "redirect_to": redirect_url
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        original_msg = str(e)
+        current_app.logger.error(original_msg)
+        error_msg = original_msg
+        translations = {
+            "Invalid email": "Correo electrónico inválido",
+            "User already exists": "El usuario ya existe",
+            "Email rate limit": "Límite de envío de correos excedido",
+        }
+        for eng, esp in translations.items():
+            if eng.lower() in error_msg.lower():
+                error_msg = esp
+                break
+        return jsonify({"error": error_msg}), 400
 
     if response.user is None:
         return jsonify({"error": "Error al invitar usuario con Supabase"}), 400
