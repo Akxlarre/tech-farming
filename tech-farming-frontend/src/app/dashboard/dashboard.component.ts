@@ -17,7 +17,7 @@ import { ZonaPredCardComponent } from './components/zona-pred-card.component';
 import { DashboardService } from './services/dashboard.service';
 import { NotificationService } from '../shared/services/notification.service';
 import { Invernadero, Zona, Sensor, Alerta, Summary, Trend } from '../models';
-import { finalize, forkJoin, map } from 'rxjs';
+import { finalize, forkJoin, map, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -856,32 +856,38 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
 
     const obs = zonas.map(z =>
       forkJoin([
-        this.dashSvc.getPredicciones({
-          invernaderoId: this.filtros.invernaderoId!,
-          zonaId: z.id,
-          horas: this.predIntervalo,
-          parametro: 'Temperatura'
-        }),
-        this.dashSvc.getPredicciones({
-          invernaderoId: this.filtros.invernaderoId!,
-          zonaId: z.id,
-          horas: this.predIntervalo,
-          parametro: 'Humedad'
-        }),
-        this.dashSvc.getPredicciones({
-          invernaderoId: this.filtros.invernaderoId!,
-          zonaId: z.id,
-          horas: this.predIntervalo,
-          parametro: 'K'
-        })
+        this.dashSvc
+          .getPredicciones({
+            invernaderoId: this.filtros.invernaderoId!,
+            zonaId: z.id,
+            horas: this.predIntervalo,
+            parametro: 'Temperatura'
+          })
+          .pipe(catchError(() => of(null))),
+        this.dashSvc
+          .getPredicciones({
+            invernaderoId: this.filtros.invernaderoId!,
+            zonaId: z.id,
+            horas: this.predIntervalo,
+            parametro: 'Humedad'
+          })
+          .pipe(catchError(() => of(null))),
+        this.dashSvc
+          .getPredicciones({
+            invernaderoId: this.filtros.invernaderoId!,
+            zonaId: z.id,
+            horas: this.predIntervalo,
+            parametro: 'K'
+          })
+          .pipe(catchError(() => of(null)))
       ]).pipe(
         map(([t, h, k]) => ({
           zona: z,
           predicciones: [
-            { parametro: 'Temperatura', summary: t.summary, trend: t.trend },
-            { parametro: 'Humedad', summary: h.summary, trend: h.trend },
-            { parametro: 'Potasio', summary: k.summary, trend: k.trend }
-          ]
+            t && { parametro: 'Temperatura', summary: t.summary, trend: t.trend },
+            h && { parametro: 'Humedad', summary: h.summary, trend: h.trend },
+            k && { parametro: 'Potasio', summary: k.summary, trend: k.trend }
+          ].filter(Boolean)
         }))
       )
     );
@@ -891,7 +897,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit {
       .pipe(finalize(() => (this.predLoading = false)))
       .subscribe({
         next: list => {
-          this.zonaPreds = list;
+          this.zonaPreds = list.filter(z => z.predicciones.length > 0);
         },
         error: () => this.notify.error('Error al cargar predicciones')
       });
