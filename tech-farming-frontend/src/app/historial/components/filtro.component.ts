@@ -225,6 +225,10 @@ export class FiltroComponent implements OnInit, OnDestroy {
 
   constructor(private historialService: HistorialService) {}
 
+  private invLoaded = false;
+  private paramLoaded = false;
+  private defaultsApplied = false;
+
   ngOnInit() {
     // 1) Inicializamos el FormGroup con validadores:
     const today = new Date();
@@ -247,6 +251,8 @@ export class FiltroComponent implements OnInit, OnDestroy {
         // Seleccionamos por defecto el primero
         this.form.get('invernaderoId')!.setValue(list[0].id);
       }
+      this.invLoaded = true;
+      this.tryAutoApply();
     });
 
     this.historialService.getTiposParametro().subscribe(list => {
@@ -255,6 +261,8 @@ export class FiltroComponent implements OnInit, OnDestroy {
         // Seleccionamos por defecto el primero
         this.form.get('tipoParametroId')!.setValue(list[0].id);
       }
+      this.paramLoaded = true;
+      this.tryAutoApply();
     });
 
     // 3) Suscripción a cambios en invernadero → cargar Zonas
@@ -342,6 +350,16 @@ export class FiltroComponent implements OnInit, OnDestroy {
     };
 
     this.filtrosSubmit.emit(params);
+  }
+
+  /**
+   * Aplica filtros automáticamente cuando se cargan las listas iniciales.
+   */
+  private tryAutoApply() {
+    if (!this.defaultsApplied && this.invLoaded && this.paramLoaded && this.form.valid) {
+      this.defaultsApplied = true;
+      this.aplicarFiltros();
+    }
   }
 
   /**
