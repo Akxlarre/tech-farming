@@ -45,6 +45,11 @@
     "file-saver": "^2.0.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+<<<<<<< codex/expand-onexport-to-generate-csv,-excel,-and-pdf
+    "zone.js": "~0.14.10",
+    "xlsx": "^0.18.5",
+    "jspdf": "^2.5.1"
+=======
 <<<<<<< codex/introduce-exportservice-y-refactorizar-exportaciones
     "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
@@ -52,6 +57,7 @@
     "zone.js": "~0.14.10",
     "xlsx": "^0.18.5",
     "jspdf": "^3.0.1"
+>>>>>>> tabs
 >>>>>>> tabs
   },
   "devDependencies": {
