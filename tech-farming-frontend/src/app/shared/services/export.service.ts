@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 @Injectable({ providedIn: 'root' })
 export class ExportService {
@@ -39,7 +39,7 @@ export class ExportService {
     if (data && data.length > 0) {
       const headers = Object.keys(data[0]);
       const rows = data.map(row => headers.map(h => row[h]));
-      (doc as any).autoTable({ head: [headers], body: rows });
+      autoTable(doc, { head: [headers], body: rows });
     } else {
       doc.text('No data', 10, 10);
     }
