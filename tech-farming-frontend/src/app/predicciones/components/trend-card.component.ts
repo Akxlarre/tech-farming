@@ -2,6 +2,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule }      from '@angular/common';
+import { MatCardModule }     from '@angular/material/card';
 
 import { TrendGaugeComponent } from './trend-gauge.component';
 
@@ -17,36 +18,41 @@ export interface Trend {
 @Component({
   selector: 'app-trend-card',
   standalone: true,
-  imports: [CommonModule, TrendGaugeComponent],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    TrendGaugeComponent
+  ],
   template: `
-    <!-- sólo renderiza si hay datos de tendencia -->
-    <ng-container *ngIf="trend">
-      <div
-        class="card w-full max-w-xs bg-base-100 shadow-lg rounded-lg p-4
-               flex flex-col items-center gap-2
-               hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow
-               focus:outline-none focus:ring-2 focus:ring-primary"
-      >
-        <app-trend-gauge [pct]="pct" [size]="48"></app-trend-gauge>
-        <h4 class="text-lg font-medium">{{ trend.title }}</h4>
-        <p
-          class="text-xl font-bold flex items-center gap-1"
-          [ngClass]="riskMsgClass"
-        >
-          <i [class]="trendIcon"></i>
-          {{ pct | number:'1.0-1' }}%
+    <mat-card class="trend-card h-full bg-base-100 p-6 rounded-lg shadow-sm flex flex-col">
+      <!-- HEADER -->
+      <div class="flex items-center mb-4">
+        <app-trend-gauge [pct]="pct" [size]="48" class="mr-3"></app-trend-gauge>
+        <h2 class="text-xl font-semibold">Tendencia</h2>
+      </div>
+
+      <!-- CUERPO -->
+      <div class="flex-1">
+        <!-- Título + porcentaje -->
+        <p class="text-lg font-medium mb-2" [ngClass]="riskMsgClass">
+          {{ trend?.title }} ({{ trend?.message }})
         </p>
-        <p *ngIf="action" class="text-sm text-gray-500 text-center">
+
+        <!-- Mensaje específico de acción -->
+        <p *ngIf="action" class="text-sm font-medium mt-2">
           {{ action }}
         </p>
       </div>
-    </ng-container>
+    </mat-card>
   `,
   styles: [`
-    :host { display: block; }
-    .msg-success { color: var(--pf-success); }
-    .msg-warning { color: var(--pf-warning); }
-    .msg-error   { color: var(--pf-error); }
+    :host { display: block; height: 100%; }
+    .trend-card { border: 1px solid var(--p-base-200); }
+
+    /* Color del texto según nivel de riesgo */
+    .msg-success { color: var(--p-success); }
+    .msg-warning { color: var(--p-warning); }
+    .msg-error   { color: var(--p-error); }
   `]
 })
 export class TrendCardComponent {
@@ -58,28 +64,14 @@ export class TrendCardComponent {
   get pct(): number {
     if (!this.trend) return 0;
     const num = parseFloat(this.trend.message.replace('%',''));
-    return isNaN(num) ? 0 : Math.abs(num);
+    return isNaN(num) ? 0 : num;
   }
 
   /** Clase de color del texto según el % */
   get riskMsgClass(): string {
-    const p = this.pct;
-    return p >= 10
-      ? 'msg-error'
-      : p >= 5
-        ? 'msg-warning'
-        : 'msg-success';
-  }
-
-  /** Icono según la tendencia */
-  get trendIcon(): string {
-    switch (this.trend?.type) {
-      case 'up':
-        return 'fas fa-arrow-up';
-      case 'down':
-        return 'fas fa-arrow-down';
-      default:
-        return 'fas fa-minus';
-    }
+    const p = Math.abs(this.pct);
+    if (p >= 10) return 'msg-error';
+    if (p >= 5)  return 'msg-warning';
+    return 'msg-success';
   }
 }
