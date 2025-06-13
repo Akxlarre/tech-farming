@@ -40,6 +40,7 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private chartInstance!: Chart<'line', number[], string>;
   public chartReady = false;
+  private themeObserver?: MutationObserver;
 
   ngOnInit(): void {
     // No se crea el gráfico aquí porque el canvas aún no está en el DOM
@@ -48,6 +49,11 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Crear el gráfico cuando el canvas esté disponible
     this.createChart();
+    this.themeObserver = new MutationObserver(() => this.applyThemeColors());
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
   }
 
   private createChart(): void {
@@ -247,6 +253,62 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
+   * Actualiza los colores del gráfico en función del tema activo de DaisyUI.
+   */
+  private applyThemeColors(): void {
+    if (!this.chartInstance) return;
+
+    const isDarkMode = document.documentElement.classList.contains('dark');
+
+    const successColor = this.normalizeColor(
+      this.getTailwindColor('--color-success'),
+      '#2B6B4A'
+    );
+    const infoColor = this.normalizeColor(
+      this.getTailwindColor('--color-info'),
+      '#3182CE'
+    );
+    const secondaryColor = this.normalizeColor(
+      this.getTailwindColor('--color-secondary'),
+      '#4C51BF'
+    );
+    const baseTextColor = this.normalizeColor(
+      this.getTailwindColor('--color-base-content'),
+      isDarkMode ? '#FFFFFF' : '#333333'
+    );
+
+    let borderColor = successColor;
+    let backgroundColor = this.hexToRgba(successColor, 0.2);
+    if (this.variable === 'Humedad') {
+      borderColor = infoColor;
+      backgroundColor = this.hexToRgba(infoColor, 0.2);
+    } else if (this.variable === 'Nitrógeno') {
+      borderColor = secondaryColor;
+      backgroundColor = this.hexToRgba(secondaryColor, 0.2);
+    }
+
+    const dataset = this.chartInstance.data.datasets[0] as any;
+    dataset.borderColor = borderColor;
+    dataset.backgroundColor = backgroundColor;
+    dataset.pointHoverBackgroundColor = borderColor;
+    dataset.pointHoverBorderColor = baseTextColor;
+
+    const scales = this.chartInstance.options.scales!;
+    const x = scales['x'] as any;
+    const y = scales['y'] as any;
+    x.ticks.color = baseTextColor;
+    y.ticks.color = baseTextColor;
+    y.grid.color = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+    if (this.chartInstance.options.plugins?.tooltip) {
+      (this.chartInstance.options.plugins.tooltip as any).backgroundColor =
+        isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.7)';
+    }
+
+    this.chartInstance.update();
+  }
+
+  /**
    * Permite actualizar los datos (invocado desde el componente padre).
    */
   public actualizarData(
@@ -288,5 +350,6 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.chartInstance) {
       this.chartInstance.destroy();
     }
+    this.themeObserver?.disconnect();
   }
 }
