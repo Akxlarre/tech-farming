@@ -37,15 +37,18 @@ def get_historial():
 
     # 3) Elegir window_every dinámicamente
     span_sec = (dt_hasta_obj - dt_desde_obj).total_seconds()
-    max_points = 200
-    every_sec = max(int(span_sec / max_points), 1)
-
-    if every_sec < 60:
-        window_every = f"{every_sec}s"
-    elif every_sec < 3600:
-        window_every = f"{every_sec // 60}m"
+    if span_sec < 6 * 24 * 3600:
+        window_every = None
     else:
-        window_every = f"{every_sec // 3600}h"
+        max_points = 200
+        every_sec = max(int(span_sec / max_points), 1)
+
+        if every_sec < 60:
+            window_every = f"{every_sec}s"
+        elif every_sec < 3600:
+            window_every = f"{every_sec // 60}m"
+        else:
+            window_every = f"{every_sec // 3600}h"
 
     current_app.logger.debug(f"Historial rango {span_sec}s → window_every={window_every}")
 
