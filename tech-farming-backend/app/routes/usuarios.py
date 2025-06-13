@@ -63,9 +63,12 @@ def invitar_usuario():
     redirect_url = f"http://localhost:4200/set-password?invitacion=true"
 
     # Invitar usuario con Supabase Admin API
-    response = supabase.auth.admin.invite_user_by_email(email, {
-        "redirect_to": redirect_url
-    })
+    try:
+        response = supabase.auth.admin.invite_user_by_email(email, {
+            "redirect_to": redirect_url
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
     if response.user is None:
         return jsonify({"error": "Error al invitar usuario con Supabase"}), 400
