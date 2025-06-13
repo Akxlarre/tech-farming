@@ -180,15 +180,12 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
             callbacks: {
               label: ctx => {
                 const val = ctx.formattedValue;
-                const ts  = this.data[ctx.dataIndex]?.timestamp;
-                const date = ts ? new Date(ts).toLocaleString('es-ES', {
-                  weekday: 'short',
-                  day: '2-digit',
-                  month: 'short',
+                const ts   = this.data[ctx.dataIndex]?.timestamp;
+                const time = ts ? new Date(ts).toLocaleTimeString('es-ES', {
                   hour: '2-digit',
                   minute: '2-digit'
                 }) : ctx.label as string;
-                return [`${this.label}: ${val}`, `Hora: ${date}`];
+                return [`${this.label}: ${val}`, `Hora: ${time}`];
               }
             }
           }
