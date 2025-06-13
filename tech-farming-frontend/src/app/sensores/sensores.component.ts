@@ -423,6 +423,7 @@ onEdited(updated: Sensor) {
   }
 
   onExport(format: 'pdf' | 'excel' | 'csv') {
+<<<<<<< codex/introduce-exportservice-y-refactorizar-exportaciones
     const data = this.sensoresConLectura.map(s => ({ id: s.id, nombre: s.nombre }));
     switch (format) {
       case 'csv':
@@ -434,6 +435,16 @@ onEdited(updated: Sensor) {
       case 'pdf':
         this.exportSvc.toPdf(data, 'sensores');
         break;
+=======
+    const headers = ['ID', 'Nombre'];
+    const rows = this.sensoresConLectura.map(s => [s.id, s.nombre]);
+    if (format === 'csv') {
+      this.exportSvc.exportAsCSV('sensores.csv', headers, rows);
+    } else if (format === 'excel') {
+      this.exportSvc.exportAsExcel('sensores.xlsx', headers, rows);
+    } else {
+      this.exportSvc.exportAsPDF('sensores.pdf', headers, rows);
+>>>>>>> tabs
     }
   }
 

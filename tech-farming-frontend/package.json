@@ -41,8 +41,14 @@
     "punycode": "^2.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+<<<<<<< codex/introduce-exportservice-y-refactorizar-exportaciones
     "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
+=======
+    "zone.js": "~0.14.10",
+    "xlsx": "^0.18.5",
+    "jspdf": "^3.0.1"
+>>>>>>> tabs
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.2.10",

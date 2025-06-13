@@ -15,6 +15,7 @@ import { InvernaderoModalService } from './invernadero-modal.service';
 import { NotificationService } from '../shared/services/notification.service';
 import { ExportService } from '../shared/services/export.service';
 import { SupabaseService } from '../services/supabase.service';
+import { ExportService } from '../shared/services/export.service';
 
 /* Componentes “genéricos” ya existentes */
 import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper.component';
@@ -448,6 +449,7 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
       case 'pdf':
         this.exportSvc.toPdf(data, 'invernaderos');
         break;
+
     }
   }
 
