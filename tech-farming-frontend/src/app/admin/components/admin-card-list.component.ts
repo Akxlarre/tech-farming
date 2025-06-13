@@ -28,8 +28,9 @@ interface Usuario {
             <span>Crear: {{ u.puedeCrear ? '✔️' : '❌' }}</span>
             <span>Eliminar: {{ u.puedeEliminar ? '✔️' : '❌' }}</span>
           </div>
-          <div class="text-right">
+          <div class="text-right space-x-2">
             <button class="btn btn-outline btn-sm" (click)="editarUsuario.emit(u)">Editar</button>
+            <button class="btn btn-error btn-sm" (click)="eliminarUsuario.emit(u)">Eliminar</button>
           </div>
         </div>
       </ng-container>
@@ -48,6 +49,7 @@ export class AdminCardListComponent {
   @Input() loading = false;
   @Input() rowCount = 5;
   @Output() editarUsuario = new EventEmitter<Usuario>();
+  @Output() eliminarUsuario = new EventEmitter<Usuario>();
 
   get skeletonArray() {
     return Array.from({ length: this.rowCount });

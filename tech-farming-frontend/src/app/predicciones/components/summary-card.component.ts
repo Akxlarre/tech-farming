@@ -73,7 +73,6 @@ export class SummaryCardComponent {
   @Input() summary?: Summary;
   @Input() projectionLabel: string = '';
   @Input() param?: string;
-
   get unit(): string {
     if (!this.param) return '°C';
     const p = this.param.toLowerCase();
