@@ -25,6 +25,7 @@
     "@angular/platform-server": "^18.2.0",
     "@angular/router": "^18.2.0",
     "@angular/ssr": "^18.2.10",
+    "@esbuild/win32-x64": "^0.25.5",
     "@rollup/rollup-win32-x64-msvc": "^4.43.0",
     "@supabase/supabase-js": "^2.49.8",
     "chart.js": "^4.4.9",

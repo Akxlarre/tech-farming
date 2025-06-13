@@ -85,37 +85,22 @@ def evaluar_y_generar_alerta(sensor_parametro_id: int, valor: float, timestamp: 
     )
 
     if alerta_antigua:
-        print(f"[ALERT DEBUG] Última alerta encontrada: ID {alerta_antigua.id} ({alerta_antigua.estado})")
         if alerta_antigua.estado == "Resuelta":
             fecha_res = alerta_antigua.fecha_resolucion
             if fecha_res and fecha_res.tzinfo is None:
                 fecha_res = fecha_res.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
             if fecha_res:
                 minutos = (timestamp - fecha_res).total_seconds() / 60
-                print(f"[ALERT DEBUG] Última alerta resuelta: {alerta_antigua.id}")
-                print(f"[ALERT DEBUG] Tiempo desde resolución: {minutos:.2f} minutos")
-                print(f"[ALERT DEBUG] Cooldown permitido: {cooldown_post_resolucion_min} minutos")
                 if minutos < cooldown_post_resolucion_min:
-                    print("[ALERT DEBUG] ❌ No se genera alerta: aún en cooldown post resolución")
                     return
         else:
             fecha_alerta = alerta_antigua.fecha_hora
             if fecha_alerta:
-                print(f"[ALERTA DEBUG] Última alerta activa encontrada: ID {alerta_antigua.id}")
-                print(f"[ALERTA DEBUG] Fecha alerta activa: {fecha_alerta.isoformat()}")
                 if fecha_alerta.tzinfo is None:
-                    print("[ALERTA DEBUG] Fecha sin tzinfo, asignando America/Santiago")
                     fecha_alerta = fecha_alerta.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("America/Santiago"))
-
                 minutos_transcurridos = (timestamp - fecha_alerta).total_seconds() / 60
-                print(f"[ALERTA DEBUG] Minutos desde última alerta activa: {minutos_transcurridos:.2f}")
-                print(f"[ALERTA DEBUG] Frecuencia mínima requerida: {frecuencia_alertas_min} minutos")
-
                 if minutos_transcurridos < frecuencia_alertas_min:
-                    print("[ALERTA DEBUG] No se generará nueva alerta aún (frecuencia mínima no cumplida)")
                     return  # Aún no han pasado los minutos requeridos
-    else:
-        print("[ALERT DEBUG] No se encontró ninguna alerta previa: se permitirá generar nueva alerta.")
 
     # Mensaje de alerta
     parametro = TipoParametro.query.get(tipo_parametro_id)
