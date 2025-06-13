@@ -31,6 +31,7 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
 import { NotificationService }       from '../shared/services/notification.service';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
+import { ExportService } from '../shared/services/export.service';
 
 
 @Component({
