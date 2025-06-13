@@ -36,7 +36,7 @@ import {
         <section class="border-t border-base-300 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
           <div class="flex flex-col justify-between h-full space-y-2">
             <div><strong>Descripción:</strong> {{ sensor.descripcion || '—' }}</div>
-            <div><strong>Instalado en:</strong> {{ sensor.fecha_instalacion | date:'medium' }}</div>
+            <div><strong>Instalado en:</strong> {{ sensor.fecha_instalacion | date:'dd/MM/yyyy' }}</div>
             <div>
               <strong>Ubicación:</strong>
               {{ sensor.invernadero?.nombre || '—' }}
