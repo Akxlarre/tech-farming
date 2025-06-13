@@ -324,13 +324,17 @@ export class FiltroComponent implements OnInit, OnDestroy {
     }
 
     const v = this.form.value;
+    const hasta = new Date(v.hasta);
+    // Al enviar solo la fecha "hasta" se ajusta a las 23:59 para cubrir el día completo
+    hasta.setHours(23, 59, 59, 999);
+
     const params: HistorialParams = {
       invernaderoId:   Number(v.invernaderoId),
       zonaId:          v.zonaId != null ? Number(v.zonaId) : undefined,
       sensorId:        v.sensorId != null ? Number(v.sensorId) : undefined,
       tipoParametroId: Number(v.tipoParametroId),
       fechaDesde:      new Date(v.desde),
-      fechaHasta:      new Date(v.hasta)
+      fechaHasta:      hasta
     };
 
     this.filtrosSubmit.emit(params);
