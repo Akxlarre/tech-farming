@@ -299,7 +299,10 @@ interface ZoneSummary {
                 <div class="space-y-6">
                   <div *ngFor="let zs of zoneSummaries" class="bg-base-100 border rounded-lg p-4">
                     <h3 class="text-lg font-semibold mb-2">{{ zs.zone.nombre }}</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div
+                      class="grid gap-4"
+                      style="grid-template-columns: repeat(auto-fit,minmax(12rem,1fr));"
+                    >
                       <app-summary-card
                         *ngFor="let s of zs.summaries"
                         [summary]="s.summary"
