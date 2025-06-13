@@ -58,7 +58,8 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private createChart(): void {
     const ctx = this.chartCanvas.nativeElement.getContext('2d') as ChartItem;
-    const isDarkMode = document.documentElement.classList.contains('dark');
+    const isDarkMode =
+      document.documentElement.getAttribute('data-theme') === 'dark';
 
     // Obtener colores de variables CSS definidas por DaisyUI / Tailwind y normalizarlos
     const successColor = this.normalizeColor(
@@ -177,6 +178,7 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.chartInstance = new Chart(ctx, config);
+    this.applyThemeColors();
 
     // Una vez creado, ocultamos el spinner
     this.chartReady = true;
@@ -258,7 +260,9 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
   private applyThemeColors(): void {
     if (!this.chartInstance) return;
 
-    const isDarkMode = document.documentElement.classList.contains('dark');
+    const isDarkMode =
+      document.documentElement.getAttribute('data-theme') === 'dark';
+
 
     const successColor = this.normalizeColor(
       this.getTailwindColor('--color-success'),
