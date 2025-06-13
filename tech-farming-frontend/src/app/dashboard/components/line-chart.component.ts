@@ -140,7 +140,8 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
             ticks: {
               color: baseTextColor,
               stepSize: 5,
-              font: { family: 'Inter, sans-serif', size: 12, weight: 500 }
+              font: { family: 'Inter, sans-serif', size: 12, weight: 500 },
+              callback: (value: string | number) => Number(value).toFixed(2)
             },
           },
         },
@@ -161,7 +162,7 @@ export class LineChartComponent implements OnInit, AfterViewInit, OnDestroy {
               label: (ctx: TooltipItem<'line'>) => {
                 const rawValue = ctx.parsed.y;
                 const unidad = this.getUnidad(this.variable);
-                return `${this.variable}: ${rawValue} ${unidad}`;
+                return `${this.variable}: ${Number(rawValue).toFixed(2)} ${unidad}`;
               },
             },
           },
