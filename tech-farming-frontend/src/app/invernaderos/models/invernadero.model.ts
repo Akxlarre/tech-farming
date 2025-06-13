@@ -20,4 +20,5 @@ export interface Invernadero {
   sensoresActivos?: number;
   sensoresTotales?: number;
   estado?: string;  // ej: "2 alertas activas" o "Sin alertas"
+  hayAlertas?: boolean;
 }
