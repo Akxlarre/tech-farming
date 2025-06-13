@@ -58,3 +58,9 @@ La solución integra lectura de sensores que miden:
 Algunas alertas históricas se generaron antes de contar con el campo
 `sensor_id`. Por compatibilidad, el listado verifica tanto `Alerta.sensor_id`
 como el sensor asociado al `sensor_parametro` cuando se filtra por sensor.
+
+## 🌐 Configuración de entorno
+
+La clave de acceso de Supabase ya no se incluye en el código fuente. Antes de
+iniciar el frontend se debe establecer la variable de entorno `SUPABASE_KEY`,
+que será leída en tiempo de ejecución para crear el cliente de Supabase.
