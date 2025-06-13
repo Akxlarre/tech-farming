@@ -9,6 +9,7 @@ import { AdminCreateModalComponent } from './components/admin-create-modal.compo
 import { AdminEditModalComponent } from './components/admin-edit-modal.component';
 import { AdminModalWrapperComponent } from './components/admin-modal-wrapper.component';
 import { AdminCardListComponent } from './components/admin-card-list.component';
+import { AdminDeleteModalComponent } from './components/admin-delete-modal.component';
 
 interface Usuario {
   id: number;
@@ -32,7 +33,8 @@ interface Usuario {
     AdminCardListComponent,
     AdminCreateModalComponent,
     AdminEditModalComponent,
-    AdminModalWrapperComponent],
+    AdminModalWrapperComponent,
+    AdminDeleteModalComponent],
   template: `
     <div *ngIf="!loading; else loadingTpl">
     <app-admin-header (create)="abrirModal()"></app-admin-header>
@@ -45,7 +47,8 @@ interface Usuario {
         [loading]="!isDataFullyLoaded"
         [rowCount]="pageSize"
         (paginaCambiada)="cambiarPagina($event)"
-        (editarUsuario)="editar($event)">
+        (editarUsuario)="editar($event)"
+        (eliminarUsuario)="confirmarEliminar($event)">
       </app-admin-table>
     </div>
 
@@ -54,7 +57,8 @@ interface Usuario {
       [usuarios]="usuariosFiltrados"
       [loading]="!isDataFullyLoaded"
       [rowCount]="pageSize"
-      (editarUsuario)="editar($event)">
+      (editarUsuario)="editar($event)"
+      (eliminarUsuario)="confirmarEliminar($event)">
     </app-admin-card-list>
 
     <app-admin-modal-wrapper *ngIf="modal.modalType$ | async as type">
@@ -75,6 +79,18 @@ interface Usuario {
                 (saved)="onUsuarioEditado()"
                 (close)="modal.closeWithAnimation()">
             </app-admin-edit-modal>
+          </ng-container>
+        </ng-container>
+
+        <!-- ELIMINAR USUARIO -->
+        <ng-container *ngSwitchCase="'delete'">
+          <ng-container *ngIf="selectedUsuario">
+            <app-admin-delete-modal
+              [usuarioId]="selectedUsuario.id"
+              [nombre]="selectedUsuario.nombre"
+              (deleted)="onUsuarioEliminado()"
+              (cancel)="modal.closeWithAnimation()">
+            </app-admin-delete-modal>
           </ng-container>
         </ng-container>
       <!-- Otros tipos de modales (edit, delete) se agregarían aquí -->
@@ -167,6 +183,16 @@ export class AdminComponent implements OnInit {
       }
     };
     this.modal.openModal('edit');
+  }
+
+  confirmarEliminar(usuario: Usuario) {
+    this.selectedUsuario = { id: usuario.id, nombre: usuario.nombre } as any;
+    this.modal.openModal('delete');
+  }
+
+  onUsuarioEliminado() {
+    this.modal.closeWithAnimation();
+    this.cargarUsuarios();
   }
 
   private startLoading(): void {
