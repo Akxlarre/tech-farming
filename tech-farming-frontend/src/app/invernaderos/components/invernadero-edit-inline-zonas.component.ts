@@ -400,7 +400,9 @@ export class InvernaderoEditInlineZonasComponent implements OnInit, OnDestroy {
    */
   obtenerSensoresCount(zonaId: number): number {
     const z = this.datosOriginales.zonas.find((x: any) => x.id === zonaId);
-    const count = Array.isArray(z?.sensores) ? z.sensores.length : 0;
+    const count = (z && 'sensores_count' in z)
+      ? (z as any).sensores_count
+      : Array.isArray(z?.sensores) ? z.sensores.length : 0;
     console.log(`[EditarZona] obtenerSensoresCount(${zonaId}) → ${count}`);
     return count;
   }

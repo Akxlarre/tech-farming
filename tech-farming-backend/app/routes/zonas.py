@@ -11,14 +11,22 @@ router = Blueprint('zonas', __name__, url_prefix='/api')
 @router.route('/invernaderos/<int:inv_id>/zonas', methods=['GET'])
 def listar_zonas_por_invernadero(inv_id):
     inv = InvernaderoModel.query.get_or_404(inv_id, description="Invernadero no encontrado")
-    zonas = ZonaModel.query.filter_by(invernadero_id=inv_id).all()
-    return jsonify([{
-        "id":       z.id,
-        "nombre":   z.nombre,
-        "descripcion": z.descripcion,
-        "activo":   z.activo,
-        "creado_en": z.creado_en.isoformat() if z.creado_en else None
-    } for z in zonas]), 200
+    zonas = (
+        ZonaModel.query
+        .options(db.joinedload(ZonaModel.sensores))
+        .filter_by(invernadero_id=inv_id)
+        .all()
+    )
+    return jsonify([
+        {
+            "id":       z.id,
+            "nombre":   z.nombre,
+            "descripcion": z.descripcion,
+            "activo":   z.activo,
+            "creado_en": z.creado_en.isoformat() if z.creado_en else None,
+            "sensores_count": len(z.sensores)
+        } for z in zonas
+    ]), 200
 
 @router.route('/zonas', methods=['POST'])
 @usuario_autenticado_requerido

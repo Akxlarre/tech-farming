@@ -47,7 +47,16 @@ def listar_invernaderos():
                     Alerta.sensor_parametro_id.in_(param_ids),
                     Alerta.sensor_id.in_(sensor_ids)
                 )
-            ).scalar()
+            ).all()
+            alertas_activas = len(alertas)
+
+            niveles = [a.nivel for a in alertas]
+            if 'Crítico' in niveles:
+                nivel_alerta = 'Crítico'
+            elif 'Advertencia' in niveles:
+                nivel_alerta = 'Advertencia'
+            else:
+                nivel_alerta = None
 
             hay_alertas = alertas_activas > 0
 
@@ -143,7 +152,16 @@ def estados_alerta():
                     Alerta.sensor_parametro_id.in_(param_ids),
                     Alerta.sensor_id.in_(sensor_ids)
                 )
-            ).scalar()
+            ).all()
+            alertas_activas = len(alertas)
+
+            niveles = [a.nivel for a in alertas]
+            if 'Crítico' in niveles:
+                nivel_alerta = 'Crítico'
+            elif 'Advertencia' in niveles:
+                nivel_alerta = 'Advertencia'
+            else:
+                nivel_alerta = None
 
             hay_alertas = alertas_activas > 0
 
