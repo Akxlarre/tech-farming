@@ -122,7 +122,7 @@ import { ZonaService }       from '../../invernaderos/zona.service';
                 type="text"
                 formControlName="search"
                 placeholder="Nombre del sensor..."
-                maxlength="15"
+                maxlength="30"
                 class="input input-bordered pl-10 w-full text-sm min-w-0"
               />
             </div>
@@ -130,7 +130,7 @@ import { ZonaService }       from '../../invernaderos/zona.service';
               *ngIf="searchControl.invalid && searchControl.hasError('maxlength')"
               class="text-xs text-error mt-1"
             >
-              Máximo 15 caracteres.
+              Máximo 30 caracteres.
             </p>
           </div>
 
@@ -210,7 +210,7 @@ export class SensorFiltersComponent implements OnInit, OnDestroy {
       tipoSensor:  [''],
       estado:      [''],
       sortBy:      [''],
-      search:       ['', [Validators.maxLength(15)]],  // límite 15 chars
+      search:       ['', [Validators.maxLength(30)]],  // límite 30 chars
     });
 
     this.invSub = this.filterForm.get('invernadero')!

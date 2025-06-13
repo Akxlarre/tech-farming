@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from app import db
 
 class Sensor(db.Model):
@@ -10,7 +11,10 @@ class Sensor(db.Model):
     descripcion = db.Column(db.Text)
     estado = db.Column(db.String(20), nullable=False)
     fecha_instalacion = db.Column(db.Date, nullable=False)
-    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    creado_en = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(ZoneInfo("America/Santiago"))
+    )
     tipo_sensor_id = db.Column(db.Integer, db.ForeignKey('tipos_sensor.id'), nullable=False)
     token = db.Column(db.String(64), unique=True, nullable=False)
 

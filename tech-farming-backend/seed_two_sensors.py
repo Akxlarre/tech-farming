@@ -3,6 +3,7 @@
 import random
 import time
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from influxdb_client import Point
 
 # ---------------------------------------------------
@@ -15,14 +16,14 @@ def escribir_dato(sensor_id, parametro, valor, ts: datetime = None):
       - tag "sensor_id" = sensor_id (string)
       - field "parametro" = parametro (string: "temperature" o "humidity")
       - field "valor" = valor (float)
-      - time = ts (si se pasa) o datetime.utcnow() si ts es None
+      - time = ts (si se pasa) o la hora actual en Chile si ts es None
     """
     if sensor_id is None or parametro is None or valor is None:
         print("⚠️ Error: sensor_id, parametro y valor son obligatorios")
         return
 
     if ts is None:
-        ts = datetime.utcnow()
+        ts = datetime.now(ZoneInfo("America/Santiago"))
 
     # Importamos Config que ya debe haber sido configurado en tu app.
     from app.config import Config
@@ -54,7 +55,7 @@ def main():
     sensor_ids = [48, 49]
 
     # 1) Punto de inicio: hace 24 horas
-    ahora  = datetime.utcnow()
+    ahora  = datetime.now(ZoneInfo("America/Santiago"))
     inicio = ahora - timedelta(hours=24)
 
     # 2) Intervalo de 30 minutos

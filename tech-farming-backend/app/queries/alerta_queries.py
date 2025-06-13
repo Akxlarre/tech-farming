@@ -264,7 +264,7 @@ def verificar_sensores_desconectados(app, minutos: int = 10):
     """
     with app.app_context():
 
-        ahora = datetime.utcnow()
+        ahora = datetime.now(ZoneInfo("America/Santiago"))
         sensores = Sensor.query.filter_by(estado="Activo").all()
         sensores_inactivos = []
 

@@ -14,6 +14,7 @@ import { InvernaderoModalService } from './invernadero-modal.service';
 
 import { NotificationService } from '../shared/services/notification.service';
 import { SupabaseService } from '../services/supabase.service';
+import { ExportService } from '../shared/services/export.service';
 
 /* Componentes “genéricos” ya existentes */
 import { InvernaderoModalWrapperComponent } from './components/invernadero-modal-wrapper.component';
@@ -53,8 +54,9 @@ import { ViewInvernaderoComponent } from './components/view-invernadero.componen
     <section class="space-y-6">
 
       <!-- HEADER + BOTON “Crear” -->
-      <app-invernadero-header 
+      <app-invernadero-header
         (create)="open('create')"
+        (exportar)="onExport($event)"
         [puedeCrear]="puedeCrear">
       </app-invernadero-header>
 
@@ -218,7 +220,8 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
     private svc: InvernaderoService,
     private supaSvc: SupabaseService,
     public modal: InvernaderoModalService,
-    private notify: NotificationService
+    private notify: NotificationService,
+    private exportSvc: ExportService
   ) {}
 
   async ngOnInit() {
@@ -274,7 +277,10 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
           // Solo actualizamos el “estado” en cada invernadero visible
           estados.forEach((est: any) => {
             const inv = this.invernaderos.find(i => i.id === est.id);
-            if (inv) inv.estado = est.estado || 'Sin alertas';
+            if (inv) {
+              inv.estado = est.estado || 'Sin alertas';
+              inv.hayAlertas = est.hayAlertas ?? false;
+            }
           });
         }
       }),
@@ -427,6 +433,22 @@ export class InvernaderosComponent implements OnInit, OnDestroy {
     if (this.loadCount === 0) {
       this.loading = false;
       this.initialLoad = false;
+    }
+  }
+
+  onExport(format: 'pdf' | 'excel' | 'csv') {
+    const data = this.invernaderos.map(i => ({ id: i.id, nombre: i.nombre }));
+    switch (format) {
+      case 'csv':
+        this.exportSvc.toCsv(data, 'invernaderos');
+        break;
+      case 'excel':
+        this.exportSvc.toExcel(data, 'invernaderos');
+        break;
+      case 'pdf':
+        this.exportSvc.toPdf(data, 'invernaderos');
+        break;
+
     }
   }
 

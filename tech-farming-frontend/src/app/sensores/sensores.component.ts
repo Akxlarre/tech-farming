@@ -28,6 +28,11 @@ import { TipoSensorService }         from './tipos_sensor.service';
 import { InvernaderoService }        from '../invernaderos/invernaderos.service';
 import { TipoSensor }                from './models/tipo-sensor.model';
 import { Invernadero, Zona }         from '../invernaderos/models/invernadero.model';
+import { NotificationService }       from '../shared/services/notification.service';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import { ExportService } from '../shared/services/export.service';
+
 
 @Component({
   selector: 'app-sensores',
@@ -49,6 +54,7 @@ import { Invernadero, Zona }         from '../invernaderos/models/invernadero.mo
     <!-- HEADER -->
     <app-sensor-header
       (create)="modal.openModal('create')"
+      (exportar)="onExport($event)"
       [puedeCrear]="puedeCrear">
     </app-sensor-header>
 
@@ -235,6 +241,8 @@ export class SensoresComponent implements OnInit, OnDestroy {
     private tiposSvc: TipoSensorService,
     private invSvc: InvernaderoService,
     public  modal: SensorModalService,
+    private notify: NotificationService,
+    private exportSvc: ExportService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -399,11 +407,12 @@ export class SensoresComponent implements OnInit, OnDestroy {
     // aquí manejas solo la creación (token), sin cerrar inmediatamente
   }
 
- onEdited(updated: Sensor) {
-   // refresca la tabla tras guardar edición
-    this.modal.closeWithAnimation();
-    this.loadPage(this.currentPage);
-  }
+onEdited(updated: Sensor) {
+  // refresca la tabla tras guardar edición
+  this.modal.closeWithAnimation();
+  this.loadPage(this.currentPage);
+  this.notify.success('Sensor actualizado correctamente.');
+}
   
   onDeleted(id: number) {
     this.modal.closeWithAnimation();
@@ -414,6 +423,73 @@ export class SensoresComponent implements OnInit, OnDestroy {
   onCloseModal() {
     this.modal.closeWithAnimation();
     this.loadPage(this.currentPage);
+  }
+
+  onExport(format: 'pdf' | 'excel' | 'csv') {
+    const headers = [
+      'ID',
+      'Nombre',
+      'Tipo de sensor',
+      'Zona',
+      'Invernadero',
+      'Estado',
+      'Última lectura',
+      'Valores'
+    ];
+
+    const rows = this.sensoresConLectura.map(s => {
+      const ult = s.ultimaLectura;
+      let valores = '';
+      if (ult?.parametros?.length) {
+        valores = ult.parametros
+          .map((nombre, idx) => {
+            const valor = Array.isArray(ult.valores) && ult.valores[idx] != null
+              ? ult.valores[idx]
+              : '—';
+            const meta = s.parametros.find(p => p.nombre === nombre);
+            const unidad = meta?.unidad ? ` ${meta.unidad}` : '';
+            return `${nombre}: ${valor}${unidad}`.trim();
+          })
+          .join('; ');
+      }
+      return [
+        s.id,
+        s.nombre,
+        s.tipo_sensor.nombre,
+        s.zona?.nombre ?? '',
+        s.invernadero?.nombre ?? '',
+        s.alertaActiva ? 'Alerta' : s.estado,
+        ult?.time ? new Date(ult.time).toLocaleString() : '',
+        valores
+      ];
+    });
+
+    if (format === 'csv') {
+      const escape = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sensores.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (format === 'excel') {
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sensores');
+      XLSX.writeFile(workbook, 'sensores.xlsx');
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text(headers.join(' | '), 10, y);
+      y += 10;
+      rows.forEach(row => {
+        doc.text(row.join(' | '), 10, y);
+        y += 10;
+      });
+      doc.save('sensores.pdf');
+    }
   }
 
   trackBySensorId(_i: any, s: Sensor) {

@@ -43,7 +43,8 @@ def resolver_alerta(alerta_id):
         ahora = datetime.now(ZoneInfo("America/Santiago"))
         
         alerta.estado = "Resuelta"
-        alerta.fecha_resolucion = ahora
+        alerta.fecha_resolucion = datetime.now(ZoneInfo("America/Santiago"))
+
         alerta.resuelta_por = usuario.id
 
         # Resolver también todas las alertas activas anteriores del mismo sensor/param
