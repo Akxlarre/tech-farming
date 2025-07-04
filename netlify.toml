@@ -1,7 +1,7 @@
 # netlify.toml
 [build]
-  base    = "tech-farming-frontend"     # where your package.json lives
-  command = "npm ci && npm run build"   # or your exact build script
+  base    = "tech-farming-frontend"
+  command = "npm ci && npm run build -- --configuration=production"
   publish = "dist/tech-farming-frontend/browser"
 
 [[redirects]]
