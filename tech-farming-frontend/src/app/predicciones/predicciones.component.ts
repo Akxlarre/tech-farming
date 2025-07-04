@@ -366,6 +366,7 @@ export class PrediccionesComponent implements OnInit {
   }
    /** Activa showNoDataMsg por 5 segundos */
   private mostrarMensajeNoData() {
+    console.log('[Predicciones] no hay datos para mostrar');
     this.showNoDataMsg = true;
     setTimeout(() => {
       this.showNoDataMsg = false;

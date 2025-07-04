@@ -23,6 +23,8 @@ export class PrediccionesService {
    * (Supondremos que este endpoint sí devuelve { data: Invernadero[], total: number })
    */
   getInvernaderos(): Observable<Invernadero[]> {
+    const url = `${this.BASE_URL}/invernaderos`;
+    console.log('[PrediccionesService] GET', url);
     return this.http
       .get<{ data: Invernadero[]; total: number }>(`${this.BASE_URL}/invernaderos`)
       .pipe(map(response => response.data));
@@ -34,7 +36,9 @@ export class PrediccionesService {
    * simplemente pedimos Zona[] sin desempaquetar.
    */
   getZonasByInvernadero(invernaderoId: number): Observable<Zona[]> {
-    return this.http.get<Zona[]>(`${this.BASE_URL}/invernaderos/${invernaderoId}/zonas`);
+    const url = `${this.BASE_URL}/invernaderos/${invernaderoId}/zonas`;
+    console.log('[PrediccionesService] GET', url);
+    return this.http.get<Zona[]>(url);
   }
 
   /**
@@ -50,9 +54,8 @@ export class PrediccionesService {
       httpParams = httpParams.set('zonaId', params.zonaId.toString());
     }
 
-    return this.http.get<PredicResult>(
-      `${this.BASE_URL}/predict_influx`,
-      { params: httpParams }
-    );
+    const url = `${this.BASE_URL}/predict_influx`;
+    console.log('[PrediccionesService] GET', url, httpParams.toString());
+    return this.http.get<PredicResult>(url, { params: httpParams });
   }
 }

@@ -25,25 +25,27 @@ export class HistorialService {
 
   /** GET  /api/invernaderos/getInvernaderos  → devuelve Invernadero[] */
   getInvernaderos(): Observable<Invernadero[]> {
+    console.log('[HistorialService] GET', this.invernaderoUrl);
     return this.http.get<Invernadero[]>(this.invernaderoUrl);
   }
 
   /** GET  /api/invernaderos/{id}/zonas */
   getZonasByInvernadero(invernaderoId: number): Observable<Zona[]> {
-    return this.http.get<Zona[]>(
-      `${this.zonaUrl}/invernaderos/${invernaderoId}/zonas`
-    );
+    const url = `${this.zonaUrl}/invernaderos/${invernaderoId}/zonas`;
+    console.log('[HistorialService] GET', url);
+    return this.http.get<Zona[]>(url);
   }
 
   /** GET  /api/zonas/{id}/sensores */
   getSensoresByZona(zonaId: number): Observable<Sensor[]> {
-    return this.http.get<Sensor[]>(
-      `${this.zonaUrl}/zonas/${zonaId}/sensores`
-    );
+    const url = `${this.zonaUrl}/zonas/${zonaId}/sensores`;
+    console.log('[HistorialService] GET', url);
+    return this.http.get<Sensor[]>(url);
   }
 
   /** GET  /api/parametros */
   getTiposParametro(): Observable<TipoParametro[]> {
+    console.log('[HistorialService] GET', this.parametroUrl);
     return this.http.get<TipoParametro[]>(this.parametroUrl);
   }
 

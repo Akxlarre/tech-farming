@@ -230,6 +230,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
   private defaultsApplied = false;
 
   ngOnInit() {
+    console.log('[Filtro] ngOnInit');
     // 1) Inicializamos el FormGroup con validadores:
     const today = new Date();
     const yesterday = new Date();
@@ -246,6 +247,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
 
     // 2) Cargar Invernaderos y parámetros básicos
     this.historialService.getInvernaderos().subscribe(list => {
+      console.log('[Filtro] invernaderos=', list.length);
       this.invernaderos = list;
       if (list.length > 0) {
         // Seleccionamos por defecto el primero
@@ -256,6 +258,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
     });
 
     this.historialService.getTiposParametro().subscribe(list => {
+      console.log('[Filtro] tiposParametro=', list.length);
       this.tiposParametro = list;
       if (list.length > 0) {
         // Seleccionamos por defecto el primero
@@ -271,6 +274,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
       .pipe(
         filter(id => id != null),
         switchMap((invId: number) => {
+          console.log('[Filtro] invernadero cambiado →', invId);
           // Limpiamos controles dependientes
           this.form.get('zonaId')!.reset();
           this.zonas = [];
@@ -286,6 +290,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
           // Si sólo hay una zona, auto-seleccionamos
           this.form.get('zonaId')!.setValue(list[0].id);
         }
+        console.log('[Filtro] zonas cargadas=', list.length);
       });
 
     // 4) Suscripción a cambios en zona → cargar Sensores
@@ -294,6 +299,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
       .pipe(
         filter(id => id != null),
         switchMap((zonaId: number) => {
+          console.log('[Filtro] zona cambiada →', zonaId);
           this.form.get('sensorId')!.reset();
           this.sensores = [];
           return this.historialService.getSensoresByZona(zonaId);
@@ -305,6 +311,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
           // Si sólo hay un sensor, auto-seleccionamos
           this.form.get('sensorId')!.setValue(list[0].id);
         }
+        console.log('[Filtro] sensores cargados=', list.length);
       });
   }
 
@@ -349,7 +356,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
       fechaDesde:      new Date(`${v.desde}T00:00:00`),
       fechaHasta:      hasta
     };
-
+    console.log('[Filtro] aplicarFiltros →', params);
     this.filtrosSubmit.emit(params);
   }
 
@@ -359,6 +366,7 @@ export class FiltroComponent implements OnInit, OnDestroy {
   private tryAutoApply() {
     if (!this.defaultsApplied && this.invLoaded && this.paramLoaded && this.form.valid) {
       this.defaultsApplied = true;
+      console.log('[Filtro] auto-aplicar filtros');
       this.aplicarFiltros();
     }
   }
