@@ -212,6 +212,12 @@ export class SensorViewModalComponent implements OnInit, OnDestroy {
     this.series = [];
     this.stats = [];
 
+    if (!this.sensor.invernadero) {
+      alert('⚠️ Este sensor no está asignado a un invernadero.');
+      this.loading = false;
+      return;
+    }
+
     const calls = this.sensor.parametros.map(p =>
       this.tsSvc.getHistorial({
         invernaderoId: this.sensor.invernadero!.id,
