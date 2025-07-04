@@ -22,7 +22,7 @@ export interface Alerta {
   providedIn: 'root'
 })
 export class AlertService {
-  private baseUrl = 'http://localhost:5000/api/alertas';
+  private baseUrl = 'https://tech-farming-production.up.railway.app/api/alertas';
 
   constructor(private http: HttpClient) {}
 

@@ -218,7 +218,7 @@ export class SensorCreateModalComponent implements OnInit {
   parametrosTouched = false;
   tiposSensores: TipoSensor[] = [];
   created!: CrearSensorResponse;
-  apiUrl = 'http://localhost:5000/api';
+  apiUrl = 'https://tech-farming-production.up.railway.app/api';
   loading = false;
 
   get jsonEjemplo() {

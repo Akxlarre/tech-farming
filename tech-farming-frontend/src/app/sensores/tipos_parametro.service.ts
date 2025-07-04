@@ -8,7 +8,7 @@ export class TipoParametroService {
   getAll() {
     throw new Error('Method not implemented.');
   }
-  private apiUrl = 'http://localhost:5000/api/parametros';
+  private apiUrl = 'https://tech-farming-production.up.railway.app/api/parametros';
 
   constructor(private http: HttpClient) {}
 

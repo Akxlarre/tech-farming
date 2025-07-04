@@ -10,7 +10,7 @@ import { AlertService, Alerta } from '../../alertas/alertas.service';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'https://tech-farming-production.up.railway.app/api';
 
   constructor(
     private http: HttpClient,

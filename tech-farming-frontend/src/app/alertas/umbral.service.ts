@@ -24,7 +24,7 @@ export interface Umbral {
   providedIn: 'root'
 })
 export class UmbralService {
-  private baseUrl = 'http://localhost:5000/api/umbrales';
+  private baseUrl = 'https://tech-farming-production.up.railway.app/api/umbrales';
 
   constructor(private http: HttpClient) {}
 

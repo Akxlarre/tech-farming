@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 import time
 
-API_URL = "http://localhost:5000/api/sensores/datos"
+API_URL = "https://tech-farming-production.up.railway.app/api/sensores/datos"
 SENSOR_TOKEN = "726202b2c1564703bc0002a81890b590"
 
 # 1) Carga el CSV y muestra sus columnas

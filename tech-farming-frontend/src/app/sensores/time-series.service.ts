@@ -35,8 +35,8 @@ export interface HistorialResponse {
 
 @Injectable({ providedIn: 'root' })
 export class TimeSeriesService {
-  private apiUrl = 'http://localhost:5000/api/sensores';
-  private apiUrlHistorial = 'http://localhost:5000/api/historial'
+  private apiUrl = 'https://tech-farming-production.up.railway.app/api/sensores';
+  private apiUrlHistorial = 'https://tech-farming-production.up.railway.app/api/historial'
 
   constructor(private http: HttpClient) {}
 

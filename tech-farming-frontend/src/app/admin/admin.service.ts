@@ -25,7 +25,7 @@ export interface Usuario {
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:5000/api/usuarios';
+  private baseUrl = 'https://tech-farming-production.up.railway.app/api/usuarios';
 
   /**
    * Invita al usuario y registra los datos en el backend.
