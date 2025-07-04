@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@angular/platform-browser": "^19.2.3"
-  },
-  "packageManager": "yarn@4.9.2"
-}
