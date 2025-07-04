@@ -1,8 +1,8 @@
 # netlify.toml (raíz del repo)
 [build]
-  base    = "tech-farming-frontend"
-  command = "npm ci && npm run build"
-  publish = "dist/tech-farming-frontend"
+  base    = "tech-farming-frontend/dist/tech-farming-frontend"
+  publish = "browser"
+  command = "npm ci && npm run build -- --configuration=production"
 
 [[redirects]]
   from   = "/*"
