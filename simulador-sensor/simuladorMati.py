@@ -1,3 +1,5 @@
+import os
+import sys
 import requests
 import pandas as pd
 import time
@@ -6,7 +8,8 @@ API_URL = "http://localhost:5000/api/sensores/datos"
 SENSOR_TOKEN = "726202b2c1564703bc0002a81890b590"
 
 # 1) Carga el CSV y muestra sus columnas
-df = pd.read_csv("D:\\DatosSimulados\\IoTProcessed_Data.csv")
+csv_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "IoTProcessed_Data.csv")
+df = pd.read_csv(csv_path)
 print("Columnas originales:", df.columns.tolist())
 
 # 2) Renombrado de columnas según cómo vengan en tu CSV
