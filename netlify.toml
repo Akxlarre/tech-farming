@@ -1,11 +1,9 @@
 [build]
   base    = "tech-farming-frontend"
   command = "npm ci && npm run build -- --configuration=production"
-  publish = "tech-farming-frontend/dist/tech-farming-frontend/browser"
+  publish = "tech-farming-frontend/dist/tech-farming-frontend"
 
-[[plugins]]
-  package = "@netlify/angular-runtime"
-
-  [plugins.inputs]
-    dist   = "tech-farming-frontend/dist/tech-farming-frontend/browser"
-    server = "tech-farming-frontend/dist/tech-farming-frontend/server"
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
