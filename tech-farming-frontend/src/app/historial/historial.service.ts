@@ -16,10 +16,10 @@ import {
 @Injectable({ providedIn: 'root' })
 export class HistorialService {
   // URLs raíz para cada recurso (Opción A)
-  private invernaderoUrl   = 'http://localhost:5000/api/invernaderos/getInvernaderos';
-  private zonaUrl          = 'http://localhost:5000/api';
-  private parametroUrl     = 'http://localhost:5000/api/parametros';
-  private historialUrl     = 'http://localhost:5000/api/historial';
+  private invernaderoUrl   = 'https://tech-farming-production.up.railway.app/api/invernaderos/getInvernaderos';
+  private zonaUrl          = 'https://tech-farming-production.up.railway.app/api';
+  private parametroUrl     = 'https://tech-farming-production.up.railway.app/api/parametros';
+  private historialUrl     = 'https://tech-farming-production.up.railway.app/api/historial';
 
   constructor(private http: HttpClient) {}
 

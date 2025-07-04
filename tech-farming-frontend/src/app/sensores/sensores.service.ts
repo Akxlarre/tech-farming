@@ -46,7 +46,7 @@ export interface EditarSensorPayload {
 
 @Injectable({ providedIn: 'root' })
 export class SensoresService {
-  private base = 'http://localhost:5000/api/sensores';
+  private base = 'https://tech-farming-production.up.railway.app/api/sensores';
 
   constructor(private http: HttpClient) { }
 

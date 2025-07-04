@@ -1441,7 +1441,7 @@ import { AlertService } from '../../alertas/alertas.service';
         .set('estado', this.filtroSensores.estado || '');
   
       const req$ = this.http
-        .get<{ data: SensorDetalle[]; total: number }>(`http://localhost:5000/api/sensores`, { params })
+        .get<{ data: SensorDetalle[]; total: number }>(`https://tech-farming-production.up.railway.app/api/sensores`, { params })
         .pipe(
           tap((resp) => {
             this.sensoresPage.data = resp.data;
@@ -1470,7 +1470,7 @@ import { AlertService } from '../../alertas/alertas.service';
         .get<{
           data: AlertaResumen[];
           pagination: { total: number; pages: number; per_page: number; page: number };
-        }>(`http://localhost:5000/api/alertas`, { params })
+        }>(`https://tech-farming-production.up.railway.app/api/alertas`, { params })
         .pipe(
           tap((resp) => {
             this.alertasPage.data = resp.data;

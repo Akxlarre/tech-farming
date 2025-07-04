@@ -5,7 +5,7 @@ import { TipoSensor } from './models/tipo-sensor.model';
 
 @Injectable({ providedIn: 'root' })
 export class TipoSensorService {
-  private apiUrl = 'http://localhost:5000/api/tipos-sensor';
+  private apiUrl = 'https://tech-farming-production.up.railway.app/api/tipos-sensor';
 
   constructor(private http: HttpClient) {}
 

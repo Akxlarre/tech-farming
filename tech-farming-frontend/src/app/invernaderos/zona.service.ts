@@ -8,7 +8,7 @@ import { Zona } from './models/invernadero.model';
   providedIn: 'root'
 })
 export class ZonaService {
-  private baseUrl = 'http://localhost:5000/api/invernaderos';
+  private baseUrl = 'https://tech-farming-production.up.railway.app/api/invernaderos';
 
   constructor(private http: HttpClient) {}
 
