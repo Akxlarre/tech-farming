@@ -178,6 +178,7 @@ export class HistorialComponent implements OnInit {
    * Se invoca al enviar los filtros completos desde FiltroComponent.
    */
   onFiltrosAplicados(params: HistorialParams) {
+    console.log('[Historial] filtros aplicados', params);
     this.isLoading = true;
     this.noData = false;
     this.historial = undefined;
@@ -185,12 +186,15 @@ export class HistorialComponent implements OnInit {
 
     this.historialService.getHistorial(params).subscribe(
       data => {
+        console.log('[Historial] datos recibidos', data);
         this.isLoading = false;
 
         if (data.series.length === 0) {
+          console.log('[Historial] respuesta vacía');
           // Mostrar banner overlay
           this.noData = true;
         } else {
+          console.log('[Historial] series recibidas:', data.series.length);
           // Guardar datos y nombre del parámetro
           this.historial = data;
           const tipoSel = this.tiposParametro.find(t => t.id === params.tipoParametroId);
