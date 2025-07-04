@@ -6,8 +6,6 @@
     "start": "ng serve",
     "build": "ng build --configuration=production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:tech-farming-frontend": "node dist/tech-farming-frontend/server/server.mjs",
     "build:css": "npx tailwindcss -i ./src/styles.css -o ./dist/styles.css --watch"
   },
   "private": true,
@@ -23,7 +21,6 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
-    "@angular/ssr": "^18.2.10",
     "@supabase/supabase-js": "^2.49.8",
     "chart.js": "^4.4.9",
     "chartjs-plugin-zoom": "^2.2.0",
