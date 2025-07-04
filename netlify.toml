@@ -1,7 +1,10 @@
 [build]
+  # Directorio donde está tu package.json de Angular
   base    = "tech-farming-frontend"
+  # El comando que genera la build de tu SPA
   command = "npm ci && npm run build -- --configuration=production"
-  publish = "tech-farming-frontend/dist/tech-farming-frontend"
+  # Carpeta estática que Netlify debe publicar
+  publish = "tech-farming-frontend/dist/tech-farming-frontend/browser"
 
 [[redirects]]
   from   = "/*"
