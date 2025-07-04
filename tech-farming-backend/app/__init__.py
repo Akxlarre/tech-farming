@@ -22,7 +22,11 @@ load_dotenv()
 db      = SQLAlchemy()
 jwt     = JWTManager()
 migrate = Migrate()
-
+frontends = [
+        "http://localhost:4200",
+        "https://subtle-tanuki-f491cb.netlify.app",        # tu Netlify
+        "https://tech-farming-production.up.railway.app",  # o el dominio Railway que use tu front
+            ]
 # InfluxDB
 try:
     influx_client    = InfluxDBClient(
@@ -43,10 +47,9 @@ def create_app():
     app.config.from_object(Config)
     app.logger.setLevel(logging.DEBUG)
 
-    # CORS
     CORS(app,
-         resources={r"/api/*": {"origins": "http://localhost:4200"}},
-         supports_credentials=True)
+        resources={r"/api/*": {"origins": frontends}},
+        supports_credentials=True)
 
     app.url_map.strict_slashes = False
 
