@@ -22,7 +22,7 @@ load_dotenv()
 db      = SQLAlchemy()
 jwt     = JWTManager()
 migrate = Migrate()
-frontends = [
+ALLOWED_ORIGINS = [
         "http://localhost:4200",
         "https://subtle-tanuki-f491cb.netlify.app",        # tu Netlify
         "https://tech-farming-production.up.railway.app",  # o el dominio Railway que use tu front
@@ -47,9 +47,13 @@ def create_app():
     app.config.from_object(Config)
     app.logger.setLevel(logging.DEBUG)
 
-    CORS(app,
-        resources={r"/api/*": {"origins": frontends}},
-        supports_credentials=True)
+    CORS(
+    app,
+    resources={ r"/api/*": {"origins": ALLOWED_ORIGINS} },
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
     app.url_map.strict_slashes = False
 
