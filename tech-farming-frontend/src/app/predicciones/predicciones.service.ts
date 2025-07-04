@@ -2,6 +2,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { Observable, map } from 'rxjs';
 
 import {
@@ -13,7 +14,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class PrediccionesService {
-  private readonly BASE_URL = 'http://127.0.0.1:5000/api';
+  private readonly BASE_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
