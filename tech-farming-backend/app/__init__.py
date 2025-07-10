@@ -52,7 +52,7 @@ def create_app():
     resources={ r"/api/*": {"origins": ALLOWED_ORIGINS} },
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 )
 
     app.url_map.strict_slashes = False

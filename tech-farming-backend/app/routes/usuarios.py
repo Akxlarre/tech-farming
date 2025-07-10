@@ -63,7 +63,7 @@ def invitar_usuario():
     if not email:
         return jsonify({"error": "Email requerido"}), 400
 
-    redirect_url = f"http://localhost:4200/set-password?invitacion=true"
+    redirect_url = f"https://subtle-tanuki-f491cb.netlify.app/set-password?invitacion=true"
 
     # Invitar usuario con Supabase Admin API
     try:
