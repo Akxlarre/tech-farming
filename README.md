@@ -66,9 +66,3 @@ Si se envían las fechas `desde` y `hasta` con el mismo día y ambas en
 extenderá internamente el parámetro `hasta` 24 horas. El componente de filtros
 del frontend ajusta automáticamente la hora de `fechaHasta` a `23:59:59` para
 cubrir la jornada completa.
-
-## 🌐 Configuración de entorno
-
-La clave de acceso de Supabase ya no se incluye en el código fuente. Antes de
-iniciar el frontend se debe establecer la variable de entorno `SUPABASE_KEY`,
-que será leída en tiempo de ejecución para crear el cliente de Supabase.
